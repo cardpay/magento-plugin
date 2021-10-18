@@ -161,7 +161,7 @@ And status of invoice for this order is changed to **Paid**
 
 For cancel (void) the payment navigate to Orders and choose the Order in status **Payment review**.
 
-![](readme_images/payment_review.png)
+![](readme_images/order_payment_review.png)
 
 After that click **Deny payment** and click **OK** in pop-up window
 
@@ -177,7 +177,7 @@ Order status is changed to **Canceled**
 
 For creating a **Refund** navigate to **Orders** and choose any order in status **Processing**
 
-![](readme_images/order_processing.png.png)
+![](readme_images/order_processing.png)
 
 Then in left navigation panel **Order view** navigate to **Invoices**
 
