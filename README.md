@@ -43,7 +43,7 @@ Installation process will explain how to install the Magento 2 plugin via comman
 
 8. Check the plugin is successfully installed
 
-* Log in into Admin panel of Unlimint Magento plugin (using your admin credentials)
+* Log in into **Admin panel** of Unlimint Magento plugin (using your admin credentials)
 
 * Navigate to **Stores > Configuration** and under the **Sales** section, click the **Payment Methods**, you see **Unlimint** and settings of it.
 
@@ -78,8 +78,8 @@ This process explains how to set up and configure the Magento plugin to accept p
  * Set **Enabled** to **Yes**
  * **Payment title** - Fill in the name of the payment method, will be presented for the customer in checkout
  * **Capture payment:**
- * Set to **Yes** - for completing payment automatically (one-phase payment),
- * Set to **No** for two-phases payment: the amount will not be captured but only blocked.
+   * Set to **Yes** - for completing payment automatically (one-phase payment),
+   * Set to **No** for two-phases payment: the amount will not be captured but only blocked.
    
  With **No** option selected payments will be captured manually from Admin Panel (see **Capture payment** below) or automatically in 7 days from the time of creating the preauthorized transaction.
 
@@ -100,7 +100,7 @@ That's it! The selected payment methods are successfully enabled in the checkout
 
 4.3. Order statuses and refunds settings
 
-Mapping of the order statuses is set by default and you need to change it ONLY if you have yours custom status flow (not recommended to change).
+Mapping of the order statuses is set by default and you need to change it ONLY if you have yours custom order status flow (not recommended to change).
 
 **Refund payment**: by default is set to **Yes**, it will be set to **No** - Refunds (Credit Memos) will be unavailable.
 
@@ -201,15 +201,15 @@ After succesfull refund status of the order is changed to **Closed**
 
 ![](readme_images/order_closed.png)
 
-And after successfull refund is created new **Credit Memo**
+And created new **Credit Memo**
 
 ![](readme_images/credit_memo_table.png)
 
 ### Refund offline
 
-**Refund offline** is the operation then refund don't created online and amount of order should be returned manually in offline with cash only.
+**Refund offline** is the operation when refund don't created online and amount of order should be returned manually in offline with cash only.
 
-**Refund offline** is possible for all supported payment methods.
+**Refund offline** is possible for all supported payment methods in Magento plugin.
 
 For creation **Refund offline** please navigate to the **Orders** - choose the Order for the refund offline.
 
