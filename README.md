@@ -59,7 +59,7 @@ This process explains how to set up and configure the Magento plugin to accept p
 
 ### Basic settings
 
-1. Log in into Admin panel of Unlimint Magento plugin (using your admin credentials)
+1. Log in into **Admin panel** of Unlimint Magento plugin (using your admin credentials)
 
 2. Navigate to **Stores** > **Configuration** and under the **Sales** section, click the **Payment Methods**. From here, you can configure the Unlimint payment methods
 
@@ -71,7 +71,7 @@ This process explains how to set up and configure the Magento plugin to accept p
 
 ![](readme_images/credentials.png)
 
-4. With your credentials filled in, you need to enable payment methods in Magento plugin. (for now it's Credit Card and Boleto)
+4. With your credentials filled in, you need to enable payment methods in Magento plugin. (Credit Card and Boleto)
  * First, access the methods you want to enable by Unlimint support (it's a part of merchant onboarding process - see [here](https://www.unlimint.com/integration/))
 
 4.1. To enable payments via **Credit Card** do the following steps:
@@ -88,7 +88,7 @@ This process explains how to set up and configure the Magento plugin to accept p
    
 ![](readme_images/credit_card.png)
 
-4.2. To enable payments via Boleto
+4.2. To enable payments via **Boleto**
 
  * Set **Enabled** to **Yes**
  * **Payment title** - Fill in the name of the payment method, will be presented for the customer in checkout
@@ -137,7 +137,7 @@ Unlimint Magento 2 plugin supports the following post-payment operations:
 
 Cancellation (void)/capture of the payment only works for **Credit card** payment method.
 And it is available only for orders were paid with payment method configured with **Capture payment** setting is set to **No**. 
-If **Capture payment** is set to **Yes -** an order is complete, you can only refund the payment by creating a **Credit Memo.**
+If **Capture payment** is set to **Yes -** an order will be completed automatically, you can only refund the payment by creating a **Credit Memo.**
 
 #### Capture of the payment
 
@@ -175,7 +175,7 @@ Order status is changed to **Canceled**
 
 **Refund (Credit memo)** operation is supported only with payment method **Credit Card**
 
-For creating a **Refund** navigate to Orders and choose any order in status **Processing**
+For creating a **Refund** navigate to **Orders** and choose any order in status **Processing**
 
 ![](readme_images/order_processing.png.png)
 
@@ -221,7 +221,7 @@ In pop-up window click the **OK** for confirm refund offline operation.
 
 ![](readme_images/offline_refund_popup.png)**
 
-After that you create the new **Credit memo.**
+After that you create the new **Credit memo**.
 
 ![](readme_images/refund_offline_memo_1.png)
 
