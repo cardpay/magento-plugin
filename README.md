@@ -9,7 +9,7 @@ Also, for preauthorized payments plugin supports cancellation (void) and capture
 
 Unlimint Magento 2 plugin is open-source and supports: 
 
-* Magento 2.4.2, 2.4.3
+* Magento Community Edition 2.4.2, 2.4.3
 * PHP 7.x according to official [Magento 2 specification ](https://devdocs.magento.com/guides/v2.4/install-gde/system-requirements.html)
 
 ### Supported payment methods
@@ -81,10 +81,10 @@ This process explains how to set up and configure the Magento plugin to accept p
    * Set to **Yes** - for completing payment automatically (one-phase payment),
    * Set to **No** for two-phases payment: the amount will not be captured but only blocked.
    
- With **No** option selected payments will be captured manually from Admin Panel (see **Capture payment** below) or automatically in 7 days from the time of creating the preauthorized transaction.
+ With **No** option selected payments will be captured manually from **Admin Panel** (see **Capture payment** below) or automatically in 7 days from the time of creating the preauthorized transaction.
 
  * **Checkout position** - This setting value is the position of the payment method for the customer in checkout
- * **Ask CPF** - set to **Yes** if you require CPF (Brazilian Tax Id) of your customer in checkout
+ * **Ask CPF** - set to **Yes** if you require **CPF (Brazilian Tax Id)** of your customer in checkout
    
 ![](readme_images/credit_card.png)
 
@@ -100,7 +100,7 @@ That's it! The selected payment methods are successfully enabled in the checkout
 
 4.3. Order statuses and refunds settings
 
-Mapping of the order statuses is set by default and you need to change it ONLY if you have yours custom order status flow (not recommended to change).
+Mapping of the order statuses is set by default and you need to change it ONLY if you have yours custom order statuses flow (not recommended to change).
 
 **Refund payment**: by default is set to **Yes**, it will be set to **No** - Refunds (Credit Memos) will be unavailable.
 
@@ -108,7 +108,7 @@ Mapping of the order statuses is set by default and you need to change it ONLY i
 
 4.4. Advanced settings - Developer Options
 
-**Log to file** - There is a setting about Magento plugin system log (cardpay.log), this log file contains the plugin debug information, communication errors between plugin front-end and back-end.
+**Log to file** - It's a setting about Magento plugin system log (cardpay.log), this log file contains the plugin debug information, communication errors between plugin front-end and back-end.
 
 By default, it's set to **Yes**. If it will be set to **No** - cardpay.log file won't be created.
 
@@ -119,14 +119,14 @@ By default, it's set to **Yes**. If it will be set to **No** - cardpay.log file 
 This process will explain how to set up order statuses for payment notifications:
 
 1. Log in the Unlimint’s [Merchant account](https://cardpay.com/ma) with your merchant creds (Obtaining of merchant creds is a part of merchant onboarding process - see details [here](https://www.unlimint.com/integration/))
-2. Go to Wallet Settings and click on the Wallet’s ID. (Settings / Wallet settings /choose specific wallet id /Callbacks /JSON callback URL
+2. Go to **Wallet Settings** and click on the Wallet’s ID. (Settings / Wallet settings /choose specific wallet id /Callbacks /JSON callback URL
 3. Fill the JSON Callback URL field with:
 
 `https://<store domain>/cardpay/notifications/creditcard`
 
 The notification statuses have been successfully configured.
 
-## Supported post payment operations
+## Supported post-payment operations
 
 Unlimint Magento 2 plugin supports the following post-payment operations:
 
