@@ -1,4 +1,4 @@
-# Magento merchant integration documentation
+# Unlimint Magento plugin
 ## Overview
 
 Unlimint Magento 2 plugin allows merchants to make payments and refunds (credit memos) using the Magento 2 platform.
@@ -61,9 +61,9 @@ This process explains how to set up and configure the Magento plugin to accept p
 
 1. Log in into Admin panel of Unlimint Magento plugin (using your admin credentials)
 
-2. Navigate to Stores > Configuration and under the **Sales** section, click the **Payment Methods**. From here, you can configure the Unlimint payment methods
+2. Navigate to **Stores** > **Configuration** and under the **Sales** section, click the **Payment Methods**. From here, you can configure the Unlimint payment methods
 
-3. To set up the credentials go to Unlimint > Credentials.
+3. To set up the credentials go to **Unlimint > Credentials.**
  * Set **Terminal code**, **terminal password**, **callback secret** values - it's merchant credentials for Unlimint APIv3 (how to obtain credentials see [here](https://www.unlimint.com/integration/))
  * Test environment:
     * Set to **Yes** for Sandbox environment (for test purposes)
@@ -211,7 +211,7 @@ And after successfull refund is created new **Credit Memo**
 
 **Refund offline** is possible for all supported payment methods.
 
-For creation **Refund offline** please navigate to the Orders - choose the Order for the refund offline.
+For creation **Refund offline** please navigate to the **Orders** - choose the Order for the refund offline.
 
 ![](readme_images/order_processing.png)
 
@@ -221,7 +221,7 @@ In pop-up window click the **OK** for confirm refund offline operation.
 
 ![](readme_images/offline_refund_popup.png)**
 
-After that you create the new credit memo.
+After that you create the new **Credit memo.**
 
 ![](readme_images/refund_offline_memo_1.png)
 
@@ -229,4 +229,4 @@ And push the button **Refund offline**
 
 ![](readme_images/refund_offline_memo.png)
 
-After refund offline order status is changed to "Closed".
+After refund offline order status is changed to **Closed.**
