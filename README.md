@@ -143,7 +143,7 @@ If **Capture payment** is set to **Yes -** an order will be completed automatica
 
 For Capture of the preathorized payment navigate to Orders and choose the Order in status **Payment review**
 
-![](readme_images/payment_review.png)
+![](readme_images/order_payment_review.png)
 
 After that click **Accept payment** and click **OK** in pop-up window.
 
