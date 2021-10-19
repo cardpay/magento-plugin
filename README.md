@@ -9,7 +9,7 @@ Also, for preauthorized payments plugin supports cancellation (void) and capture
 
 Unlimint Magento 2 plugin is open-source and supports: 
 
-* Magento Community Edition 2.4.2, 2.4.3
+* Magento Open Source 2.4.2, 2.4.3
 * PHP 7.x according to official [Magento 2 specification ](https://devdocs.magento.com/guides/v2.4/install-gde/system-requirements.html)
 
 ### Supported payment methods
