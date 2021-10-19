@@ -1,0 +1,84 @@
+/* Styles for success page */
+
+#box-cardpay, #logo-cardpay {
+    padding: 0;
+    text-align: left;
+}
+
+#box-cardpay > p {
+    text-transform: unset;
+    line-height: 22px;
+}
+
+#box-cardpay {
+    margin-top: 20px;
+}
+
+.cardpay-title {
+    margin: 0 0 10px 0;
+    font-weight: bold;
+}
+
+.cardpay-title-info-payment {
+    margin: 20px 0 10px 0;
+    text-transform: uppercase;
+}
+
+#frame-cardpay {
+    width: 90%;
+    height: 728px;
+    border: 0;
+}
+
+#btn-boleto-cardpay {
+    font-size: 1.25em;
+    text-align: center;
+    line-height: 1.25em;
+    padding: 6px 12px;
+    font-family: 'Lato', sans-serif;
+    font-weight: 400;
+    background-color: #36A1F1;
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #36A1F1), color-stop(100%, #0F79C9));
+    background-image: -webkit-linear-gradient(#36A1F1, #0F79C9); //NOSONAR
+    background-image: -moz-linear-gradient(#36A1F1, #0F79C9); //NOSONAR
+    background-image: -o-linear-gradient(#36A1F1, #0F79C9); //NOSONAR
+    background-image: linear-gradient(#36A1F1, #0F79C9); //NOSONAR
+    -webkit-box-shadow: inset 0 1px #97DCFF;
+    box-shadow: 0 1px #97DCFF inset;
+    color: #FFF !important;
+    border: 1px solid #0D6FB9;
+    border-radius: 4px 4px 4px 4px;
+    cursor: pointer;
+    display: inline-block;
+    text-decoration: none;
+}
+
+#btn-boleto-cardpay:hover {
+    background-color: #4CBFF8;
+    background-image: linear-gradient(#4CBFF8, #1699DF);
+    box-shadow: 0 1px #B6EBFF inset;
+    background-image: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #4CBFF8), color-stop(100%, #1699DF));
+    background-image: -webkit-linear-gradient(#4CBFF8, #1699DF);
+    background-image: -moz-linear-gradient(#4CBFF8, #1699DF);
+    background-image: -o-linear-gradient(#4CBFF8, #1699DF);
+    background-image: linear-gradient(#4CBFF8, #1699DF);
+    -webkit-box-shadow: inset 0 1px #B6EBFF;
+    border: 1px solid #1890D3;
+    color: #FFF;
+    text-decoration: none;
+}
+
+#logo-cardpay {
+    margin: 20px 0;
+    width: 100px;
+}
+
+#logo-cardpay img {
+    width: 100%;
+}
+
+.button-success {
+    text-align: left;
+    margin: 20px 0 20px 0;
+}
+

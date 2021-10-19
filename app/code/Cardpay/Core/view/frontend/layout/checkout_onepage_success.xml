@@ -1,0 +1,13 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" layout="1column" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Cardpay_Core::css/style-success.css"/>
+    </head>
+    <body>
+        <referenceContainer name="content">
+			<block name="cardpay.core.paymentinfo" class="Cardpay\Core\Block\Basic\Info" 
+				template="Cardpay_Core::basic/info.phtml" after="checkout.success">
+          </block>
+      </referenceContainer>        
+    </body>
+</page>

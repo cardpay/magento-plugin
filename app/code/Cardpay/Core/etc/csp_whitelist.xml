@@ -1,0 +1,30 @@
+<?xml version="1.0"?>
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp:etc/csp_whitelist.xsd">
+    <policies>
+        <policy id="script-src">
+            <values>
+                <value id="cpstatic.com" type="host">*.cpstatic.com</value>
+            </values>
+        </policy>
+        <policy id="connect-src">
+            <values>
+                <value id="cardpay.com" type="host">*.cardpay.com</value>
+            </values>
+        </policy>
+        <policy id="img-src">
+            <values>
+                <value id="cpstatic.com" type="host">*.cpstatic.com</value>
+                <value id="cardpay.com" type="host">*.cardpay.com</value>
+                <value id="cardpay.com" type="host">*.cardpay.com</value>
+                <value id="cardpay.com.br" type="host">*.cardpay.com.br</value>
+                <value id="cardpay.com.mx" type="host">*.cardpay.com.mx</value>
+                <value id="cardpay.com.ar" type="host">*.cardpay.com.ar</value>
+            </values>
+        </policy>
+        <policy id="frame-src">
+            <values>
+                <value id="cardpay.com" type="host">*.cardpay.com</value>
+            </values>
+        </policy>
+    </policies>
+</csp_whitelist>

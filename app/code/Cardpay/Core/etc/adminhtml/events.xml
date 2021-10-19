@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="sales_order_creditmemo_save_before">
+        <observer name="cardpay_creditmemo_before_save_observer" instance="Cardpay\Core\Observer\RefundObserverBeforeSave"/>
+    </event>
+</config>

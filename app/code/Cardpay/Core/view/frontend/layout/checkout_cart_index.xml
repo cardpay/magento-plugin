@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <css src="Cardpay_Core::css/style.css"/>
+        <css src="Cardpay_Core::css/style-calculator.css"/>
+    </head>
+
+    <body>
+        <referenceBlock name="checkout.cart.totals">
+            <arguments>
+                <argument name="jsLayout" xsi:type="array">
+                    <item name="components" xsi:type="array">
+                        <item name="block-totals" xsi:type="array">
+                            <item name="children" xsi:type="array">
+
+                                <item name="discount_coupon" xsi:type="array">
+                                    <item name="component" xsi:type="string">
+                                        Cardpay_Core/js/view/checkout/cart/totals/discount_coupon
+                                    </item>
+                                    <item name="sortOrder" xsi:type="string">20</item>
+                                    <item name="config" xsi:type="array">
+                                        <item name="template" xsi:type="string">
+                                            Cardpay_Core/checkout/cart/totals/discount_coupon
+                                        </item>
+                                        <item name="title" xsi:type="string" translate="true">Coupon discount of the
+                                            Cardpay
+                                        </item>
+                                    </item>
+                                </item>
+
+                                <item name="finance_cost" xsi:type="array">
+                                    <item name="component" xsi:type="string">
+                                        Cardpay_Core/js/view/checkout/cart/totals/finance_cost
+                                    </item>
+                                    <item name="sortOrder" xsi:type="string">20</item>
+                                    <item name="config" xsi:type="array">
+                                        <item name="template" xsi:type="string">
+                                            Cardpay_Core/checkout/cart/totals/finance_cost
+                                        </item>
+                                        <item name="title" xsi:type="string" translate="true">Finance Cost</item>
+                                    </item>
+                                </item>
+
+                            </item>
+                        </item>
+                    </item>
+                </argument>
+            </arguments>
+        </referenceBlock>
+    </body>
+</page>

@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
+    <group id="custom_checkout_ticket" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+        <label>Boleto</label>
+
+        <field id="active" translate="label" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Enabled</label>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+            <config_path>payment/cardpay_customticket/active</config_path>
+        </field>
+
+        <field id="title" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Payment Title</label>
+            <config_path>payment/cardpay_customticket/title</config_path>
+        </field>
+
+        <field id="sort_order" translate="label comment" type="text" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Checkout Position</label>
+            <frontend_class>validate-number</frontend_class>
+            <config_path>payment/cardpay_customticket/sort_order</config_path>
+            <comment>This setting will be the position in which the payment method will be available to the buyer.</comment>
+        </field>
+    </group>
+</include>

@@ -1,0 +1,19 @@
+<?php
+/**
+ * @var Cardpay\Core\Block\Basic\Info $block
+ */
+$payment = $this->getPayment();
+$paymentResponse = $payment->getAdditionalInformation("paymentResponse");
+$payment_method = $this->getPaymentMethod();
+?>
+
+<?php if ($paymentInfo = $block->getPaymentInfo()): ?>
+    <div id="box-cardpay">
+        <?php if ($payment_method == 'cardpay_customticket') { ?>
+            <p>
+                <?php /* @escapeNotVerified */
+                echo __('Pay the boleto wherever you want. It will be approved within 2 business days.'); ?>
+            </p>
+        <?php } ?>
+    </div>
+<?php endif; ?>

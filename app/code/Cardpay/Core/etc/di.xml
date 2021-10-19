@@ -1,0 +1,35 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Cardpay\Core\Helper\Message\MessageInterface" type="Cardpay\Core\Helper\Message\StatusOrderMessage"/>
+    <preference for="Magento\Framework\Setup\ModuleContextInterface" type="Magento\Setup\Model\ModuleContext"/>
+    <preference for="Magento\Quote\Api\CartRepositoryInterface" type="Magento\Quote\Model\QuoteRepository"/>
+    <type name="Cardpay\Core\Logger\Handler\System">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="Cardpay\Core\Logger\Handler">
+        <arguments>
+            <argument name="filesystem" xsi:type="object">Magento\Framework\Filesystem\Driver\File</argument>
+        </arguments>
+    </type>
+    <type name="Cardpay\Core\Logger\Logger">
+        <arguments>
+            <argument name="name" xsi:type="string">cardpay</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="system" xsi:type="object">Cardpay\Core\Logger\Handler\System</item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Cardpay\Core\Model\Core">
+        <arguments>
+            <argument name="statusMessage" xsi:type="object">Cardpay\Core\Helper\Message\StatusMessage</argument>
+            <argument name="statusDetailMessage" xsi:type="object">Cardpay\Core\Helper\Message\StatusDetailMessage</argument>
+            <argument name="statusOrderMessage" xsi:type="object">Cardpay\Core\Helper\Message\StatusOrderMessage</argument>
+        </arguments>
+    </type>
+    <type name="Magento\Framework\App\Request\CsrfValidator">
+        <plugin name="csrf_validator_skip" type="Cardpay\Core\Plugin\CsrfValidatorSkip"/>
+    </type>
+</config>

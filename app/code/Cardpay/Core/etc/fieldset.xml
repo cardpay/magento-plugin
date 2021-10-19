@@ -1,0 +1,18 @@
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:DataObject/etc/fieldset.xsd">
+    <scope id="global">
+        <fieldset id="sales_convert_quote_address">
+            <field name="discount_coupon_amount">
+                <aspect name="to_order"/>
+            </field>
+            <field name="base_discount_coupon_amount">
+                <aspect name="to_order"/>
+            </field>
+            <field name="finance_cost_amount">
+                <aspect name="to_order"/>
+            </field>
+            <field name="base_finance_cost_amount">
+                <aspect name="to_order"/>
+            </field>
+        </fieldset>
+    </scope>
+</config>
