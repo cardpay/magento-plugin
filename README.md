@@ -81,7 +81,8 @@ This process explains how to set up and configure the Magento plugin to accept p
    * Set to **Yes** - for completing payment automatically (one-phase payment),
    * Set to **No** for two-phases payment: the amount will not be captured but only blocked.
    
- With **No** option selected payments will be captured manually from **Admin Panel** (see **Capture payment** below) or automatically in 7 days from the time of creating the preauthorized transaction.
+ With **No** option selected payments will be captured automatically in 7 days from the time of creating the preauthorized transaction.
+ In installment case with **No** option selected installments will be declined automatically in 7 days from the time of creating the preauthorized transaction.
 
  * **Checkout position** - This setting value is the position of the payment method for the customer in checkout
  * **Ask CPF** - set to **Yes** if you require **CPF (Brazilian Tax Id)** of your customer in checkout
