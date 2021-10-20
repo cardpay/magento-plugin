@@ -82,6 +82,7 @@ This process explains how to set up and configure the Magento plugin to accept p
    * Set to **No** for two-phases payment: the amount will not be captured but only blocked.
    
  With **No** option selected payments will be captured automatically in 7 days from the time of creating the preauthorized transaction.
+ 
  In installment case with **No** option selected installments will be declined automatically in 7 days from the time of creating the preauthorized transaction.
 
  * **Checkout position** - This setting value is the position of the payment method for the customer in checkout
