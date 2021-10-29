@@ -1,4 +1,4 @@
-# Magento merchant integration documentation
+# Unlimint Magento plugin
 ## Overview
 
 Unlimint Magento 2 plugin allows merchants to make payments and refunds (credit memos) using the Magento 2 platform.
@@ -9,7 +9,7 @@ Also, for preauthorized payments plugin supports cancellation (void) and capture
 
 Unlimint Magento 2 plugin is open-source and supports: 
 
-* Magento 2.4.2, 2.4.3
+* Magento Open Source 2.4.2, 2.4.3
 * PHP 7.x according to official [Magento 2 specification ](https://devdocs.magento.com/guides/v2.4/install-gde/system-requirements.html)
 
 ### Supported payment methods
@@ -43,7 +43,7 @@ Installation process will explain how to install the Magento 2 plugin via comman
 
 8. Check the plugin is successfully installed
 
-* Log in into Admin panel of Unlimint Magento plugin (using your admin credentials)
+* Log in into **Admin panel** of Unlimint Magento plugin (using your admin credentials)
 
 * Navigate to **Stores > Configuration** and under the **Sales** section, click the **Payment Methods**, you see **Unlimint** and settings of it.
 
@@ -59,11 +59,11 @@ This process explains how to set up and configure the Magento plugin to accept p
 
 ### Basic settings
 
-1. Log in into Admin panel of Unlimint Magento plugin (using your admin credentials)
+1. Log in into **Admin panel** of Unlimint Magento plugin (using your admin credentials)
 
-2. Navigate to Stores > Configuration and under the **Sales** section, click the **Payment Methods**. From here, you can configure the Unlimint payment methods
+2. Navigate to **Stores** > **Configuration** and under the **Sales** section, click the **Payment Methods**. From here, you can configure the Unlimint payment methods
 
-3. To set up the credentials go to Unlimint > Credentials.
+3. To set up the credentials go to **Unlimint > Credentials.**
  * Set **Terminal code**, **terminal password**, **callback secret** values - it's merchant credentials for Unlimint APIv3 (how to obtain credentials see [here](https://www.unlimint.com/integration/))
  * Test environment:
     * Set to **Yes** for Sandbox environment (for test purposes)
@@ -71,24 +71,26 @@ This process explains how to set up and configure the Magento plugin to accept p
 
 ![](readme_images/credentials.png)
 
-4. With your credentials filled in, you need to enable payment methods in Magento plugin. (for now it's Credit Card and Boleto)
+4. With your credentials filled in, you need to enable payment methods in Magento plugin. (Credit Card and Boleto)
  * First, access the methods you want to enable by Unlimint support (it's a part of merchant onboarding process - see [here](https://www.unlimint.com/integration/))
 
 4.1. To enable payments via **Credit Card** do the following steps:
  * Set **Enabled** to **Yes**
  * **Payment title** - Fill in the name of the payment method, will be presented for the customer in checkout
  * **Capture payment:**
- * Set to **Yes** - for completing payment automatically (one-phase payment),
- * Set to **No** for two-phases payment: the amount will not be captured but only blocked.
+   * Set to **Yes** - for completing payment automatically (one-phase payment),
+   * Set to **No** for two-phases payment: the amount will not be captured but only blocked.
    
- With **No** option selected payments will be captured manually from Admin Panel (see **Capture payment** below) or automatically in 7 days from the time of creating the preauthorized transaction.
+ With **No** option selected payments will be captured automatically in 7 days from the time of creating the preauthorized transaction.
+ 
+ In installment case with **No** option selected installments will be declined automatically in 7 days from the time of creating the preauthorized transaction.
 
  * **Checkout position** - This setting value is the position of the payment method for the customer in checkout
- * **Ask CPF** - set to **Yes** if you require CPF (Brazilian Tax Id) of your customer in checkout
+ * **Ask CPF** - set to **Yes** if you require **CPF (Brazilian Tax Id)** of your customer in checkout
    
 ![](readme_images/credit_card.png)
 
-4.2. To enable payments via Boleto
+4.2. To enable payments via **Boleto**
 
  * Set **Enabled** to **Yes**
  * **Payment title** - Fill in the name of the payment method, will be presented for the customer in checkout
@@ -100,7 +102,7 @@ That's it! The selected payment methods are successfully enabled in the checkout
 
 4.3. Order statuses and refunds settings
 
-Mapping of the order statuses is set by default and you need to change it ONLY if you have yours custom status flow (not recommended to change).
+Mapping of the order statuses is set by default and you need to change it ONLY if you have yours custom order statuses flow (not recommended to change).
 
 **Refund payment**: by default is set to **Yes**, it will be set to **No** - Refunds (Credit Memos) will be unavailable.
 
@@ -108,7 +110,7 @@ Mapping of the order statuses is set by default and you need to change it ONLY i
 
 4.4. Advanced settings - Developer Options
 
-**Log to file** - There is a setting about Magento plugin system log (cardpay.log), this log file contains the plugin debug information, communication errors between plugin front-end and back-end.
+**Log to file** - It's a setting about Magento plugin system log (cardpay.log), this log file contains the plugin debug information, communication errors between plugin front-end and back-end.
 
 By default, it's set to **Yes**. If it will be set to **No** - cardpay.log file won't be created.
 
@@ -119,14 +121,14 @@ By default, it's set to **Yes**. If it will be set to **No** - cardpay.log file 
 This process will explain how to set up order statuses for payment notifications:
 
 1. Log in the Unlimint’s [Merchant account](https://cardpay.com/ma) with your merchant creds (Obtaining of merchant creds is a part of merchant onboarding process - see details [here](https://www.unlimint.com/integration/))
-2. Go to Wallet Settings and click on the Wallet’s ID. (Settings / Wallet settings /choose specific wallet id /Callbacks /JSON callback URL
+2. Go to **Wallet Settings** and click on the Wallet’s ID. (Settings / Wallet settings /choose specific wallet id /Callbacks /JSON callback URL
 3. Fill the JSON Callback URL field with:
 
 `https://<store domain>/cardpay/notifications/creditcard`
 
 The notification statuses have been successfully configured.
 
-## Supported post payment operations
+## Supported post-payment operations
 
 Unlimint Magento 2 plugin supports the following post-payment operations:
 
@@ -137,13 +139,13 @@ Unlimint Magento 2 plugin supports the following post-payment operations:
 
 Cancellation (void)/capture of the payment only works for **Credit card** payment method.
 And it is available only for orders were paid with payment method configured with **Capture payment** setting is set to **No**. 
-If **Capture payment** is set to **Yes -** an order is complete, you can only refund the payment by creating a **Credit Memo.**
+If **Capture payment** is set to **Yes -** an order will be completed automatically, you can only refund the payment by creating a **Credit Memo.**
 
 #### Capture of the payment
 
 For Capture of the preathorized payment navigate to Orders and choose the Order in status **Payment review**
 
-![](readme_images/payment_review.png)
+![](readme_images/order_payment_review.png)
 
 After that click **Accept payment** and click **OK** in pop-up window.
 
@@ -161,7 +163,7 @@ And status of invoice for this order is changed to **Paid**
 
 For cancel (void) the payment navigate to Orders and choose the Order in status **Payment review**.
 
-![](readme_images/payment_review.png)
+![](readme_images/order_payment_review.png)
 
 After that click **Deny payment** and click **OK** in pop-up window
 
@@ -175,9 +177,9 @@ Order status is changed to **Canceled**
 
 **Refund (Credit memo)** operation is supported only with payment method **Credit Card**
 
-For creating a **Refund** navigate to Orders and choose any order in status **Processing**
+For creating a **Refund** navigate to **Orders** and choose any order in status **Processing**
 
-![](readme_images/order_processing.png.png)
+![](readme_images/order_processing.png)
 
 Then in left navigation panel **Order view** navigate to **Invoices**
 
@@ -201,17 +203,17 @@ After succesfull refund status of the order is changed to **Closed**
 
 ![](readme_images/order_closed.png)
 
-And after successfull refund is created new **Credit Memo**
+And created new **Credit Memo**
 
 ![](readme_images/credit_memo_table.png)
 
 ### Refund offline
 
-**Refund offline** is the operation then refund don't created online and amount of order should be returned manually in offline with cash only.
+**Refund offline** is the operation when refund don't created online and amount of order should be returned manually in offline with cash only.
 
-**Refund offline** is possible for all supported payment methods.
+**Refund offline** is possible for all supported payment methods in Magento plugin.
 
-For creation **Refund offline** please navigate to the Orders - choose the Order for the refund offline.
+For creation **Refund offline** please navigate to the **Orders** - choose the Order for the refund offline.
 
 ![](readme_images/order_processing.png)
 
@@ -221,7 +223,7 @@ In pop-up window click the **OK** for confirm refund offline operation.
 
 ![](readme_images/offline_refund_popup.png)**
 
-After that you create the new credit memo.
+After that you create the new **Credit memo**.
 
 ![](readme_images/refund_offline_memo_1.png)
 
@@ -229,4 +231,4 @@ And push the button **Refund offline**
 
 ![](readme_images/refund_offline_memo.png)
 
-After refund offline order status is changed to "Closed".
+After refund offline order status is changed to **Closed.**
