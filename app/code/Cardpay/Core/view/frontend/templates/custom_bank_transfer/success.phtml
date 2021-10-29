@@ -14,7 +14,7 @@ $link_to_order = '<a href="' . $block->escapeUrl($this->getOrderUrl()) . '">' . 
 ?>
 
 <?php
-if ($this->checkExistCallback() == false && $this->getRedirectUserStatus()) {
+if (!$this->checkExistCallback() && $this->getRedirectUserStatus()) {
     ?>
     <script>
         window.location.href = "<?php echo $paymentResponse['transaction_details']['redirect_url']; ?>";
@@ -22,10 +22,9 @@ if ($this->checkExistCallback() == false && $this->getRedirectUserStatus()) {
 <?php } ?>
 
 <div id="box-cardpay">
-    <?php if ($payment_method == 'cardpay_custom_bank_transfer') { ?>
+    <?php if ($payment_method === 'cardpay_custom_bank_transfer') { ?>
 
-        <?php if ($this->checkExistCallback() == false) { ?>
-
+        <?php if (!$this->checkExistCallback()) { ?>
             <h2 class="cardpay-title">
                 <?php /* @escapeNotVerified */
                 echo __('Thank you for your purchase!'); ?>
@@ -68,7 +67,7 @@ if ($this->checkExistCallback() == false && $this->getRedirectUserStatus()) {
                     echo __($successMsg, $link_to_order); ?></p>
             <?php } ?>
 
-            <?php if ($paymentResponse['status'] != 'rejected' && (isset($message_status['title']) && isset($message_status['message']))): ?>
+            <?php if (isset($message_status['title'], $message_status['message']) && $paymentResponse['status'] !== 'rejected'): ?>
                 <p><?php /* @escapeNotVerified */
                     echo __($successMsg, $link_to_order); ?></p>
             <?php endif; ?>
@@ -103,7 +102,7 @@ if ($this->checkExistCallback() == false && $this->getRedirectUserStatus()) {
 </div>
 
 <div class="primary button-success">
-    <?php if ($paymentResponse['status'] == 'rejected'): ?>
+    <?php if ($paymentResponse['status'] === 'rejected'): ?>
         <a class="action primary continue"
            href="<?php echo $block->escapeUrl($block->getReOrderUrl()) ?>"><span><?php /* @escapeNotVerified */
                 echo __('Retry order') ?></span></a>

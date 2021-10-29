@@ -116,16 +116,9 @@
     vertical-align: middle;
 }
 
-#paymentCost {
-}
-
 #paymentCost label {
     display: inline-block;
     width: 45px;
-}
-
-#op-bank-select {
-
 }
 
 #op-bank-select select {

@@ -32,7 +32,7 @@ $payment_method = $this->getPaymentMethod();
 
         <?php if ($paymentResponse['redirect_url']) { ?>
             <a href="<?php echo $block->escapeUrl(urldecode($paymentResponse['redirect_url'])); ?>"
-               target="_blank" id="btn-boleto-cardpay">
+               target="_blank" rel="noopener" id="btn-boleto-cardpay">
                 <?php /* @escapeNotVerified */
                 echo __('Generate Ticket'); ?>
             </a>

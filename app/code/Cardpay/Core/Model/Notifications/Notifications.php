@@ -56,17 +56,17 @@ class Notifications
             $type = 'payment_data';
         }
 
-        if (!isset($params['payment_method']) || !isset($params[$type])) {
+        if (!isset($params['payment_method'], $params[$type])) {
             throw new Exception(__('Invalid Unlimint callback'), Response::HTTP_BAD_REQUEST);
         }
 
-        $paymentData = $params[$type];
-        if (!isset($paymentData["id"]) || empty($paymentData["id"])) {
+        $requestData = $params[$type];
+        if (!isset($requestData['id'])) {
             throw new Exception(__('Request param ID not found'), Response::HTTP_BAD_REQUEST);
         }
 
         $method = $params['payment_method'];
-        $id = $paymentData['id'];
+        $id = $requestData['id'];
 
         return ['id' => $id, 'method' => $method, 'type' => $type];
     }
@@ -74,7 +74,7 @@ class Notifications
     private function validateSignature($request)
     {
         $callbackSignatureHeader = $request->getHeaders(self::HEADER_SIGNATURE, null);
-        if ($callbackSignatureHeader == null) {
+        if (is_null($callbackSignatureHeader)) {
             throw new Exception(__('Could not get Unlimint callback signature'), Response::HTTP_BAD_REQUEST);
         }
 
@@ -82,7 +82,7 @@ class Notifications
         $callbackSecret = $this->_cpHelper->getCallbackSecret();
         $generatedSignature = hash('sha512', $body . $callbackSecret);
 
-        if ($generatedSignature != $callbackSignatureHeader->getFieldValue()) {
+        if ($generatedSignature !== $callbackSignatureHeader->getFieldValue()) {
             throw new Exception(__('Unlimint callback signature does not match'), Response::HTTP_BAD_REQUEST);
         }
     }
@@ -91,7 +91,7 @@ class Notifications
      * @param $request
      * @return MerchantOrder|Payment
      */
-    public function getTopicClass($request)
+    public function getPayment()
     {
         return $this->payment;
     }

@@ -10,11 +10,6 @@ use Exception;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Webapi\Rest\Request;
 
-/**
- * Class Creditcard
- *
- * @package Cardpay\Core\Controller\Notifications
- */
 class Creditcard extends NotificationBase
 {
     const LOG_NAME = 'creditcard_notification';
@@ -40,42 +35,40 @@ class Creditcard extends NotificationBase
         parent::__construct($context);
     }
 
-    /**
-     * Controller Action
-     */
     public function execute()
     {
         try {
             $request = $this->_wRequest;
 
             $requestValues = $this->_notifications->getRequestParams($request);
-            $topicClass = $this->_notifications->getTopicClass($request);
+            $notificationPayment = $this->_notifications->getPayment();
 
-            if ($requestValues['method'] != 'BANKCARD') {
-                $message = "Unlimint - Invalid Notification Parameters, Invalid Type.";
+            if ($requestValues['method'] !== 'BANKCARD') {
+                $message = 'Unlimint - Invalid Notification Parameters, Invalid Type.';
                 $this->setResponseHttp(Response::HTTP_BAD_REQUEST, $message, $request->getBodyParams());
             }
 
-            $payment = $request->getBodyParams();
+            $requestParams = $request->getBodyParams();
 
-            if ($requestValues['type'] == 'refund_data') {
-                $response = $topicClass->refund($payment);
+            $response = null;
+            if ($requestValues['type'] === 'refund_data') {
+                $notificationPayment->refund($requestParams);
             } else {
-                $response = $topicClass->updateStatusOrderByPayment($payment);
+                $response = $notificationPayment->updateStatusOrderByPayment($requestParams);
             }
-            $this->setResponseHttp($response['httpStatus'], $response['message'], $response['data']);
-
-            return;
+            if (isset($response['httpStatus'], $response['message'], $response['data'])) {
+                $this->setResponseHttp($response['httpStatus'], $response['message'], $response['data']);
+            }
 
         } catch (Exception $e) {
             $statusResponse = Response::HTTP_INTERNAL_ERROR;
 
-            if (method_exists($e, "getCode")) {
+            if (method_exists($e, 'getCode')) {
                 $statusResponse = $e->getCode();
             }
 
-            $message = "Unlimint - There was an error processing the notification. Could not handle the error.";
-            $this->setResponseHttp($statusResponse, $message, ["exception_error" => $e->getMessage()]);
+            $message = 'Unlimint - There was an error processing the notification. Could not handle the error.';
+            $this->setResponseHttp($statusResponse, $message, ['exception_error' => $e->getMessage()]);
         }
     }
 
@@ -87,9 +80,9 @@ class Creditcard extends NotificationBase
     protected function setResponseHttp($httpStatus, $message, $data = [])
     {
         $response = [
-            "status" => $httpStatus,
-            "message" => $message,
-            "data" => $data
+            'status' => $httpStatus,
+            'message' => $message,
+            'data' => $data
         ];
 
         $this->getResponse()->setHeader('Content-Type', 'application/json', true);

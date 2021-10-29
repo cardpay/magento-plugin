@@ -24,9 +24,9 @@ class Payment extends \Cardpay\Core\Model\Custom\Payment
 
     protected $_code = self::CODE;
 
-    protected $fields = array(
+    protected $fields = [
         "payment_method_id", "identification_type", "identification_number", "financial_institution", "entity_type"
-    );
+    ];
 
     /**
      * @param DataObject $data
@@ -79,7 +79,7 @@ class Payment extends \Cardpay\Core\Model\Custom\Payment
             $order = $this->getInfoInstance()->getOrder();
             $payment = $order->getPayment();
 
-            $payment_info = array();
+            $payment_info = [];
 
             if ($payment->getAdditionalInformation("coupon_code") != "") {
                 $payment_info['coupon_code'] = $payment->getAdditionalInformation("coupon_code");
@@ -119,16 +119,15 @@ class Payment extends \Cardpay\Core\Model\Custom\Payment
             $payment = $response['response'];
             $this->getInfoInstance()->setAdditionalInformation("paymentResponse", $payment);
             return true;
-
-        } else {
-            $messageErrorToClient = $this->_coreModel->getMessageError($response);
-            $arrayLog = array(
-                "response" => $response,
-                "message" => $messageErrorToClient
-            );
-            $this->_helperData->log("CustomPaymentTicket::initialize - The API returned an error while creating the payment, more details: " . json_encode($arrayLog));
-            throw new LocalizedException(__($messageErrorToClient));
         }
+
+        $messageErrorToClient = $this->_coreModel->getMessageError($response);
+        $arrayLog = [
+            "response" => $response,
+            "message" => $messageErrorToClient
+        ];
+        $this->_helperData->log("CustomPaymentTicket::initialize - The API returned an error while creating the payment, more details: " . json_encode($arrayLog));
+        throw new LocalizedException(__($messageErrorToClient));
     }
 
     /**

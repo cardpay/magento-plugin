@@ -4,10 +4,6 @@ namespace Cardpay\Core\Lib;
 
 use Exception;
 
-/**
- * Unlimint Integration Library
- * Access Unlimint for payments integration
- */
 class Api
 {
     const VERSION = "0.3.3";
@@ -42,23 +38,15 @@ class Api
     /**
      * @var null
      */
-    private $_platform = null;
+    private $_platform;
 
     /**
      * @var null
      */
-    private $_so = null;
-
-    /**
-     * @var null
-     */
-    private $_type = null;
+    private $_type;
 
     protected $_cpHelper;
 
-    /**
-     * \Cardpay\Core\Lib\Api constructor
-     */
     public function __construct()
     {
         $i = func_num_args();
@@ -67,11 +55,11 @@ class Api
             throw new Exception('Invalid arguments. Use CLIENT_ID and CLIENT SECRET, or ACCESS_TOKEN');
         }
 
-        if ($i == 1) {
+        if ($i === 1) {
             $this->ll_access_token = func_get_arg(0);
         }
 
-        if ($i == 2) {
+        if ($i === 2) {
             $this->terminal_code = func_get_arg(0);
             $this->terminal_password = func_get_arg(1);
         }
@@ -93,22 +81,25 @@ class Api
     /**
      * Get Access Token for API use
      */
-    public function get_access_token()
+    public function getAccessToken()
     {
         if (isset ($this->ll_access_token) && !is_null($this->ll_access_token)) {
             return $this->ll_access_token;
         }
 
-        $app_client_values = $this->build_query(array(
+        $app_client_values = $this->buildQuery([
             'terminal_code' => $this->terminal_code,
             'password' => $this->terminal_password,
             'grant_type' => 'password'
-        ));
+        ]);
 
         $authResponse = RestClient::post($this->getHost() . "/api/auth/token", $app_client_values, "application/x-www-form-urlencoded");
-
-        if ($authResponse["status"] != 200) {
-            throw new Exception ($authResponse['response']['message'], $authResponse['status']);
+        if ((int)$authResponse['status'] !== 200) {
+            $message = '';
+            if (isset($authResponse['response']['message'])) {
+                $message = $authResponse['response']['message'];
+            }
+            throw new Exception($message, $authResponse['status']);
         }
 
         $this->access_data = $authResponse['response'];
@@ -118,76 +109,51 @@ class Api
         return $this->ll_access_token;
     }
 
-    /**
-     * Refund accredited payment
-     *
-     * @param int $id
-     * @return array(json)
-     */
     public function performRefund($data)
     {
         return $this->post("/api/refunds", $data);
     }
 
-    /**
-     * Create a checkout preference
-     * @param array $preference
-     * @return array(json)
-     */
     public function createParams($preference)
     {
-        $access_token = $this->get_access_token();
+        $access_token = $this->getAccessToken();
 
-        $extra_params = array(
+        $extra_params = [
             'platform: ' . $this->_platform, 'so;',
             'type: ' . $this->_type,
             self::AUTH_HEADER_PREFIX . $access_token
-        );
+        ];
 
         return RestClient::post($this->getHost() . "/checkout/preferences", $preference, self::CONTENT_TYPE, $extra_params);
     }
 
-    public function check_discount_campaigns($transaction_amount, $payer_email, $coupon_code)
+    public function checkDiscountCampaigns($transaction_amount, $payer_email, $coupon_code)
     {
-        $access_token = $this->get_access_token();
+        $accessToken = $this->getAccessToken();
         $url = $this->getHost() . "/discount_campaigns?transaction_amount=$transaction_amount&payer_email=$payer_email&coupon_code=$coupon_code";
 
-        return RestClient::get($url, null, [self::AUTH_HEADER_PREFIX . $access_token]);
+        return RestClient::get($url, null, [self::AUTH_HEADER_PREFIX . $accessToken]);
     }
 
-    /* Generic resource call methods */
-
-    /**
-     * Generic resource get
-     * @param uri
-     * @param params
-     * @param authenticate = true
-     */
     public function get($uri, $params = null, $authenticate = true)
     {
-        $params = is_array($params) ? $params : array();
+        $params = is_array($params) ? $params : [];
 
         $access_token = null;
         if ($authenticate !== false) {
-            $access_token = $this->get_access_token();
+            $access_token = $this->getAccessToken();
         }
 
         $uri = $this->getHost() . $uri;
 
         if (count($params) > 0) {
             $uri .= (strpos($uri, "?") === false) ? "?" : "&";
-            $uri .= $this->build_query($params);
+            $uri .= $this->buildQuery($params);
         }
 
         return RestClient::get($uri, null, [self::AUTH_HEADER_PREFIX . $access_token]);
     }
 
-    /**
-     * Generic resource post
-     * @param uri
-     * @param data
-     * @param params
-     */
     public function post($uri, $data, $urlParams = null)
     {
         $url = $this->buildUrl($uri, $urlParams);
@@ -208,11 +174,11 @@ class Api
     {
         $url = $this->getHost() . $uri;
 
-        $urlParams = is_array($urlParams) ? $urlParams : array();
+        $urlParams = is_array($urlParams) ? $urlParams : [];
 
         if (count($urlParams) > 0) {
             $url .= (strpos($url, "?") === false) ? "?" : "&";
-            $url .= $this->build_query($urlParams);
+            $url .= $this->buildQuery($urlParams);
         }
 
         return $url;
@@ -220,51 +186,38 @@ class Api
 
     private function buildExtraParams()
     {
-        return array(self::AUTH_HEADER_PREFIX . $this->get_access_token());
+        return [self::AUTH_HEADER_PREFIX . $this->getAccessToken()];
     }
 
-    /**
-     * Generic resource put
-     * @param uri
-     * @param data
-     * @param params
-     */
     public function put($uri, $data, $params = null)
     {
-        $params = is_array($params) ? $params : array();
-
-        $access_token = $this->get_access_token();
-
-        $uri = $this->getHost() . $uri;
-
-        if (count($params) > 0) {
-            $uri .= (strpos($uri, "?") === false) ? "?" : "&";
-            $uri .= $this->build_query($params);
-        }
-
-        return RestClient::put($uri, $data, null, [self::AUTH_HEADER_PREFIX . $access_token]);
+        return RestClient::put(
+            $this->getUriWithParams($uri, $params),
+            $data,
+            $this->buildExtraParams()
+        );
     }
 
-    /**
-     * Generic resource delete
-     * @param uri
-     * @param data
-     * @param params
-     */
     public function delete($uri, $params = null)
     {
-        $params = is_array($params) ? $params : array();
+        return RestClient::delete(
+            $this->getUriWithParams($uri, $params),
+            null,
+            $this->buildExtraParams()
+        );
+    }
 
-        $access_token = $this->get_access_token();
+    private function getUriWithParams($uri, $params = null) {
+        $params = is_array($params) ? $params : [];
 
         $uri = $this->getHost() . $uri;
 
         if (count($params) > 0) {
             $uri .= (strpos($uri, "?") === false) ? "?" : "&";
-            $uri .= $this->build_query($params);
+            $uri .= $this->buildQuery($params);
         }
 
-        return RestClient::delete($uri, null, [self::AUTH_HEADER_PREFIX . $access_token]);
+        return $uri;
     }
 
     /**
@@ -272,24 +225,24 @@ class Api
      *
      * @return string
      */
-    private function build_query($params)
+    private function buildQuery($params)
     {
         if (function_exists("http_build_query")) {
             return http_build_query($params);
-        } else {
-            $elements = [];
-            foreach ($params as $name => $value) {
-                $elements[] = "$name=" . urlencode($value);
-            }
-
-            return implode("&", $elements);
         }
+
+        $elements = [];
+        foreach ($params as $name => $value) {
+            $elements[] = "$name=" . urlencode($value);
+        }
+
+        return implode("&", $elements);
     }
 
     /**
      * @param null $host
      */
-    public function set_host($host)
+    public function setHost($host)
     {
         $this->host = $host;
     }
@@ -313,23 +266,15 @@ class Api
     /**
      * @param null $platform
      */
-    public function set_platform($platform)
+    public function setPlatform($platform)
     {
         $this->_platform = $platform;
     }
 
     /**
-     * @param null $so
-     */
-    public function set_so($so = '')
-    {
-        $this->_so = $so;
-    }
-
-    /**
      * @param null $type
      */
-    public function set_type($type)
+    public function setType($type)
     {
         $this->_type = $type;
     }

@@ -372,9 +372,11 @@ textarea.has-error {
     margin: 0 !important;
 }
 
+/*
 .cardpay-discount-options {
     display: inline-block;
 }
+*/
 
 .cardpay-ticket-label {
     vertical-align: top;

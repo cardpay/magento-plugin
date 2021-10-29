@@ -155,7 +155,7 @@ class RefundObserverBeforeSave implements ObserverInterface
     /**
      * @throws LocalizedException
      */
-    protected function throwRefundException($message, $data = array())
+    protected function throwRefundException($message, $data = [])
     {
         $this->dataHelper->log("RefundObserverBeforeSave::sendRefundRequest - " . $message, ConfigData::CUSTOM_LOG_PREFIX, $data);
         throw new LocalizedException(new Phrase('Cardpay - ' . $message));

@@ -70,11 +70,6 @@ class Data extends \Magento\Payment\Helper\Data
     protected $_mpLogger;
 
     /**
-     * @var Cache
-     */
-    protected $_mpCache;
-
-    /**
      * @var Collection
      */
     protected $_statusFactory;
@@ -100,7 +95,6 @@ class Data extends \Magento\Payment\Helper\Data
     /**
      * Data constructor.
      * @param Message\MessageInterface $messageInterface
-     * @param Cache $cpCache
      * @param Context $context
      * @param LayoutFactory $layoutFactory
      * @param Factory $paymentMethodFactory
@@ -116,7 +110,6 @@ class Data extends \Magento\Payment\Helper\Data
      */
     public function __construct(
         Message\MessageInterface $messageInterface,
-        Cache                    $cpCache,
         Context                  $context,
         LayoutFactory            $layoutFactory,
         Factory                  $paymentMethodFactory,
@@ -135,7 +128,6 @@ class Data extends \Magento\Payment\Helper\Data
         parent::__construct($context, $layoutFactory, $paymentMethodFactory, $appEmulation, $paymentConfig, $initialConfig);
         $this->_messageInterface = $messageInterface;
         $this->_mpLogger = $logger;
-        $this->_mpCache = $cpCache;
         $this->_statusFactory = $statusFactory;
         $this->_orderFactory = $orderFactory;
         $this->_switcher = $switcher;
@@ -176,7 +168,7 @@ class Data extends \Magento\Payment\Helper\Data
         $stringPansMasked = preg_replace("/(\d{6})\d{0,9}(\d{4})/i", '${1}...${2}', $string);
 
         // mask password
-        return preg_replace("/password=.+&/i", 'password=***&', $stringPansMasked);
+        return preg_replace("/password=.+&/i", 'password=***&', $stringPansMasked);    //NOSONAR
     }
 
     /**
@@ -197,10 +189,10 @@ class Data extends \Magento\Payment\Helper\Data
         $api = new Api($terminalCode, $terminalPassword);
 
         $api->setHelperData($this);
-        $api->set_platform(self::PLATFORM_OPENPLATFORM);
-        $api->set_type(self::TYPE);
+        $api->setPlatform(self::PLATFORM_OPENPLATFORM);
+        $api->setType(self::TYPE);
 
-        $api->set_host($this->getHost());
+        $api->setHost($this->getHost());
         $api->setTerminalCode($this->scopeConfig->getValue(ConfigData::PATH_TERMINAL_CODE, ScopeInterface::SCOPE_STORE));
         $api->setTerminalPassword($this->scopeConfig->getValue(ConfigData::PATH_TERMINAL_PASSWORD, ScopeInterface::SCOPE_STORE));
 
@@ -354,13 +346,10 @@ class Data extends \Magento\Payment\Helper\Data
             $objectManager = ObjectManager::getInstance();
             $store = $objectManager->get('Magento\Framework\Locale\Resolver');
             $locale = $store->getLocale();
-            $locale = explode("_", $locale);
-            $locale = $locale[1];
-
-            return $locale;
-
+            $locale = explode('_', $locale);
+            return $locale[1];
         } catch (Exception $e) {
-            return "US";
+            return 'US';
         }
     }
 

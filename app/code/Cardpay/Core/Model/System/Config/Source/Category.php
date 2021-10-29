@@ -50,7 +50,7 @@ class Category implements ArrayInterface
 
         $response = $response['response'];
 
-        $cat = array();
+        $cat = [];
         $count = 0;
         foreach ($response as $v) {
             //force category others first

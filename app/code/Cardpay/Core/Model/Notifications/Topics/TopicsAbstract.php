@@ -9,6 +9,7 @@ use Cardpay\Core\Helper\Response;
 use Exception;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\DB\TransactionFactory;
+use Magento\Framework\Phrase;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\CreditmemoFactory;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
@@ -21,18 +22,18 @@ use Magento\Store\Model\ScopeInterface;
 
 abstract class TopicsAbstract
 {
-    public $_statusUpdatedFlag;
-    protected $_scopeConfig;
-    protected $_dataHelper;
-    protected $_orderFactory;
-    protected $_creditmemoFactory;
-    protected $_messageInterface;
-    protected $_statusFactory;
-    protected $_orderSender;
-    protected $_orderCommentSender;
-    protected $_transactionFactory;
-    protected $_invoiceSender;
-    protected $_invoiceService;
+    public $statusUpdatedFlag;
+    protected $scopeConfig;
+    protected $dataHelper;
+    protected $orderFactory;
+    protected $creditmemoFactory;
+    protected $messageInterface;
+    protected $statusFactory;
+    protected $orderSender;
+    protected $orderCommentSender;
+    protected $transactionFactory;
+    protected $invoiceSender;
+    protected $invoiceService;
     protected $_transaction;
 
     /**
@@ -63,17 +64,17 @@ abstract class TopicsAbstract
         InvoiceService       $invoiceService
     )
     {
-        $this->_dataHelper = $dataHelper;
-        $this->_scopeConfig = $scopeConfig;
-        $this->_orderFactory = $orderFactory;
-        $this->_creditmemoFactory = $creditmemoFactory;
-        $this->_messageInterface = $messageInterface;
-        $this->_statusFactory = $statusFactory;
-        $this->_orderSender = $orderSender;
-        $this->_orderCommentSender = $orderCommentSender;
-        $this->_transactionFactory = $transactionFactory;
-        $this->_invoiceSender = $invoiceSender;
-        $this->_invoiceService = $invoiceService;
+        $this->dataHelper = $dataHelper;
+        $this->scopeConfig = $scopeConfig;
+        $this->orderFactory = $orderFactory;
+        $this->creditmemoFactory = $creditmemoFactory;
+        $this->messageInterface = $messageInterface;
+        $this->statusFactory = $statusFactory;
+        $this->orderSender = $orderSender;
+        $this->orderCommentSender = $orderCommentSender;
+        $this->transactionFactory = $transactionFactory;
+        $this->invoiceSender = $invoiceSender;
+        $this->invoiceService = $invoiceService;
     }
 
     /**
@@ -82,30 +83,17 @@ abstract class TopicsAbstract
      */
     public function getOrderByIncrementId($incrementId)
     {
-        return $this->_orderFactory->create()->loadByIncrementId($incrementId);
+        return $this->orderFactory->create()->loadByIncrementId($incrementId);
     }
 
     /**
-     * @param $paymentResponse
-     * @return \Magento\Framework\Phrase|string
+     * @param string $paymentResponse
+     * @return Phrase|string
      */
     public function getMessage($paymentResponse)
     {
-        $this->_dataHelper->log("getMessage", ConfigData::BASIC_LOG_PREFIX, $paymentResponse);
+        $this->dataHelper->log("getMessage", ConfigData::BASIC_LOG_PREFIX, $paymentResponse);
         return print_r($paymentResponse, true);
-    }
-
-    /**
-     * @param $order
-     * @param $invoice
-     * @return string
-     */
-    public function getMessageInvoice($order, $invoice)
-    {
-        $rawMessage = __('<br/> Order id: %1', $order->getIncrementId());
-        $rawMessage .= __('<br/> Invoice ID: %1', $invoice->getId());
-        $rawMessage .= __('<br/> Total Invoiced: %1', $invoice->getGrandTotal());
-        return $rawMessage;
     }
 
     /**
@@ -116,27 +104,27 @@ abstract class TopicsAbstract
     {
         $pathStatus = "PATH_ORDER_" . $payment['status'];
         $path = constant('\Cardpay\Core\Helper\ConfigData::' . $pathStatus);
-        $status = $this->_scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE);
+        $status = $this->scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE);
 
         if (empty($status)) {
-            $status = $this->_scopeConfig->getValue(ConfigData::PATH_ORDER_IN_PROCESS, ScopeInterface::SCOPE_STORE);
+            $status = $this->scopeConfig->getValue(ConfigData::PATH_ORDER_IN_PROCESS, ScopeInterface::SCOPE_STORE);
         }
 
         return $status;
     }
 
     /**
-     * @param $order
+     * @param Order $order
      * @param $newStatusOrder
      * @param $message
      * @return mixed
      */
     public function setStatusAndComment($order, $newStatusOrder, $message)
     {
-        $this->_dataHelper->log('setStatusAndComment', ConfigData::BASIC_LOG_PREFIX);
+        $this->dataHelper->log('setStatusAndComment', ConfigData::BASIC_LOG_PREFIX);
 
         if ($order->getState() !== Order::STATE_COMPLETE) {
-            if ($newStatusOrder == 'canceled' && $order->getState() != 'canceled') {
+            if ($newStatusOrder === 'canceled' && $order->getState() !== 'canceled') {
                 $order->cancel();
             } else {
                 $order->setState($this->_getAssignedState($newStatusOrder));
@@ -155,7 +143,7 @@ abstract class TopicsAbstract
      */
     public function _getAssignedState($status)
     {
-        $collection = $this->_statusFactory->joinStates()->addFieldToFilter('main_table.status', $status);
+        $collection = $this->statusFactory->joinStates()->addFieldToFilter('main_table.status', $status);
         $collectionItems = $collection->getItems();
         return array_pop($collectionItems)->getState();
     }
@@ -188,7 +176,7 @@ abstract class TopicsAbstract
         $merchantOrder = $data['merchantOrder'];
         if (isset($merchantOrder["amount_refunded"]) && $merchantOrder["amount_refunded"] > 0) {
             $creditMemo = $this->generateCreditMemo($data, $order);
-            if (empty($creditMemo)) {
+            if ($creditMemo === null) {
                 return false;
             }
         }
@@ -218,7 +206,7 @@ abstract class TopicsAbstract
         if ($amount > 0) {
             $order->setExternalType('partial');
 
-            $creditMemo = $this->_creditmemoFactory->createByOrder($order, [-1]);
+            $creditMemo = $this->creditmemoFactory->createByOrder($order, [-1]);
             if (count($creditMemos) > 0) {
                 $creditMemo->setAdjustmentPositive($amount);
             } else {
@@ -252,7 +240,7 @@ abstract class TopicsAbstract
     public function updateOrder($order, $data)
     {
         if ($this->checkStatusAlreadyUpdated($order, $data)) {
-            $this->_dataHelper->log("Already updated", ConfigData::BASIC_LOG_PREFIX);
+            $this->dataHelper->log("Already updated", ConfigData::BASIC_LOG_PREFIX);
             return $order;
         }
         $this->updatePaymentInfo($order, $data);
@@ -306,7 +294,7 @@ abstract class TopicsAbstract
 
         $paymentStatus = $paymentOrder->save();
 
-        $this->_dataHelper->log("Update Payment", ConfigData::BASIC_LOG_PREFIX, $paymentStatus->getData());
+        $this->dataHelper->log("Update Payment", ConfigData::BASIC_LOG_PREFIX, $paymentStatus->getData());
     }
 
     /**
@@ -337,7 +325,7 @@ abstract class TopicsAbstract
         $payment = $data['payments'][$data['statusFinal']['key']];
         $message = $this->getMessage($payment);
 
-        if ($this->_statusUpdatedFlag) {
+        if ($this->statusUpdatedFlag) {
             return ['text' => $message, 'code' => Response::HTTP_OK];
         }
 
@@ -345,11 +333,11 @@ abstract class TopicsAbstract
 
         try {
             $infoPayments = $order->getPayment()->getAdditionalInformation();
-            if ($this->_getMulticardLastValue($payment['status']) == 'approved') {
+            if ($this->_getMulticardLastValue($payment['status']) === 'approved') {
                 $this->_handleTwoCards($payment, $infoPayments);
-                $this->_dataHelper->setOrderSubtotals($payment, $order);
-                $this->_createInvoice($order);
-            } elseif ($payment['status'] == 'refunded' || $payment['status'] == 'cancelled') {
+                $this->dataHelper->setOrderSubtotals($payment, $order);
+                $this->createInvoice($order, null);
+            } elseif ($payment['status'] === 'refunded' || $payment['status'] === 'cancelled') {
                 $order->setExternalRequest(true);
                 $order->cancel();
             }
@@ -357,7 +345,7 @@ abstract class TopicsAbstract
             return ['text' => $message, 'code' => Response::HTTP_OK];
 
         } catch (Exception $e) {
-            $this->_dataHelper->log("Error in setOrderStatus: " . $e, ConfigData::BASIC_LOG_PREFIX);
+            $this->dataHelper->log("Error in setOrderStatus: " . $e, ConfigData::BASIC_LOG_PREFIX);
             return ['text' => $e, 'code' => Response::HTTP_BAD_REQUEST];
         }
     }
@@ -374,9 +362,9 @@ abstract class TopicsAbstract
             $statusOrder = $this->getConfigStatus($payment);
 
             $emailAlreadySent = false;
-            $emailOrderCreate = $this->_scopeConfig->getValue(ConfigData::PATH_ADVANCED_EMAIL_CREATE, ScopeInterface::SCOPE_STORE);
+            $emailOrderCreate = $this->scopeConfig->getValue(ConfigData::PATH_ADVANCED_EMAIL_CREATE, ScopeInterface::SCOPE_STORE);
 
-            if ($statusOrder == 'canceled') {
+            if ($statusOrder === 'canceled') {
                 $order->cancel();
             } else {
                 $order->setState($this->_getAssignedState($statusOrder));
@@ -384,21 +372,21 @@ abstract class TopicsAbstract
 
             $order->addStatusToHistory($statusOrder, $message, true);
             if ($emailOrderCreate && !$order->getEmailSent()) {
-                $this->_orderSender->send($order, true);
+                $this->orderSender->send($order, true);
                 $emailAlreadySent = true;
             }
 
             if ($emailAlreadySent === false) {
-                $statusEmail = $this->_scopeConfig->getValue(ConfigData::PATH_ADVANCED_EMAIL_UPDATE, ScopeInterface::SCOPE_STORE);
+                $statusEmail = $this->scopeConfig->getValue(ConfigData::PATH_ADVANCED_EMAIL_UPDATE, ScopeInterface::SCOPE_STORE);
                 $statusEmailList = explode(",", $statusEmail);
                 if (in_array($payment['status'], $statusEmailList)) {
-                    $this->_orderSender->send($order, $notify = '1', str_replace("<br/>", "", $message));
+                    $this->orderSender->send($order);
                 }
             }
         }
 
-        $this->_dataHelper->log("Update order", ConfigData::BASIC_LOG_PREFIX, $order->getData());
-        $this->_dataHelper->log($message, ConfigData::BASIC_LOG_PREFIX);
+        $this->dataHelper->log("Update order", ConfigData::BASIC_LOG_PREFIX, $order->getData());
+        $this->dataHelper->log($message, ConfigData::BASIC_LOG_PREFIX);
 
         return $order->save();
     }
@@ -430,20 +418,20 @@ abstract class TopicsAbstract
      * @param $order
      * @param $message
      */
-    public function _createInvoice($order)
+    public function createInvoice($order, $paymentData)
     {
         if (!$order->hasInvoices()) {
-            $invoice = $this->_invoiceService->prepareInvoice($order);
+            $invoice = $this->invoiceService->prepareInvoice($order);
             $invoice->register();
             $invoice->pay();
             $invoice->save();
 
-            $transaction = $this->_transactionFactory->create();
+            $transaction = $this->transactionFactory->create();
             $transaction->addObject($invoice);
             $transaction->addObject($invoice->getOrder());
             $transaction->save();
 
-            $this->_invoiceSender->send($invoice);
+            $this->invoiceSender->send($invoice);
 
             return true;
         }

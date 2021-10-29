@@ -148,6 +148,14 @@ define(
                 return false;
             },
 
+            areInstallmentsEnabled: function () {
+                if (window.checkoutConfig.payment[this.getCode()] != undefined) {
+                    return window.checkoutConfig.payment[this.getCode()]['are_installments_enabled'] == 1;
+                }
+
+                return false;
+            },
+
             getCardBrandsLogoURL: function () {
                 if (window.checkoutConfig.payment[this.getCode()] != undefined) {
                     return window.checkoutConfig.payment[this.getCode()]['card_brands_logo_url'];
@@ -181,7 +189,7 @@ define(
                         'card_number': document.querySelector(CPv1.selectors.cardNumber).value,
                         'security_code': document.querySelector(CPv1.selectors.securityCode).value,
                         'card_holder_name': document.querySelector(CPv1.selectors.cardholderName).value,
-                        'installments': document.querySelector(CPv1.selectors.installments).value,
+                        'installments': document.getElementById('installments') ? document.querySelector(CPv1.selectors.installments).value : null,
                         'cpf': document.getElementById('cpf') ? document.querySelector(CPv1.selectors.cpf).value : null,
                         'total_amount': document.querySelector(CPv1.selectors.amount).value,
                         'amount': document.querySelector(CPv1.selectors.amount).value,

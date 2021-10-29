@@ -29,8 +29,28 @@
             <source_model>Cardpay\Core\Model\System\Config\Source\Order\Status</source_model>
             <config_path>payment/cardpay/order_status_chargeback</config_path>
         </field>
+        <field id="order_status_in_process" translate="label" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Order status when payment is in_process</label>
+            <source_model>Cardpay\Core\Model\System\Config\Source\Order\Status</source_model>
+            <config_path>payment/cardpay/order_status_in_process</config_path>
+        </field>
+        <field id="order_status_pending" translate="label" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Order status when payment is pending</label>
+            <source_model>Cardpay\Core\Model\System\Config\Source\Order\Status</source_model>
+            <config_path>payment/cardpay/order_status_pending</config_path>
+        </field>
+        <field id="order_status_approved" translate="label" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Order status when payment is approved</label>
+            <source_model>Cardpay\Core\Model\System\Config\Source\Order\Status</source_model>
+            <config_path>payment/cardpay/order_status_approved</config_path>
+        </field>
+        <field id="order_status_refunded" translate="label" type="select" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Order status when payment is refunded</label>
+            <source_model>Cardpay\Core\Model\System\Config\Source\Order\Status</source_model>
+            <config_path>payment/cardpay/order_status_refunded</config_path>
+        </field>
 
-        <field id="refund_available" translate="label comment" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="refund_available" translate="label comment" type="select" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Refund payment</label>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
             <config_path>payment/cardpay/refund_available</config_path>

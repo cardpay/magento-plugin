@@ -90,13 +90,13 @@ class Coupon extends Action
             $payer_email = $this->getRequest()->getParam('payer_email');
 
             if (empty($coupon_id)) {
-                $response = array(
+                $response = [
                     "status" => 400,
-                    "response" => array(
+                    "response" => [
                         "error" => "invalid_id",
                         "message" => __("Invalid coupon code"),
-                    )
-                );
+                    ]
+                ];
                 $this->getResponse()->setHeader(self::CONTENT_TYPE, self::CONTENT_TYPE_VALUE, true);
                 $this->getResponse()->setBody(json_encode($response));
 
@@ -129,16 +129,16 @@ class Coupon extends Action
                 $this->checkoutSession->setData('cardpay_discount_amount', (float)$couponAmount);
 
             } else {
-                $responseBuyer = array(
+                $responseBuyer = [
                     "status" => 400,
-                    "response" => array(
+                    "response" => [
                         "error" => "unidentified_error",
                         "message" => __("An error has occurred, please try again. If the error persists, please contact the seller.")
-                    ),
-                    "data" => array(
+                    ],
+                    "data" => [
                         "coupon_code" => $coupon_id
-                    )
-                );
+                    ]
+                ];
 
                 if (isset($responseApi['response']) && isset($responseApi['response']['message']) && isset($responseApi['response']['error'])) {
                     $responseBuyer["response"]["error"] = $responseApi['response']['error'];
@@ -157,7 +157,7 @@ class Coupon extends Action
             // remove value session
             $this->checkoutSession->setData('cardpay_discount_amount', 0);
 
-            $responseBuyer = array("status" => 200);
+            $responseBuyer = ["status" => 200];
 
             $this->getResponse()->setHeader(self::CONTENT_TYPE, self::CONTENT_TYPE_VALUE, true);
             $this->getResponse()->setBody(json_encode($responseBuyer));

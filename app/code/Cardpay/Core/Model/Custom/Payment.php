@@ -13,7 +13,6 @@ use Magento\Payment\Model\Method\Cc;
 use Magento\Payment\Model\Method\ConfigInterface;
 use Magento\Payment\Model\Method\Online\GatewayInterface;
 use Magento\Quote\Api\Data\CartInterface;
-use Magento\Sales\Model\Order;
 use Magento\Store\Model\ScopeInterface;
 
 /**
@@ -361,7 +360,7 @@ class Payment extends Cc implements GatewayInterface
 
             $this->_helperData->log('CustomPayment::initialize - Credit Card: POST', self::LOG_NAME, $requestMasked);
 
-            $isOnePhasePayment = (1 == $this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_CAPTURE, ScopeInterface::SCOPE_STORE));
+            $isOnePhasePayment = (1 === (int)$this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_CAPTURE, ScopeInterface::SCOPE_STORE));
             if (!$isOnePhasePayment) {
                 if (isset($requestParams['recurring_data'])) {
                     $requestParams['recurring_data']['preauth'] = 'true';    // 2 phase installment
@@ -403,10 +402,10 @@ class Payment extends Cc implements GatewayInterface
         }
 
         $messageErrorToClient = $this->_coreModel->getMessageError($response);
-        $arrayLog = array(
+        $arrayLog = [
             'response' => $response,
             'message' => $messageErrorToClient
-        );
+        ];
 
         $this->_helperData->log('CustomPayment::initialize - The API returned an error while creating the payment, more details: ' . json_encode($arrayLog));
         throw new LocalizedException(__($messageErrorToClient));
@@ -568,98 +567,5 @@ class Payment extends Cc implements GatewayInterface
         $this->_coreModel->postRefund($paymentId);
 
         return $this;
-    }
-
-    public function acceptPayment(InfoInterface $payment)
-    {
-        $this->_helperData->log("CustomPayment::acceptPayment");
-
-        parent::acceptPayment($payment);
-        $isUnlimintPaymentCompleted = $this->changeUnlimintPaymentStatus($payment, 'COMPLETE', 'COMPLETED');
-        if ($isUnlimintPaymentCompleted) {
-            $this->setOrderStateAndStatus(Order::STATE_PROCESSING);
-        }
-    }
-
-    public function denyPayment(InfoInterface $payment)
-    {
-        $this->_helperData->log("CustomPayment::denyPayment");
-
-        parent::denyPayment($payment);
-        $isUnlimintPaymentTerminated = $this->changeUnlimintPaymentStatus($payment, 'REVERSE', 'VOIDED');
-        if ($isUnlimintPaymentTerminated) {
-            $this->setOrderStateAndStatus(Order::STATE_CANCELED);
-        }
-    }
-
-    private function changeUnlimintPaymentStatus($payment, $statusTo, $expectedResponseStatus)
-    {
-        $canPaymentStatusBeChanged = $this->canPaymentStatusBeChanged($payment);
-        if (!$canPaymentStatusBeChanged) {
-            throw new LocalizedException(__('Operation is not available'));
-        }
-
-        $api = $this->_coreModel->getApiInstance();
-        $url = '/api/payments/' . $payment['additional_information']['paymentResponse']['payment_data']['id'];
-
-        $requestParams = $this->getDefaultChangeStatusParams();
-        $requestParams['payment_data']['status_to'] = $statusTo;
-
-        $this->_helperData->log("CustomPayment::changePaymentStatus, request: " . print_r($requestParams, true));
-        $response = $api->patch($url, $requestParams);
-        $this->_helperData->log("CustomPayment::changePaymentStatus, response: " . print_r($response, true));
-
-        // UNSUPPORTED_OPERATION in Unlimint API
-        if ($response != null && isset($response['status']) && (Response::METHOD_NOT_ALLOWED == $response['status'])) {
-            throw new LocalizedException(__('Operation is not available'));
-        }
-
-        return isset($response)
-            && isset($response['payment_data'])
-            && isset($response['payment_data']['status'])
-            && $expectedResponseStatus == $response['payment_data']['status'];
-    }
-
-    private function canPaymentStatusBeChanged($payment)
-    {
-        if ($payment === null
-            || !isset($payment['additional_information'])
-            || empty($payment['additional_information']['method'])
-            || !isset($payment['additional_information']['installments'])
-            || !isset($payment['additional_information']['paymentResponse'])
-        ) {
-            return false;
-        }
-
-        $paymentResponse = $payment['additional_information']['paymentResponse'];
-        if (!isset($paymentResponse['payment_data']) || empty($paymentResponse['payment_data']['id'])) {
-            return false;
-        }
-
-        // only BANKCARD payment method is allowed
-        if ($payment['additional_information']['method'] !== 'cardpay_custom') {
-            return false;
-        }
-
-        // only single payment is allowed (not installment)
-        return $payment['additional_information']['installments'] == 1;
-    }
-
-    private function getDefaultChangeStatusParams()
-    {
-        $requestParams = array();
-
-        $requestParams['request']['id'] = time();
-        $requestParams['request']['time'] = date("c");
-        $requestParams['operation'] = 'CHANGE_STATUS';
-
-        return $requestParams;
-    }
-
-    private function setOrderStateAndStatus($orderState)
-    {
-        $order = $this->getInfoInstance()->getOrder();
-        $order->setState($orderState)->setStatus($orderState);
-        $order->save();
     }
 }

@@ -5,12 +5,10 @@ namespace Cardpay\Core\Lib;
 use Cardpay\Core\Helper\Data;
 use Exception;
 
-/**
- * Unlimint cURL RestClient
- */
 class RestClient
 {
-    const CONTENT_TYPE = 'application/json';
+    private const CONTENT_TYPE = 'application/json';
+    private const USER_AGENT = 'UnlimintPlugin/1.0.3/Magento';
 
     /**
      * @var Data
@@ -18,70 +16,54 @@ class RestClient
     protected static $_cpHelper;
 
     /**
-     * API URL
-     */
-    const API_BASE_URL = '';
-
-    /**
-     * Product Id
-     */
-    const PRODUCT_ID = 'BC32CANTRPP001U8NHO0';
-
-    /**
      * Platform Id
      */
-    const PLATFORM_ID = 'Magento2';
+    private const PLATFORM_ID = 'Magento2';
 
     /**
      * @param       $uri
      * @param       $method
-     * @param       $content_type
-     * @param array $extra_params
+     * @param       $contentType
+     * @param array $extraParams
      *
      * @return resource
      * @throws Exception
      */
-    private static function get_connect($uri, $method, $content_type, $extra_params = array())
+    private static function getConnection($uri, $method, $contentType, $extraParams = array())
     {
         if (!extension_loaded("curl")) {
             throw new Exception("cURL extension not found. You need to enable cURL in your php.ini or another configuration you have.");
         }
 
-        $connect = curl_init(self::API_BASE_URL . $uri);
+        $connection = curl_init($uri);
 
-        curl_setopt($connect, CURLOPT_USERAGENT, "Unlimint Magento-2 Cart");
-        curl_setopt($connect, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($connect, CURLOPT_CUSTOMREQUEST, $method);
-        curl_setopt($connect, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+        curl_setopt($connection, CURLOPT_USERAGENT, self::USER_AGENT);
+        curl_setopt($connection, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($connection, CURLOPT_CUSTOMREQUEST, $method);
+        curl_setopt($connection, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
-        $headers = array("Accept: " . self::CONTENT_TYPE, "Content-Type: " . $content_type);
+        $headers = array("Accept: " . self::CONTENT_TYPE, "Content-Type: " . $contentType);
 
-        if ($method == 'POST') {
-            $headers[] = "x-product-id: " . self::PRODUCT_ID;
-            $headers[] = 'x-platform-id:' . self::PLATFORM_ID;
-            $headers[] = 'x-integrator-id:' . self::$sponsor_id;
+        if (count($extraParams) > 0) {
+            $headers = array_merge($headers, $extraParams);
         }
 
-        if (count($extra_params) > 0) {
-            $headers = array_merge($headers, $extra_params);
-        }
+        curl_setopt($connection, CURLOPT_HTTPHEADER, $headers);
 
-        curl_setopt($connect, CURLOPT_HTTPHEADER, $headers);
-
-        return $connect;
+        return $connection;
     }
 
     /**
      * @param $connect
      * @param $data
-     * @param $content_type
+     * @param $contentType
      *
      * @throws Exception
      */
-    private static function set_data(&$connect, $data, $content_type)
+    private static function set_data(&$connect, $data, $contentType)
     {
-        if ($content_type == self::CONTENT_TYPE) {
-            if (gettype($data) == "string") {
+        if ($contentType == self::CONTENT_TYPE) {
+            if (is_string($data)) {
                 json_decode($data, true);
             } else {
                 $data = json_encode($data);
@@ -90,7 +72,7 @@ class RestClient
             if (function_exists('json_last_error')) {
                 $json_error = json_last_error();
                 if ($json_error != JSON_ERROR_NONE) {
-                    throw new Exception("JSON Error [{$json_error}] - Data: {$data}");
+                    throw new Exception("JSON Error [$json_error] - Data: $data");
                 }
             }
         }
@@ -102,17 +84,17 @@ class RestClient
      * @param $method
      * @param $url
      * @param $data
-     * @param $content_type
-     * @param $extra_params
+     * @param $contentType
+     * @param $extraParams
      *
      * @return array
      * @throws Exception
      */
-    private static function exec($method, $url, $data, $content_type, $extra_params)
+    private static function exec($method, $url, $data, $contentType, $extraParams)
     {
-        $connect = self::get_connect($url, $method, $content_type, $extra_params);
+        $connect = self::getConnection($url, $method, $contentType, $extraParams);
         if ($data) {
-            self::set_data($connect, $data, $content_type);
+            self::set_data($connect, $data, $contentType);
         }
 
         $api_result = curl_exec($connect);
@@ -199,17 +181,11 @@ class RestClient
 
     private static function maskCardData($data)
     {
-        if (isset($data['card_account'])
-            && isset($data['card_account']['card'])
-            && isset($data['card_account']['card']['pan'])
-        ) {
+        if (isset($data['card_account']['card']['pan'])) {
             $data['card_account']['card']['pan'] = self::$_cpHelper->maskSensitiveInfo($data['card_account']['card']['pan']);
         }
 
-        if (isset($data['card_account'])
-            && isset($data['card_account']['card'])
-            && isset($data['card_account']['card']['security_code'])
-        ) {
+        if (isset($data['card_account']['card']['security_code'])) {
             $data['card_account']['card']['security_code'] = '...';
         }
 
@@ -318,7 +294,7 @@ class RestClient
     public static function logError($code, $errors)
     {
         $server_version = php_uname();
-        $php_version = phpversion();
+        $php_version = PHP_VERSION;
 
         $data = array(
             "code" => $code,

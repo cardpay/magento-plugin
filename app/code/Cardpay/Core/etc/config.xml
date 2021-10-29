@@ -15,6 +15,7 @@
                 <binary_mode>0</binary_mode>
                 <gateway_mode>0</gateway_mode>
                 <capture>1</capture>
+                <installment>0</installment>
             </cardpay_custom>
             <cardpay_customticket>
                 <active>0</active>
@@ -26,8 +27,8 @@
                 <coupon_cardpay>0</coupon_cardpay>
             </cardpay_customticket>
             <cardpay>
-                <order_status_approved>payment_review</order_status_approved>
-                <order_status_authorized>payment_review</order_status_authorized>
+                <order_status_approved>processing</order_status_approved>
+                <order_status_authorized>processing</order_status_authorized>
                 <order_status_in_process>processing</order_status_in_process>
                 <order_status_pending>pending_payment</order_status_pending>
                 <order_status_rejected>cancelled</order_status_rejected>

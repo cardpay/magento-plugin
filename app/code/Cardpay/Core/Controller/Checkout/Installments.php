@@ -86,23 +86,52 @@ class Installments extends Action
             return array();
         }
 
-        $installmentsOptions = array_merge(
-            array(
-                array(
-                    'installments' => 1,
-                    'amount' => (float)$quote->getGrandTotal()   // cast to float is required to remove trailing zeros (00)
-                )
-            ),
-            $response['response']['options']
-        );
-
         $installments = array(
             'currency' => $this->getCurrencySymbol(),
-            'options' => $installmentsOptions
+            'options' => $this->getInstallmentOptions($response, $quote->getGrandTotal())
         );
 
         $jsonFactory = $this->resultJsonFactory->create();
         return $jsonFactory->setData($installments);
+    }
+
+    private function getInstallmentOptions($response, $grandTotal)
+    {
+        $optionsResponse = $response['response']['options'];
+
+        $options = array();
+        foreach ($optionsResponse as $option) {
+            if (!isset($option['installments'], $option['amount'])) {
+                continue;
+            }
+
+            $installments = $option['installments'];
+            $amount = $option['amount'];
+
+            $options[] = array(
+                'installments' => $installments,
+                'amount' => $this->formatAmount($amount)
+            );
+        }
+
+        return array_merge(
+            array(
+                array(
+                    'installments' => 1,
+                    'amount' => $this->formatAmount($grandTotal)
+                )
+            ),
+            $options
+        );
+    }
+
+    private function formatAmount($amount)
+    {
+        if (empty($amount)) {
+            return $amount;
+        }
+
+        return number_format($amount, 2);
     }
 
     /**

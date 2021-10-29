@@ -17,7 +17,7 @@ class CsrfValidatorSkip
      */
     public function aroundValidate(CsrfValidator $subject, callable $proceed, RequestInterface $request, ActionInterface $action)
     {
-        if ($request->getModuleName() == 'cardpay') {
+        if ($request->getModuleName() === 'cardpay') {
             return; // Skip CSRF check
         }
 

@@ -112,7 +112,7 @@ class BasicConfigProvider implements ConfigProviderInterface
             $debit = 0;
             $credit = 0;
             $ticket = 0;
-            $choMethods = array();
+            $choMethods = [];
 
             foreach ($paymentMethods['response'] as $pm) {
                 if (!in_array($pm['id'], $excludePaymentMethods)) {
@@ -127,16 +127,16 @@ class BasicConfigProvider implements ConfigProviderInterface
                 }
             }
 
-            return array(
+            return [
                 "debit" => $debit,
                 "credit" => $credit,
                 "ticket" => $ticket,
                 "checkout_methods" => $choMethods
-            );
+            ];
 
         } catch (Exception $e) {
             $this->_coreHelper->log("makeBannerCheckout:: An error occurred at the time of obtaining the ticket payment methods: " . $e);
-            return array();
+            return [];
         }
     }
 }

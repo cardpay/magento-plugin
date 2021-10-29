@@ -133,6 +133,7 @@ class CustomConfigProvider implements ConfigProviderInterface
                     'module_version' => $this->_coreHelper->getModuleVersion(),
                     'mp_gateway_mode' => $this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_GATEWAY_MODE, ScopeInterface::SCOPE_STORE),
                     'is_cpf_required' => $this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_ASK_CPF, ScopeInterface::SCOPE_STORE),
+                    'are_installments_enabled' => $this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_INSTALLMENT, ScopeInterface::SCOPE_STORE),
                     'card_brands_logo_url' => $this->_assetRepo->getUrl("Cardpay_Core::images/card_brands.png"),
                 ],
             ],

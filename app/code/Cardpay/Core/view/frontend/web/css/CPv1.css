@@ -411,79 +411,12 @@
     margin-bottom: 10px;
 }
 
-.form-row {
-    display: block;
-    margin-top: 8px;
-    margin-bottom: 8px;
-    margin-left: -15px;
-    margin-right: -15px;
-}
-
-[class^=form-col-] {
-    position: relative;
-    min-height: 1px;
-    padding-right: 5px;
-    padding-left: 5px;
-    float: left;
-    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-    -moz-box-sizing: border-box; /* Firefox, other Gecko */
-    box-sizing: border-box;
-    margin-top: 5px;
-}
-
-.form-col-1 {
-    width: 8.33333333%;
-}
-
-.form-col-2 {
-    width: 16.66666667%;
-}
-
-.form-col-3 {
-    width: 25%;
-}
-
-.form-col-4 {
-    width: 33.33333333%;
-}
-
-.form-col-5 {
-    width: 41.66666667%;
-}
-
-.form-col-6 {
-    width: 50%;
-}
-
-.form-col-7 {
-    width: 58.33333333%;
-}
-
-.form-col-8 {
-    width: 66.66666667%;
-}
-
-.form-col-9 {
-    width: 75%;
-}
-
-.form-col-10 {
-    width: 83.33333333%;
-}
-
-.form-col-11 {
-    width: 91.66666667%;
-}
-
-.form-col-12 {
-    width: 100%;
-}
-
 .form-row label {
     width: 100%;
     float: left;
 }
 
+/*
 .form-control-mine {
     width: 100% !important;
     height: 27px;
@@ -494,11 +427,11 @@
     background-image: none;
     border: 1px solid #ccc;
     border-radius: 4px;
-    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-    -moz-box-sizing: border-box; /* Firefox, other Gecko */
+    -webkit-box-sizing: border-box; !* Safari/Chrome, other WebKit *!
+    -moz-box-sizing: border-box; !* Firefox, other Gecko *!
     box-sizing: border-box;
 }
-
+*/
 
 .form-row select {
     width: 100%;
@@ -520,6 +453,7 @@
     appearance: menulist-button;
 }
 
+/*
 .mensagem-febraban {
     text-transform: uppercase;
     font-size: 10px;
@@ -527,6 +461,7 @@
     font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
     margin-top: 10px;
 }
+*/
 
 [class^=form-col-] label.require:after {
     content: ' *';
@@ -542,19 +477,6 @@
 }
 
 /* Error */
-.erro_febraban {
-    text-transform: uppercase;
-    font-size: 10px;
-    margin-left: -10px;
-    margin-right: -10px;
-    margin-bottom: 8px;
-    color: red;
-    font-weight: bold;
-    display: none;
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    clear: both;
-}
-
 #box-banner {
     float: left;
     width: 100%;

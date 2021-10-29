@@ -10,12 +10,12 @@ use Cardpay\Core\Model\Core;
 use Exception;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\DB\TransactionFactory;
+use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\CreditmemoFactory;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderCommentSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\Order\Invoice;
-use Magento\Sales\Model\Order\Payment\Transaction;
 use Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Status\Collection as StatusFactory;
@@ -26,10 +26,30 @@ class Payment extends TopicsAbstract
 {
     const LOG_NAME = 'notification_payment';
 
-    protected $_cpHelper;
-    protected $_scopeConfig;
-    protected $_coreModel;
-    protected $_transactionBuilder;
+    /**
+     * @var cpHelper
+     */
+    protected $cpHelper;
+
+    /**
+     * @var ScopeConfigInterface
+     */
+    protected $scopeConfig;
+
+    /**
+     * @var Core
+     */
+    protected $coreModel;
+
+    /**
+     * @var BuilderInterface
+     */
+    protected $transactionBuilder;
+
+    /**
+     * @var Transaction
+     */
+    private $transaction;
 
     /**
      * Payment constructor.
@@ -64,10 +84,11 @@ class Payment extends TopicsAbstract
 
     )
     {
-        $this->_cpHelper = $cpHelper;
-        $this->_scopeConfig = $scopeConfig;
-        $this->_coreModel = $coreModel;
-        $this->_transactionBuilder = $transactionBuilder;
+        $this->cpHelper = $cpHelper;
+        $this->scopeConfig = $scopeConfig;
+        $this->coreModel = $coreModel;
+        $this->transactionBuilder = $transactionBuilder;
+        $this->transaction = new Transaction($cpHelper, $transactionBuilder);
 
         parent::__construct(
             $scopeConfig,
@@ -85,14 +106,14 @@ class Payment extends TopicsAbstract
     }
 
     /**
-     * @param $payment
+     * @param $requestParams
      * @throws Exception
      */
-    public function refund($payment)
+    public function refund($requestParams)
     {
-        $refundData = $payment['refund_data'];
+        $refundData = $requestParams['refund_data'];
         $amount = $refundData['amount'];
-        $orderId = $payment['merchant_order']['id'];
+        $orderId = $requestParams['merchant_order']['id'];
 
         $order = $this->getOrderByIncrementId($orderId);
 
@@ -104,19 +125,15 @@ class Payment extends TopicsAbstract
         //get payment order object
         $paymentOrder = $order->getPayment();
         $paymentMethod = $paymentOrder->getMethodInstance()->getCode();
-        if (!($paymentMethod == 'cardpay_custom'
-            || $paymentMethod == 'cardpay_customticket'
-            || $paymentMethod == 'cardpay_custom_bank_transfer'
-            || $paymentMethod == 'cardpay_basic')
-        ) {
+        if (!in_array($paymentMethod, ['cardpay_custom', 'cardpay_customticket', 'cardpay_custom_bank_transfer', 'cardpay_basic'])) {
             return;
         }
 
         //Check refund available
-        $refundAvailable = $this->_scopeConfig->getValue(ConfigData::PATH_ORDER_REFUND_AVAILABLE, ScopeInterface::SCOPE_STORE);
-        if ($refundAvailable == 0) {
-            $this->_cpHelper->log(__FUNCTION__ . ' - Refund is disabled', ConfigData::CUSTOM_LOG_PREFIX);
-            throw new Exception(__("Refund is disabled"));
+        $refundAvailable = $this->scopeConfig->getValue(ConfigData::PATH_ORDER_REFUND_AVAILABLE, ScopeInterface::SCOPE_STORE);
+        if (0 === (int)$refundAvailable) {
+            $this->cpHelper->log(__FUNCTION__ . ' - Refund is disabled', ConfigData::CUSTOM_LOG_PREFIX);
+            throw new Exception(__('Refund is disabled'));
         }
 
         //Get amount refund
@@ -125,121 +142,85 @@ class Payment extends TopicsAbstract
             throw new Exception(__('The refunded amount must be greater than 0.'));
         }
 
-        $creditMemo = $this->generateCreditMemo($payment, $order);
+        $creditMemo = $this->generateCreditMemo($requestParams, $order);
 
         if (!is_null($creditMemo)) {
-            $successMessageRefund = "Unlimint - " . __("Refund of %1 was processed successfully.", $amountRefund);
-            $this->_cpHelper->log(__FUNCTION__ . " - " . $successMessageRefund, ConfigData::CUSTOM_LOG_PREFIX, $creditMemo);
+            $successMessageRefund = 'Unlimint - ' . __('Refund of %1 was processed successfully.', $amountRefund);
+            $this->cpHelper->log(__FUNCTION__ . ' - ' . $successMessageRefund, ConfigData::CUSTOM_LOG_PREFIX, $creditMemo);
         } else {
-            $this->_cpHelper->log(__FUNCTION__ . " - " . __('Could not process the refund'), ConfigData::CUSTOM_LOG_PREFIX, $creditMemo);
-            throw new Exception(__("Could not process the refund, The Unlimint API returned an unexpected error. Check the log files."));
+            $this->cpHelper->log(__FUNCTION__ . ' - ' . __('Could not process the refund'), ConfigData::CUSTOM_LOG_PREFIX, $creditMemo);
+            throw new Exception(__('Could not process the refund, The Unlimint API returned an unexpected error. Check the log files.'));
         }
     }
 
     /**
-     * @param $payment
+     * @param $requestParams
      * @return array
      * @throws Exception
      */
-    public function updateStatusOrderByPayment($payment)
+    public function updateStatusOrderByPayment($requestParams)
     {
-        $orderId = $payment['merchant_order']['id'];
-        $type = isset($payment['payment_data']) ? 'payment_data' : 'recurring_data';
-        $paymentData = $payment[$type];
+        $orderId = $requestParams['merchant_order']['id'];
+        $type = isset($requestParams['payment_data']) ? 'payment_data' : 'recurring_data';
+        $paymentData = $requestParams[$type];
 
-        $order = parent::getOrderByIncrementId($orderId);
+        /**
+         * @var Order
+         */
+        $order = $this->getOrderByIncrementId($orderId);
 
         if (!$order->getId()) {
-            $message = "Unlimint - The order was not found in Magento. You will not be able to follow the process without this information.";
-            $this->_cpHelper->log('updateStatusOrderByPayment', self::LOG_NAME, $message);
-            return ["httpStatus" => Response::HTTP_NOT_FOUND, "message" => $message, "data" => $orderId];
+            $message = 'Unlimint - The order was not found in Magento. You will not be able to follow the process without this information.';
+            $this->cpHelper->log('updateStatusOrderByPayment', self::LOG_NAME, $message);
+            return ['httpStatus' => Response::HTTP_NOT_FOUND, 'message' => $message, 'data' => $orderId];
         }
 
         $currentOrderStatus = $order->getState();
-        $this->_cpHelper->log('currentOrderStatus', self::LOG_NAME, $currentOrderStatus);
+        $this->cpHelper->log('currentOrderStatus', self::LOG_NAME, $currentOrderStatus);
 
-        $message = parent::getMessage($paymentData);
+        $message = '';
+        if (isset($paymentData['id'])) {
+            $message = $this->getMessage('Unlimint payment id: ' . $paymentData['id']);
+        }
 
         if (isset($paymentData['status'])) {
-            $statusAlreadyUpdated = $this->checkStatusAlreadyUpdated($paymentData, $order);
-
-            $newOrderStatus = parent::getConfigStatus($paymentData);
-
-            if ($statusAlreadyUpdated) {
-                $orderPayment = $order->getPayment();
-                $orderPayment->setAdditionalInformation("paymentResponse", $payment);
-                $order->save();
-
-                $messageHttp = "Unlimint - Status has already been updated.";
-                return [
-                    "httpStatus" => Response::HTTP_OK,
-                    "message" => $messageHttp,
-                    "data" => [
-                        "message" => $message,
-                        "order_id" => $order->getIncrementId(),
-                        "current_order_status" => $currentOrderStatus,
-                        "new_order_status" => $newOrderStatus
-                    ]
-                ];
-            }
-
-            $order = self::setStatusAndComment($order, $newOrderStatus, $message);
+            $newOrderStatus = $this->getConfigStatus($paymentData);
+            $order = $this->setStatusAndComment($order, $newOrderStatus, $message);
             $this->sendEmailCreateOrUpdate($order, $message);
 
             $paymentObj = $order->getPayment();
-            $paymentObj->setAdditionalInformation("paymentResponse", $payment);
+            $paymentObj->setAdditionalInformation('paymentResponse', $requestParams);
             $paymentObj->save();
 
             $responseInvoice = false;
-            if ($paymentData['status'] == 'COMPLETED') {
-                $responseInvoice = $this->createInvoice($order, $message, $paymentData);
+            if ($paymentData['status'] === 'COMPLETED') {
+                $responseInvoice = $this->createInvoice($order, $paymentData);
             }
 
-            $messageHttp = "Unlimint - Status successfully updated.";
-            return [
-                "httpStatus" => Response::HTTP_OK,
-                "message" => $messageHttp,
-                "data" => [
-                    "message" => $message,
-                    "order_id" => $order->getIncrementId(),
-                    "new_order_status" => $newOrderStatus,
-                    "old_order_status" => $currentOrderStatus,
-                    "created_invoice" => $responseInvoice
-                ]
-            ];
-
-        } else {
-            $order = self::setStatusAndComment($order, $currentOrderStatus, $message);
-
-            $messageHttp = 'Unlimint - Notification Received.';
+            $messageHttp = 'Unlimint - Status successfully updated.';
             return [
                 'httpStatus' => Response::HTTP_OK,
                 'message' => $messageHttp,
                 'data' => [
                     'message' => $message,
                     'order_id' => $order->getIncrementId(),
+                    'new_order_status' => $newOrderStatus,
+                    'old_order_status' => $currentOrderStatus,
+                    'created_invoice' => $responseInvoice
                 ]
             ];
         }
-    }
 
-    /**
-     * @param $paymentResponse
-     * @param $order
-     * @return bool
-     */
-    public function checkStatusAlreadyUpdated($paymentResponse, $order)
-    {
-        $orderUpdated = false;
-        $statusToUpdate = parent::getConfigStatus($paymentResponse);
-        $commentsObject = $order->getStatusHistoryCollection(true);
-        foreach ($commentsObject as $commentObj) {
-            if ($commentObj->getStatus() == $statusToUpdate) {
-                $orderUpdated = true;
-            }
-        }
+        $order = $this->setStatusAndComment($order, $currentOrderStatus, $message);
 
-        return $orderUpdated;
+        return [
+            'httpStatus' => Response::HTTP_OK,
+            'message' => 'Unlimint - Notification Received.',
+            'data' => [
+                'message' => $message,
+                'order_id' => $order->getIncrementId(),
+            ]
+        ];
     }
 
     /**
@@ -248,102 +229,55 @@ class Payment extends TopicsAbstract
      */
     public function sendEmailCreateOrUpdate($order, $message)
     {
-        $emailOrderCreate = $this->_scopeConfig->getValue(ConfigData::PATH_ADVANCED_EMAIL_CREATE, ScopeInterface::SCOPE_STORE);
+        $emailOrderCreate = $this->scopeConfig->getValue(ConfigData::PATH_ADVANCED_EMAIL_CREATE, ScopeInterface::SCOPE_STORE);
         $emailAlreadySent = false;
         if ($emailOrderCreate && !$order->getEmailSent()) {
-            $this->_orderSender->send($order, true);
+            $this->orderSender->send($order, true);
             $emailAlreadySent = true;
         }
 
         if ($emailAlreadySent === false) {
-            $statusEmail = $this->_scopeConfig->getValue(ConfigData::PATH_ADVANCED_EMAIL_UPDATE, ScopeInterface::SCOPE_STORE);
-            $statusEmailList = explode(",", $statusEmail);
+            $statusEmail = $this->scopeConfig->getValue(ConfigData::PATH_ADVANCED_EMAIL_UPDATE, ScopeInterface::SCOPE_STORE);
+            $statusEmailList = explode(',', $statusEmail);
             if (in_array($order->getStatus(), $statusEmailList)) {
-                $this->_orderCommentSender->send($order, true, str_replace("<br/>", "", $message));
+                $this->orderCommentSender->send($order, true, str_replace('<br/>', '', $message));
             }
         }
     }
 
     /**
-     * @param $order
-     * @param $message
+     * @param Order $order
      * @return bool
      * @throws Exception
      */
-    public function createInvoice($order, $message, $paymentData)
+    public function createInvoice($order, $paymentData)
     {
         if (!$order->hasInvoices()) {
-            $this->_cpHelper->log('Create Invoice', self::LOG_NAME, $paymentData);
+            $this->cpHelper->log('Create invoice', self::LOG_NAME, $paymentData);
 
+            /**
+             * @var Invoice
+             */
             $invoice = $order->prepareInvoice();
             $invoice->setRequestedCaptureCase(Invoice::CAPTURE_ONLINE);
             $invoice->register();
 
-            $invoice->addComment(str_replace("<br/>", "", $message), false, true);
-
             $invoice->setTransactionId($paymentData['id']);
             $invoice->save();
 
-            $this->createTransaction($order, $paymentData);
+            $this->transaction->createTransaction($paymentData, $order);
             $order->save();
 
             try {
-                $this->_invoiceSender->send($invoice, true, $message);
+                $this->invoiceSender->send($invoice, true);
             } catch (Exception $e) {
-                $this->_cpHelper->log('We can\'t send the invoice email right now.', self::LOG_NAME, $message);
+                $this->cpHelper->log("We can't send the invoice email right now.", self::LOG_NAME);
             }
 
             return true;
         }
 
         return false;
-    }
-
-    public function createTransaction($order = null, $paymentData)
-    {
-        try {
-            $this->_cpHelper->log('Create Transaction', self::LOG_NAME, $paymentData);
-
-            //get payment object from order object
-            $payment = $order->getPayment();
-            $payment->setLastTransId($paymentData['id']);
-            $payment->setTransactionId($paymentData['id']);
-            $payment->setAdditionalInformation(
-                [Transaction::RAW_DETAILS => (array)$paymentData]
-            );
-            $formatedPrice = $order->getBaseCurrency()->formatTxt(
-                $order->getGrandTotal()
-            );
-
-            $message = __("The authorized amount is %1.", $formatedPrice);
-
-            //get the object of builder class
-            $trans = $this->_transactionBuilder;
-            $transaction = $trans->setPayment($payment)
-                ->setOrder($order)
-                ->setTransactionId($paymentData['id'])
-                ->setAdditionalInformation(
-                    [Transaction::RAW_DETAILS => (array)$paymentData]
-                )
-                ->setFailSafe(true)
-                //build method creates the transaction and returns the object
-                ->build(Transaction::TYPE_CAPTURE);
-
-            $payment->addTransactionCommentsToOrder(
-                $transaction,
-                $message
-            );
-
-            $payment->setParentTransactionId(null);
-            $payment->save();
-            $order->save();
-
-            return $transaction->save()->getTransactionId();
-
-        } catch (Exception $e) {
-            $this->_cpHelper->log("Create transaction error", self::LOG_NAME, $e);
-            return null;
-        }
     }
 
     /**
@@ -354,8 +288,8 @@ class Payment extends TopicsAbstract
     public function getPaymentData($id, $type = null)
     {
         try {
-            $response = $this->_coreModel->getPayment($id);
-            $this->_cpHelper->log("Response API CP Get Payment", self::LOG_NAME, $response);
+            $response = $this->coreModel->getPayment($id);
+            $this->cpHelper->log('Response API CP Get Payment', self::LOG_NAME, $response);
 
             if (!$this->isValidResponse($response)) {
                 throw new Exception(__('CP API Invalid Response'), 400);
@@ -367,7 +301,7 @@ class Payment extends TopicsAbstract
             return ['merchantOrder' => null, 'payments' => $payments, 'shipmentData' => null];
 
         } catch (Exception $e) {
-            $this->_cpHelper->log(__("ERROR - Notifications Payment getPaymentData"), self::LOG_NAME, $e->getMessage());
+            $this->cpHelper->log(__('ERROR - Notifications Payment getPaymentData'), self::LOG_NAME, $e->getMessage());
             return null;
         }
     }

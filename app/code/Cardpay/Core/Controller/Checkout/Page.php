@@ -159,23 +159,6 @@ class Page extends Action
     }
 
     /**
-     * Return handle name, depending on payment method used in the order placed
-     *
-     * @return string
-     */
-    public function getCheckoutHandle()
-    {
-        $handle = '';
-        $order = $this->_getOrder();
-        if (!empty($order->getId())) {
-            $handle = $order->getPayment()->getMethod();
-        }
-        $handle .= '_success';
-
-        return $handle;
-    }
-
-    /**
      * @param $payment
      * @throws Exception
      */

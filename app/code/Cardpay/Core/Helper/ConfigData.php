@@ -22,6 +22,8 @@ class ConfigData
     const PATH_CUSTOM_COUPON = 'payment/cardpay_custom/coupon_cardpay';
     const PATH_CUSTOM_GATEWAY_MODE = 'payment/cardpay_custom/gateway_mode';
     const PATH_CUSTOM_ASK_CPF = 'payment/cardpay_custom/ask_cpf';
+    const PATH_CUSTOM_INSTALLMENT = 'payment/cardpay_custom/installment';
+    const PATH_CUSTOM_DESCRIPTOR = 'payment/cardpay_custom/descriptor';
     const PATH_CUSTOM_CAPTURE = 'payment/cardpay_custom/capture';
 
     // custom method ticket
@@ -49,11 +51,12 @@ class ConfigData
 
     // order configuration
     const STATUS_CANCELLED = 'payment/cardpay/order_status_cancelled';
+    const STATUS_IN_PROCESS = 'payment/cardpay/order_status_in_process';
 
     const PATH_ORDER_AUTHORIZED = 'payment/cardpay/order_status_authorized';
-    const PATH_ORDER_IN_PROCESS = 'payment/cardpay/order_status_in_process';
+    const PATH_ORDER_IN_PROCESS = self::STATUS_IN_PROCESS;
     const PATH_ORDER_NEW = 'payment/cardpay/order_status_pending';
-    const PATH_ORDER_COMPLETED = 'payment/cardpay/order_status_approved';
+    const PATH_ORDER_COMPLETED = self::STATUS_IN_PROCESS;
     const PATH_ORDER_DECLINED = 'payment/cardpay/order_status_rejected';
     const PATH_ORDER_CANCELLED = self::STATUS_CANCELLED;
     const PATH_ORDER_VOIDED = self::STATUS_CANCELLED;

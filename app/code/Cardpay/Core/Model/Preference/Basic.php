@@ -448,7 +448,7 @@ class Basic extends AbstractMethod
                 $test_mode = false;
             }
 
-            $arr['metadata'] = array(
+            $arr['metadata'] = [
                 "platform" => "Magento2",
                 "platform_version" => $this->_productMetaData->getVersion(),
                 "module_version" => $this->_version->afterLoad(),
@@ -456,7 +456,7 @@ class Basic extends AbstractMethod
                 "checkout" => "Pro",
                 "sponsor_id" => $sponsor_id,
                 "test_mode" => $test_mode
-            );
+            ];
 
             if (!empty($config['statement_descriptor'])) {
                 $arr['statement_descriptor'] = $config['statement_descriptor'];

@@ -17,17 +17,17 @@ class Basic extends NotificationBase
 {
     const LOG_NAME = 'basic_notification';
 
-    protected $_paymentFactory;
+    protected $paymentFactory;
     protected $coreHelper;
     protected $coreModel;
     protected $_finalStatus = ['rejected', 'cancelled', 'refunded', 'charged_back'];
     protected $_notFinalStatus = ['authorized', 'process', 'in_mediation'];
-    protected $_orderFactory;
-    protected $_notifications;
-    protected $_wRequest;
+    protected $orderFactory;
+    protected $notifications;
+    protected $request;
 
     /**
-     * Basic constructor.
+     * Basic constructor
      * @param Context $context
      * @param Payment $paymentFactory
      * @param Data $coreHelper
@@ -42,15 +42,15 @@ class Basic extends NotificationBase
         Core          $coreModel,
         OrderFactory  $orderFactory,
         Notifications $notifications,
-        Request       $wRequest
+        Request       $request
     )
     {
-        $this->_paymentFactory = $paymentFactory;
+        $this->paymentFactory = $paymentFactory;
         $this->coreHelper = $coreHelper;
         $this->coreModel = $coreModel;
-        $this->_orderFactory = $orderFactory;
-        $this->_notifications = $notifications;
-        $this->_wRequest = $wRequest;
+        $this->orderFactory = $orderFactory;
+        $this->notifications = $notifications;
+        $this->request = $request;
 
         parent::__construct($context);
     }
@@ -60,13 +60,13 @@ class Basic extends NotificationBase
      */
     public function execute()
     {
-        $request = $this->_wRequest;
+        $request = $this->request;
 
         try {
-            $requestParams = $this->_notifications->getRequestParams($request);
+            $requestParams = $this->notifications->getRequestParams($request);
 
-            $topicClass = $this->_notifications->getTopicClass($request);
-            $data = $this->_notifications->getPaymentInformation($topicClass, $requestParams);
+            $topicClass = $this->notifications->getPayment();
+            $data = $this->notifications->getPaymentInformation($topicClass, $requestParams);
             if (empty($data)) {
                 throw new Exception(__('Error Merchant Order notification is expected'), 400);
             }
@@ -76,17 +76,15 @@ class Basic extends NotificationBase
                 throw new Exception(__('Merchant Order not found or is an notification invalid type.'), 400);
             }
 
-            $order = $this->_orderFactory->create()->loadByIncrementId($merchantOrder["external_reference"]);
-
+            $order = $this->orderFactory->create()->loadByIncrementId($merchantOrder["external_reference"]);
             if (empty($order) || empty($order->getId())) {
                 throw new Exception(__('Error Order Not Found in Magento: ') . $merchantOrder["external_reference"], 400);
             }
-
-            if ($order->getStatus() == 'canceled') {
+            if ($order->getStatus() === 'canceled') {
                 throw new Exception(__('Order already cancelled: ') . $merchantOrder["external_reference"], 400);
             }
 
-            $data['statusFinal'] = $topicClass->getStatusFinal($data['payments'], $merchantOrder);
+            $data['statusFinal'] = $topicClass->getStatusFinal($merchantOrder);
 
             if (!$topicClass->validateRefunded($order, $data)) {
                 throw new Exception(__('Error Order Refund'), 400);
@@ -109,9 +107,9 @@ class Basic extends NotificationBase
     protected function setResponseHttp($httpStatus, $message, $data = [])
     {
         $response = [
-            "status" => $httpStatus,
-            "message" => $message,
-            "data" => $data
+            'status' => $httpStatus,
+            'message' => $message,
+            'data' => $data
         ];
 
         $this->getResponse()->setHeader('Content-Type', 'application/json', true);

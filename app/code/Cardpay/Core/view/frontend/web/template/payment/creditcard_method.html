@@ -127,15 +127,17 @@
                     </div>
                 </div>
 
-                <div id="mp-box-installments">
-                    <div class="mp-box-inputs mp-col-100" id="mp-box-installments-selector">
-                        <label for="installments"> <!-- ko i18n: 'Installments'--><!-- /ko --> <em>*</em></label>
-                        <select id="installments" data-checkout="installments" name="cardpay_custom[installments]"
-                                required class="validate-select" data-bind="afterRender: assignInstallmentOptions"></select>
-                    </div>
+                <!-- ko if: areInstallmentsEnabled() -->
+                    <div id="mp-box-installments">
+                        <div class="mp-box-inputs mp-col-100" id="mp-box-installments-selector">
+                            <label for="installments"> <!-- ko i18n: 'Installments'--><!-- /ko --> <em>*</em></label>
+                            <select id="installments" data-checkout="installments" name="cardpay_custom[installments]"
+                                    required class="validate-select" data-bind="afterRender: assignInstallmentOptions"></select>
+                        </div>
 
-                    <span class="mp-error" id="mp-error-210" data-main="#installments"> <!-- ko i18n: 'Invalid number of installments'--><!-- /ko --> </span>
-                </div>
+                        <span class="mp-error" id="mp-error-210" data-main="#installments"> <!-- ko i18n: 'Invalid number of installments'--><!-- /ko --> </span>
+                    </div>
+                <!-- /ko -->
 
                 <!-- ko if: isCpfRequired() -->
                     <div class="mp-box-inputs mp-col-100">

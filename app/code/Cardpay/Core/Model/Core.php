@@ -496,37 +496,18 @@ class Core extends AbstractMethod
 
         $this->_coreHelper->log("getDefaultRequestParams -> init");
 
-        $requestParams = array();
+        $requestParams = [];
         $requestParams['request']['id'] = time();
         $requestParams['request']['time'] = date("c");
 
         $requestParams['merchant_order']['id'] = $order->getIncrementId();
         $requestParams['merchant_order']['description'] = __(
-            "Order # %1",
+            'Order # %1',
             $order->getIncrementId(),
-            $this->_storeManager->getStore()->getBaseUrl(UrlInterface::URL_TYPE_LINK)
+            $this->_storeManager->getStore()->getBaseUrl()
         );
 
-        $installments = 1;
-        if (isset($paymentInfo["installments"])) {
-            $installments = (int)$paymentInfo["installments"];
-        }
-
-        if ($installments > 1) {
-            $requestParams['recurring_data'] = array(
-                "installment_type" => "MF_HOLD",
-                "amount" => (float)$order->getBaseGrandTotal(),
-                "currency" => $currencyCode,
-                "initiator" => "cit",
-                "interval" => "30",
-                "period" => "day",
-                "payments" => $installments,
-                "trans_type" => "01"           // Goods/Service Purchase
-            );
-        } else {
-            $requestParams['payment_data']['amount'] = $this->getAmount();
-            $requestParams['payment_data']['currency'] = $currencyCode;
-        }
+        $requestParams = $this->assignRequestData($paymentInfo, $currencyCode, $requestParams);
 
         $requestParams['merchant_order']['items'] = $this->getItemsInfo($order);
 
@@ -542,7 +523,7 @@ class Core extends AbstractMethod
         }
         $requestParams['customer']['phone'] = $phone;
 
-        if ($order->canShip()) {
+        if ($order->canShip() && !is_null($order->getShippingAddress())) {
             $shipping = $order->getShippingAddress()->getData();
 
             $sPhone = trim($shipping['telephone']);
@@ -561,12 +542,12 @@ class Core extends AbstractMethod
 
         $notificationUrl = $this->_urlBuilder->getUrl('cardpay/redirect/callback', ['_secure' => true]);
 
-        $requestParams['return_urls'] = array(
-            "cancel_url" => $notificationUrl . 'action/cancel/orderId/' . $orderIncId,
-            "decline_url" => $notificationUrl . 'action/decline/orderId/' . $orderIncId,
-            "inprocess_url" => $notificationUrl . 'action/inprocess/orderId/' . $orderIncId,
-            "success_url" => $notificationUrl . 'action/success/orderId/' . $orderIncId
-        );
+        $requestParams['return_urls'] = [
+            'cancel_url' => $notificationUrl . 'action/cancel/orderId/' . $orderIncId,
+            'decline_url' => $notificationUrl . 'action/decline/orderId/' . $orderIncId,
+            'inprocess_url' => $notificationUrl . 'action/inprocess/orderId/' . $orderIncId,
+            'success_url' => $notificationUrl . 'action/success/orderId/' . $orderIncId
+        ];
 
         return $requestParams;
     }
@@ -641,7 +622,7 @@ class Core extends AbstractMethod
         $errors = Response::PAYMENT_CREATION_ERRORS;
 
         $unlimintApiErrorMessage = $this->getUnlimintApiErrorMessage($response, $errors);
-        if (!empty($unlimintApiErrorMessage)) {
+        if ($unlimintApiErrorMessage !== null) {
             return $unlimintApiErrorMessage;
         }
 
@@ -749,20 +730,20 @@ class Core extends AbstractMethod
         $payer_email = $this->getEmailCustomer();
         $coupon_code = $coupon_id;
 
-        if ($payer_email == "") {
+        if (!empty($payer_email)) {
             $payer_email = $email;
         }
 
         $api = $this->getApiInstance();
 
-        $details_discount = $api->check_discount_campaigns($transaction_amount, $payer_email, $coupon_code);
+        $details_discount = $api->checkDiscountCampaigns($transaction_amount, $payer_email, $coupon_code);
 
         //add value on return api discount
         $details_discount['response']['transaction_amount'] = $transaction_amount;
         $details_discount['response']['params'] = [
-            "transaction_amount" => $transaction_amount,
-            "payer_email" => $payer_email,
-            "coupon_code" => $coupon_code
+            'transaction_amount' => $transaction_amount,
+            'payer_email' => $payer_email,
+            'coupon_code' => $coupon_code
         ];
 
         return $details_discount;
@@ -802,5 +783,43 @@ class Core extends AbstractMethod
     public function refund(InfoInterface $payment, $amount)
     {
         return $this;
+    }
+
+    private function assignRequestData($paymentInfo, $currencyCode, $requestParams)
+    {
+        $installments = 1;
+        if (isset($paymentInfo['installments'])) {
+            $installments = (int)$paymentInfo['installments'];
+        }
+
+        $dynamicDescriptor = trim($this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_DESCRIPTOR, ScopeInterface::SCOPE_STORE));
+        $areInstallmentsEnabled = (1 === (int)($this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_INSTALLMENT, ScopeInterface::SCOPE_STORE)));
+
+        if ($areInstallmentsEnabled && $installments > 1) {
+            // installment
+            $requestParams['recurring_data'] = [
+                'installment_type' => 'MF_HOLD',
+                'amount' => $this->getAmount(),
+                'currency' => $currencyCode,
+                'initiator' => 'cit',
+                'interval' => '30',
+                'period' => 'day',
+                'payments' => $installments,
+                'trans_type' => '01'           // Goods/Service Purchase
+            ];
+            if (!empty($dynamicDescriptor)) {
+                $requestParams['recurring_data']['dynamic_descriptor'] = $dynamicDescriptor;
+            }
+
+        } else {
+            // regular payment
+            $requestParams['payment_data']['amount'] = $this->getAmount();
+            $requestParams['payment_data']['currency'] = $currencyCode;
+            if (!empty($dynamicDescriptor)) {
+                $requestParams['payment_data']['dynamic_descriptor'] = $dynamicDescriptor;
+            }
+        }
+
+        return $requestParams;
     }
 }
