@@ -79,14 +79,13 @@ This process explains how to set up and configure the Magento plugin to accept p
  * **Payment title** - Fill in the name of the payment method, will be presented for the customer in checkout
  * **Capture payment:**
    * Set to **Yes** - for completing payment automatically (one-phase payment),
-   * Set to **No** for two-phases payment: the amount will not be captured but only blocked.
-   
+   * Set to **No** for two-phases payment: the amount will not be captured but only blocked.  
  With **No** option selected payments will be captured automatically in 7 days from the time of creating the preauthorized transaction.
  
  In installment case with **No** option selected installments will be declined automatically in 7 days from the time of creating the preauthorized transaction.
  * **Installment enabled:** - this setting enables installment payments possibility
-   * Set to **Yes** -installment payments are enabled, number of installments are available for selection in payment form, it's possible to split payment to 2-12 installments, each installment in 30 days period.   
-   * Set to **No** - installment payments aren't enabled
+   * Set to **Yes** -installment payments are enabled, number of installments are available for selection in payment form, it's possible to split payment to 2-12 installments, each installment in 30 days period.
+   * Set to **No** - installment payments aren't enabled
  * **Checkout position** - This setting value is the position of the payment method for the customer in checkout
  * **Ask CPF** - set to **Yes** if you require **CPF (Brazilian Tax Id)** of your customer in checkout
  * **Dynamic Descriptor** - in this setting is described dynamic_descriptor parameter in payment request - details about it see in [API documentation](https://integration.unlimint.com/#PaymentRequestPaymentData)
@@ -105,7 +104,7 @@ That's it! The selected payment methods are successfully enabled in the checkout
 
 4.3. Order statuses and refunds settings
 
-Mapring of the order statuses is set by default and you need to change it ONLY if you have yours custom order statuses flow (not recommended to change).
+Mapping of the order statuses is set by default and you need to change it ONLY if you have yours custom order statuses flow (not recommended to change).
 
 **Refund payment**: by default is set to **Yes**, it will be set to **No** - Refunds (Credit Memos) will be unavailable.
 
