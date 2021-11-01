@@ -85,11 +85,12 @@ This process explains how to set up and configure the Magento plugin to accept p
  
  In installment case with **No** option selected installments will be declined automatically in 7 days from the time of creating the preauthorized transaction.
  * **Installment enabled:** - this setting enables installment payments possibility
-   * Set to **Yes** -installment payments are enabled, number of installments are available for selection in payment form, it's possible to split payment to 2-12 installments, each installment in 30 days period   
+   * Set to **Yes** -installment payments are enabled, number of installments are available for selection in payment form, it's possible to split payment to 2-12 installments, each installment in 30 days period.   
    * Set to **No** - installment payments aren't enabled
  * **Checkout position** - This setting value is the position of the payment method for the customer in checkout
  * **Ask CPF** - set to **Yes** if you require **CPF (Brazilian Tax Id)** of your customer in checkout
- * **Dynamic Descriptor** - in this setting is described dynamic_descriptor parameter in payment request - details about it see in [API documentation](https://integration.unlimint.com/#PaymentRequestPaymentData)  
+ * **Dynamic Descriptor** - in this setting is described dynamic_descriptor parameter in payment request - details about it see in [API documentation](https://integration.unlimint.com/#PaymentRequestPaymentData)
+   
 ![](readme_images/credit_card.png)
 
 4.2. To enable payments via **Boleto**
@@ -141,6 +142,7 @@ Unlimint Magento 2 plugin supports the following post-payment operations:
 
 Cancellation (void)/capture of the payment only works for **Credit card** payment method.
 And it is available only for orders were paid with payment method configured with **Capture payment** setting is set to **No**. 
+
 If **Capture payment** is set to **Yes -** an order will be completed automatically, you can only refund the payment by creating a **Credit Memo.**
 
 #### Capture of the payment
