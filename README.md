@@ -84,10 +84,12 @@ This process explains how to set up and configure the Magento plugin to accept p
  With **No** option selected payments will be captured automatically in 7 days from the time of creating the preauthorized transaction.
  
  In installment case with **No** option selected installments will be declined automatically in 7 days from the time of creating the preauthorized transaction.
-
+ * **Installment enabled:** - this setting enables installment payments possibility
+   * Set to **Yes** -installment payments are enabled, number of installments are available for selection in payment form, it's possible to split payment to 2-12 installments, each installment in 30 days period   
+   * Set to **No** - installment payments aren't enabled
  * **Checkout position** - This setting value is the position of the payment method for the customer in checkout
  * **Ask CPF** - set to **Yes** if you require **CPF (Brazilian Tax Id)** of your customer in checkout
-   
+ * **Dynamic Descriptor** - in this setting is described dynamic_descriptor parameter in payment request - details about it see in [API documentation](https://integration.unlimint.com/#PaymentRequestPaymentData)  
 ![](readme_images/credit_card.png)
 
 4.2. To enable payments via **Boleto**
@@ -143,31 +145,43 @@ If **Capture payment** is set to **Yes -** an order will be completed automatica
 
 #### Capture of the payment
 
-For Capture of the preathorized payment navigate to Orders and choose the Order in status **Payment review**
+For Capture of the preathorized payment navigate to **Orders** and choose the **Order**.
 
-![](readme_images/order_payment_review.png)
+Create the invoice fo this order manually - click on **Invoice**
 
-After that click **Accept payment** and click **OK** in pop-up window.
+![](readme_images/invoice_order_processing.png)
 
-![](readme_images/accept_popup.png)
+Check all information in invoice, edit quanity of goods if needed (you can reduce the quantity of the goods and **complete order partially**).
 
-After this action order status is changed to **Processing.**
+Then click **Submit invoice.**
 
-![](readme_images/order_processing.png)
+![](readme_images/invoice_order_submit.png)
 
-And status of invoice for this order is changed to **Paid**
+After this action you should click **Ship** in order.
+
+![](readme_images/invoice_order_processing_ship.png)
+
+In **New shipment** screen check all information about shipment, add shipment information if needed, then click **Submit shipment**
+
+![](readme_images/invoice_order_shipment_submit.png)
+
+Then status of the order is changed to **Complete**.
+
+![](readme_images/order_complete.png)
+
+And status of invoice for this order is changed to **Paid**.
 
 ![](readme_images/invoice_paid.png)
 
 #### Cancel (void) the payment
 
-For cancel (void) the payment navigate to Orders and choose the Order in status **Payment review**.
+For cancel (void) the payment navigate to Orders and choose the Order for cancel (void) payment.
 
-![](readme_images/order_payment_review.png)
+![](readme_images/order_cancel.png)
 
-After that click **Deny payment** and click **OK** in pop-up window
+And then click **Cancel**. In pop-up window click **Ok**
 
-![](readme_images/deny_popup.png)
+![](readme_images/cancel_popup.png)
 
 Order status is changed to **Canceled**
 
