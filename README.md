@@ -105,7 +105,7 @@ That's it! The selected payment methods are successfully enabled in the checkout
 
 4.3. Order statuses and refunds settings
 
-Mapping of the order statuses is set by default and you need to change it ONLY if you have yours custom order statuses flow (not recommended to change).
+Mapring of the order statuses is set by default and you need to change it ONLY if you have yours custom order statuses flow (not recommended to change).
 
 **Refund payment**: by default is set to **Yes**, it will be set to **No** - Refunds (Credit Memos) will be unavailable.
 
