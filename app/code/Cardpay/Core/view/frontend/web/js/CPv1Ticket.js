@@ -132,7 +132,7 @@ const INLINE_BLOCK = 'inline-block';
 
         options.url += (options.url.indexOf("?") >= 0 ? "&" : "?") + "referer=" + escape(CPv1Ticket.referer);
         options.requestedMethod = options.method;
-        if (useXDomain && options.method == "PUT") {
+        if (useXDomain && String(options.method) === "PUT") {
             options.method = "POST";
             options.url += "&_method=PUT";
         }
@@ -258,13 +258,13 @@ const INLINE_BLOCK = 'inline-block';
     }
 
     CPv1Ticket.hideErrors = function () {
-        for (var x = 0; x < document.querySelectorAll('[data-checkout]').length; x++) {
-            var $field = document.querySelectorAll('[data-checkout]')[x];
+        for (let x = 0; x < document.querySelectorAll('[data-checkout]').length; x++) {
+            const $field = document.querySelectorAll('[data-checkout]')[x];
             $field.classList.remove("mp-error-input");
         }
 
-        for (var x = 0; x < document.querySelectorAll('.erro_febraban').length; x++) {
-            var $span = document.querySelectorAll('.erro_febraban')[x];
+        for (let y = 0; y < document.querySelectorAll('.erro_febraban').length; y++) {
+            const $span = document.querySelectorAll('.erro_febraban')[y];
             $span.style.display = 'none';
         }
     }
@@ -316,10 +316,10 @@ const INLINE_BLOCK = 'inline-block';
     CPv1Ticket.validaCPF = function (strCPF) {
         var Soma;
         var Resto;
-        strCPF = strCPF.replace(/[.-\s]/g, '')
+        strCPF = String(strCPF.replace(/[.-\s]/g, ''))
         Soma = 0;
 
-        if (strCPF == "00000000000") {
+        if (strCPF === "00000000000") {
             return false;
         }
 
@@ -327,13 +327,13 @@ const INLINE_BLOCK = 'inline-block';
             Soma = Soma + parseInt(strCPF.substring(i - 1, i)) * (11 - i);
         }
 
-        Resto = (Soma * 10) % 11;
+        Resto = parseInt((Soma * 10) % 11);
 
-        if ((Resto == 10) || (Resto == 11)) {
+        if ((Resto === 10) || (Resto === 11)) {
             Resto = 0;
         }
 
-        if (Resto != parseInt(strCPF.substring(9, 10))) {
+        if (Resto !== parseInt(strCPF.substring(9, 10))) {
             return false;
         }
 
@@ -344,11 +344,11 @@ const INLINE_BLOCK = 'inline-block';
 
         Resto = (Soma * 10) % 11;
 
-        if ((Resto == 10) || (Resto == 11)) {
+        if ((Resto === 10) || (Resto === 11)) {
             Resto = 0;
         }
 
-        return Resto == parseInt(strCPF.substring(10, 11));
+        return Resto === parseInt(strCPF.substring(10, 11));
     }
 
     CPv1Ticket.validaCNPJ = function (strCNPJ) {
@@ -366,7 +366,7 @@ const INLINE_BLOCK = 'inline-block';
         digitosIguais = 1;
 
         for (let i = 0; i < strCNPJ.length - 1; i++) {
-            if (strCNPJ.charAt(i) != strCNPJ.charAt(i + 1)) {
+            if (strCNPJ.charAt(i) !== strCNPJ.charAt(i + 1)) {
                 digitosIguais = 0;
                 break;
             }
@@ -394,8 +394,8 @@ const INLINE_BLOCK = 'inline-block';
             }
         }
 
-        resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
-        if (resultado != digitos.charAt(0)) {
+        resultado = String(soma % 11 < 2 ? 0 : 11 - soma % 11);
+        if (resultado !== digitos.charAt(0)) {
             return false;
         }
 
@@ -411,7 +411,7 @@ const INLINE_BLOCK = 'inline-block';
         }
 
         resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
-        return resultado == digitos.charAt(1);
+        return resultado === digitos.charAt(1);
     }
 
     CPv1Ticket.execFormatDocument = function () {
@@ -464,7 +464,7 @@ const INLINE_BLOCK = 'inline-block';
         CPv1Ticket.coupon_of_discounts.payer_email = payer_email;
 
         // flow: CPB
-        if (CPv1Ticket.site_id == "CPB") {
+        if (String(CPv1Ticket.site_id) === "CPB") {
             CPv1Ticket.actionsMLB();
         }
     }

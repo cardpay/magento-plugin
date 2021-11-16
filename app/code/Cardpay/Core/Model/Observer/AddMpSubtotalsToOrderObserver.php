@@ -35,7 +35,7 @@ class AddMpSubtotalsToOrderObserver implements ObserverInterface
             $order->setBaseFinanceCostAmount($baseFinanceCost);
         }
 
-        if ($order->getPayment()->getMethod() == "cardpay_standard") {
+        if ((string)$order->getPayment()->getMethod() === 'cardpay_standard') {
             $order->setFinanceCostAmount(0);
             $order->setBaseFinanceCostAmount(0);
         }

@@ -114,17 +114,18 @@ define(
 
             getInsertList: function ($pmFilter, pmSelected) {
                 let insertList = false;
+                const paymentTypeId = String(pmSelected.payment_type_id);
 
-                if ($pmFilter == 'credit') {
-                    if (pmSelected.payment_type_id == 'credit_card') {
+                if (String($pmFilter) === 'credit') {
+                    if (paymentTypeId === 'credit_card') {
                         insertList = true
                     }
-                } else if ($pmFilter == 'debit') {
-                    if (pmSelected.payment_type_id == 'debit_card' || pmSelected.payment_type_id == 'prepaid_card') {
+                } else if (String($pmFilter) === 'debit') {
+                    if (paymentTypeId === 'debit_card' || paymentTypeId === 'prepaid_card') {
                         insertList = true
                     }
                 } else {
-                    if (pmSelected.payment_type_id != 'credit_card' && pmSelected.payment_type_id != 'debit_card' && pmSelected.payment_type_id != 'prepaid_card') {
+                    if (paymentTypeId !== 'credit_card' && paymentTypeId !== 'debit_card' && paymentTypeId !== 'prepaid_card') {
                         insertList = true
                     }
                 }
@@ -151,9 +152,9 @@ define(
                             }
                         }
                     }
-
-                    return listPm;
                 }
+
+                return listPm;
             },
         });
     }

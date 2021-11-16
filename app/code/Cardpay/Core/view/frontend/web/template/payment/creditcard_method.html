@@ -44,14 +44,12 @@
                 <div class="mp-box-inputs mp-col-100">
                     <label for="cardNumber"> <!-- ko i18n: 'Credit card number'--><!-- /ko --> <em>*</em></label>
                     <input type="text" id="cardNumber" data-checkout="cardNumber" autocomplete="off" maxlength="19"
-                        minlength="13" required data-bind="event: {
-                                keyup: onlyNumbersInCardNumber,
-                                blur: validateCreditCardNumber
-                            }"/>
+                        minlength="13" required data-bind="event: { keyup: validateCreditCardNumber }"/>
                     <span class="mp-error" id="mp-error-205" data-main="#cardNumber"> <!-- ko i18n: 'Parameter cardNumber can not be null/empty'-->
                         <!-- /ko --> </span>
-                    <span class="mp-error" id="mp-error-E301" data-main="#cardNumber"> <!-- ko i18n: 'Invalid Card Number'-->
+                    <span class="mp-error" id="mp-error-card-number" data-main="#cardNumber"> <!-- ko i18n: 'Invalid Card Number'-->
                         <!-- /ko --> </span>
+                    <span id="card-brand" class="card-brand"></span>
                 </div>
 
                 <div class="mp-box-inputs mp-col-100">

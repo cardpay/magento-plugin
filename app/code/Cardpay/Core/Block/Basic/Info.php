@@ -3,27 +3,27 @@
 namespace Cardpay\Core\Block\Basic;
 
 use Magento\Checkout\Model\Session;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Element\Template\Context;
-use Magento\Sales\Model\OrderFactory;
+use Magento\Sales\Model\Order\Payment;
 
 class Info extends \Magento\Payment\Block\Info
 {
-    protected $_checkoutSession;
-    protected $_orderFactory;
-    protected $_scopeConfig;
-
     protected $_template = 'Cardpay_Core::basic/info.phtml';
 
+    /**
+     * @var Session
+     */
+    private $_checkoutSession;
+
     public function __construct(
-        Context      $context,
-        Session      $checkoutSession,
-        OrderFactory $orderFactory,
-        array        $data = []
+        Context $context,
+        Session $checkoutSession,
+        array   $data = []
     )
     {
         parent::__construct($context, $data);
         $this->_checkoutSession = $checkoutSession;
-        $this->_orderFactory = $orderFactory;
     }
 
 
@@ -41,9 +41,8 @@ class Info extends \Magento\Payment\Block\Info
         return false;
     }
 
-
     /**
-     * @return \Magento\Sales\Model\Order\Payment
+     * @return Payment
      */
     public function getPayment()
     {
@@ -53,7 +52,7 @@ class Info extends \Magento\Payment\Block\Info
 
     /**
      * @return string
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function getPaymentMethod()
     {
@@ -73,9 +72,9 @@ class Info extends \Magento\Payment\Block\Info
         $payment = $this->getPayment();
         if ($payment) {
             return $payment->getAdditionalInformation();
-        } else {
-            return null;
         }
+
+        return null;
     }
 
     public function getTransactionId()
@@ -91,7 +90,7 @@ class Info extends \Magento\Payment\Block\Info
             $ret = $this->getInfo()->getAdditionalInformation('transaction_id');
         }
 
-        return ($ret);
+        return $ret;
     }
 
     public function getStatusMessage($payment)
@@ -103,6 +102,6 @@ class Info extends \Magento\Payment\Block\Info
     public function getPaymentInfo()
     {
         $payment = $this->getPayment();
-        return $payment->getAdditionalInformation("paymentResponse");
+        return $payment->getAdditionalInformation('paymentResponse');
     }
 }

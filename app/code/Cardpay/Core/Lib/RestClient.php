@@ -4,11 +4,19 @@ namespace Cardpay\Core\Lib;
 
 use Cardpay\Core\Helper\Data;
 use Exception;
+use function curl_close;
+use function curl_error;
+use function curl_exec;
+use function curl_getinfo;
+use function json_decode;
+use const CURLINFO_HTTP_CODE;
+use const false;
+use const true;
 
 class RestClient
 {
     private const CONTENT_TYPE = 'application/json';
-    private const USER_AGENT = 'UnlimintPlugin/1.0.3/Magento';
+    private const USER_AGENT = 'UnlimintPlugin/1.0.4/Magento';
 
     /**
      * @var Data
@@ -29,10 +37,10 @@ class RestClient
      * @return resource
      * @throws Exception
      */
-    private static function getConnection($uri, $method, $contentType, $extraParams = array())
+    private static function getConnection($uri, $method, $contentType, $extraParams = [])
     {
-        if (!extension_loaded("curl")) {
-            throw new Exception("cURL extension not found. You need to enable cURL in your php.ini or another configuration you have.");
+        if (!extension_loaded('curl')) {
+            throw new Exception('cURL extension not found. You need to enable cURL in your php.ini or another configuration you have.');
         }
 
         $connection = curl_init($uri);
@@ -42,7 +50,7 @@ class RestClient
         curl_setopt($connection, CURLOPT_CUSTOMREQUEST, $method);
         curl_setopt($connection, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
 
-        $headers = array("Accept: " . self::CONTENT_TYPE, "Content-Type: " . $contentType);
+        $headers = ['Accept: ' . self::CONTENT_TYPE, 'Content-Type: ' . $contentType];
 
         if (count($extraParams) > 0) {
             $headers = array_merge($headers, $extraParams);
@@ -60,9 +68,9 @@ class RestClient
      *
      * @throws Exception
      */
-    private static function set_data(&$connect, $data, $contentType)
+    private static function setData($connect, $data, $contentType)
     {
-        if ($contentType == self::CONTENT_TYPE) {
+        if ((string)$contentType === self::CONTENT_TYPE) {
             if (is_string($data)) {
                 json_decode($data, true);
             } else {
@@ -71,7 +79,7 @@ class RestClient
 
             if (function_exists('json_last_error')) {
                 $json_error = json_last_error();
-                if ($json_error != JSON_ERROR_NONE) {
+                if ($json_error !== JSON_ERROR_NONE) {
                     throw new Exception("JSON Error [$json_error] - Data: $data");
                 }
             }
@@ -90,34 +98,48 @@ class RestClient
      * @return array
      * @throws Exception
      */
-    private static function exec($method, $url, $data, $contentType, $extraParams)
+    protected static function exec($method, $url, $data, $contentType, $extraParams)
     {
-        $connect = self::getConnection($url, $method, $contentType, $extraParams);
-        if ($data) {
-            self::set_data($connect, $data, $contentType);
+        if (empty($url) || strncmp($url, 'http', 4) !== 0) {
+            return [];
         }
 
-        $api_result = curl_exec($connect);
-        $api_http_code = curl_getinfo($connect, CURLINFO_HTTP_CODE);
-
-        if ($api_result === FALSE) {
-            throw new Exception(curl_error($connect));
+        $connection = self::getConnection($url, $method, $contentType, $extraParams);
+        if (!empty($data)) {
+            self::setData($connection, $data, $contentType);
         }
 
-        $response = array(
-            'status' => $api_http_code,
-            'response' => json_decode($api_result, true)
-        );
+        $apiResult = curl_exec($connection);
+        $apiHttpCode = curl_getinfo($connection, CURLINFO_HTTP_CODE);
+        curl_close($connection);
 
-        if ($response != null && $response['status'] >= 400 && self::$check_loop == 0) {
+        if ($apiResult === false) {
+            throw new Exception(curl_error($connection));
+        }
+
+        $response = [
+            'status' => $apiHttpCode,
+            'response' => json_decode($apiResult, true)
+        ];
+
+        if ((int)$response['status'] >= 400 && self::$checkLoop === 0) {
             self::logErrorResponse($response, $data, $url);
         }
 
-        self::$check_loop = 0;
-        curl_close($connect);
+        self::$checkLoop = 0;
 
         return $response;
     }
+
+    /**
+     * @param $url
+     * @param $method
+     * @param $contentType
+     * @param $extraParams
+     * @param $data
+     * @return array
+     * @throws Exception
+     */
 
     /**
      * @param array $response
@@ -127,30 +149,30 @@ class RestClient
     private static function logErrorResponse(array $response, $data, $url)
     {
         try {
-            self::$check_loop = 1;
+            self::$checkLoop = 1;
             $payloads = null;
             $endpoint = null;
-            $errors = array();
+            $errors = [];
 
-            //add data
-            if (isset($data) && $data != null) {
+            // add data
+            if (!empty($data)) {
                 $payloads = json_encode(self::maskCardData($data));
             }
 
-            //add uri
-            if (isset($url) && $url != null) {
+            // add uri
+            if (!empty($url)) {
                 $endpoint = $url;
             }
 
-            $errors[] = array(
-                "endpoint" => $endpoint,
-                "message" => self::getErrorMessage($response),
-                "payloads" => $payloads
-            );
+            $errors[] = [
+                'endpoint' => $endpoint,
+                'message' => self::getErrorMessage($response),
+                'payloads' => $payloads
+            ];
 
             self::logError($response['status'], $errors);
         } catch (Exception $e) {
-            error_log("error to call API LOGS" . $e);
+            error_log('error to call API LOGS' . $e);
         }
     }
 
@@ -200,9 +222,9 @@ class RestClient
      * @return array
      * @throws Exception
      */
-    public static function get($uri, $content_type = self::CONTENT_TYPE, $extra_params = array())
+    public static function get($uri, $content_type = self::CONTENT_TYPE, $extra_params = [])
     {
-        return self::exec("GET", $uri, null, $content_type, $extra_params);
+        return self::exec('GET', $uri, null, $content_type, $extra_params);
     }
 
     /**
@@ -214,14 +236,14 @@ class RestClient
      * @return array
      * @throws Exception
      */
-    public static function post($url, $data, $content_type = self::CONTENT_TYPE, $extra_params = array())
+    public static function post($url, $data, $content_type = self::CONTENT_TYPE, $extra_params = [])
     {
-        return self::exec("POST", $url, $data, $content_type, $extra_params);
+        return self::exec('POST', $url, $data, $content_type, $extra_params);
     }
 
-    public static function patch($url, $data, $content_type = self::CONTENT_TYPE, $extra_params = array())
+    public static function patch($url, $data, $content_type = self::CONTENT_TYPE, $extra_params = [])
     {
-        return self::exec("PATCH", $url, $data, $content_type, $extra_params);
+        return self::exec('PATCH', $url, $data, $content_type, $extra_params);
     }
 
     /**
@@ -233,9 +255,9 @@ class RestClient
      * @return array
      * @throws Exception
      */
-    public static function put($uri, $data, $content_type = self::CONTENT_TYPE, $extra_params = array())
+    public static function put($uri, $data, $content_type = self::CONTENT_TYPE, $extra_params = [])
     {
-        return self::exec("PUT", $uri, $data, $content_type, $extra_params);
+        return self::exec('PUT', $uri, $data, $content_type, $extra_params);
     }
 
     /**
@@ -246,9 +268,9 @@ class RestClient
      * @return array
      * @throws Exception
      */
-    public static function delete($uri, $content_type = self::CONTENT_TYPE, $extra_params = array())
+    public static function delete($uri, $content_type = self::CONTENT_TYPE, $extra_params = [])
     {
-        return self::exec("DELETE", $uri, null, $content_type, $extra_params);
+        return self::exec('DELETE', $uri, null, $content_type, $extra_params);
     }
 
     /**
@@ -259,7 +281,7 @@ class RestClient
     static $email_admin = "";
     static $country_initial = "";
     static $sponsor_id = "";
-    static $check_loop = 0;
+    static $checkLoop = 0;
 
     public static function setHelperData($cpHelper)
     {
@@ -296,16 +318,16 @@ class RestClient
         $server_version = php_uname();
         $php_version = PHP_VERSION;
 
-        $data = array(
-            "code" => $code,
-            "errors" => $errors,
-            "module" => self::PLATFORM_ID,
-            "module_version" => self::$module_version,
-            "url_store" => self::$url_store,
-            "country_initial" => self::$country_initial,
-            "server_version" => $server_version,
-            "code_lang" => "PHP " . $php_version
-        );
+        $data = [
+            'code' => $code,
+            'errors' => $errors,
+            'module' => self::PLATFORM_ID,
+            'module_version' => self::$module_version,
+            'url_store' => self::$url_store,
+            'country_initial' => self::$country_initial,
+            'server_version' => $server_version,
+            'code_lang' => 'PHP ' . $php_version
+        ];
 
         self::$_cpHelper->log('sendErrorLog', 'cardpay-restclient', $data);
     }

@@ -3,7 +3,6 @@
 namespace Cardpay\Core\Logger\Handler;
 
 use Magento\Framework\Logger\Handler\Base;
-use Monolog\Logger;
 
 /**
  * Unlimint logger handler
@@ -15,7 +14,7 @@ class System extends Base
      *
      * @var int
      */
-    protected $loggerType = Logger::DEBUG;
+    protected $loggerType;
 
     /**
      * File name

@@ -5,10 +5,10 @@
         <arguments>
             <argument name="configProviders" xsi:type="array">
                 <item name="cardpay_core_custom_provider" xsi:type="object">
-                    Cardpay\Core\Model\CustomConfigProvider
+                    Cardpay\Core\Model\BankCardConfigProvider
                 </item>
                 <item name="cardpay_core_customTicket_provider" xsi:type="object">
-                    Cardpay\Core\Model\CustomTicketConfigProvider
+                    Cardpay\Core\Model\BoletoConfigProvider
                 </item>
             </argument>
         </arguments>
@@ -16,8 +16,8 @@
     <type name="Magento\Payment\Model\CcGenericConfigProvider">
         <arguments>
             <argument name="methodCodes" xsi:type="array">
-                <item name="cardpay_custom" xsi:type="const">Cardpay\Core\Model\Custom\Payment::CODE</item>
-                <item name="cardpay_customticket" xsi:type="const">Cardpay\Core\Model\CustomTicket\Payment::CODE</item>
+                <item name="cardpay_custom" xsi:type="const">Cardpay\Core\Model\Payment\BankCardPayment::CODE</item>
+                <item name="cardpay_customticket" xsi:type="const">Cardpay\Core\Model\Payment\BoletoPayment::CODE</item>
             </argument>
         </arguments>
     </type>

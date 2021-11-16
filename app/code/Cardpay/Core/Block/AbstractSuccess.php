@@ -2,13 +2,9 @@
 
 namespace Cardpay\Core\Block;
 
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\View\Element\Template;
 
-/**
- * Class AbstractSuccess
- *
- * @package Cardpay\Core\Block
- */
 class AbstractSuccess extends Template
 {
     /**
@@ -102,7 +98,7 @@ class AbstractSuccess extends Template
 
     /**
      * @return string
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
     public function getPaymentMethod()
     {
@@ -114,8 +110,8 @@ class AbstractSuccess extends Template
      */
     public function getInfoPayment()
     {
-        $order_id = $this->_checkoutSession->getLastRealOrderId();
-        return $this->_coreFactory->create()->getInfoPaymentByOrder($order_id);
+        $orderId = $this->_checkoutSession->getLastRealOrderId();
+        return $this->_coreFactory->create()->getInfoPaymentByOrder($orderId);
     }
 
     /**
@@ -127,11 +123,11 @@ class AbstractSuccess extends Template
      */
     public function getMessageByStatus($payment)
     {
-        $status = $payment['status'] != "" ? $payment['status'] : '';
-        $status_detail = $payment['status_detail'] != "" ? $payment['status_detail'] : '';
-        $payment_method = $payment['payment_method_id'] != "" ? $payment['payment_method_id'] : '';
-        $amount = $payment['transaction_amount'] != "" ? $payment['transaction_amount'] : '';
-        $installments = $payment['installments'] != "" ? $payment['installments'] : '';
+        $status = !empty($payment['status']) ? $payment['status'] : '';
+        $status_detail = !empty($payment['status_detail']) ? $payment['status_detail'] : '';
+        $payment_method = !empty($payment['payment_method_id']) ? $payment['payment_method_id'] : '';
+        $amount = !empty($payment['transaction_amount']) ? $payment['transaction_amount'] : '';
+        $installments = !empty($payment['installments']) ? $payment['installments'] : '';
 
         return $this->_coreFactory->create()->getMessageByStatus($status, $status_detail, $payment_method, $installments, $amount);
     }
@@ -143,13 +139,19 @@ class AbstractSuccess extends Template
      */
     public function getOrderUrl()
     {
-        $params = ['order_id' => $this->_checkoutSession->getLastRealOrder()->getId()];
+        $params = [
+            'order_id' => $this->_checkoutSession->getLastRealOrder()->getId()
+        ];
+
         return $this->_urlBuilder->getUrl('sales/order/view', $params);
     }
 
     public function getReOrderUrl()
     {
-        $params = ['order_id' => $this->_checkoutSession->getLastRealOrder()->getId()];
+        $params = [
+            'order_id' => $this->_checkoutSession->getLastRealOrder()->getId()
+        ];
+
         return $this->_urlBuilder->getUrl('sales/order/reorder', $params);
     }
 }

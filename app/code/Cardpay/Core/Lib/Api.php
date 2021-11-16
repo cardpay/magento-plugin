@@ -3,12 +3,12 @@
 namespace Cardpay\Core\Lib;
 
 use Exception;
+use Magento\Framework\Exception\LocalizedException;
 
 class Api
 {
-    const VERSION = "0.3.3";
-    const AUTH_HEADER_PREFIX = 'Authorization: Bearer ';
-    const CONTENT_TYPE = 'application/json';
+    private const AUTH_HEADER_PREFIX = 'Authorization: Bearer ';
+    private const CONTENT_TYPE = 'application/json';
 
     /**
      * @var mixed
@@ -18,12 +18,12 @@ class Api
     /**
      * @var mixed
      */
-    private $terminal_code;
+    private $terminalCode;
 
     /**
      * @var mixed
      */
-    private $terminal_password;
+    private $terminalPassword;
 
     /**
      * @var mixed
@@ -33,7 +33,7 @@ class Api
     /**
      * @var
      */
-    private $access_data;
+    private $accessData;
 
     /**
      * @var null
@@ -47,39 +47,29 @@ class Api
 
     protected $_cpHelper;
 
+    /**
+     * @throws Exception
+     */
     public function __construct()
     {
-        $i = func_num_args();
+        $numberOfArguments = func_num_args();
 
-        if ($i > 2 || $i < 1) {
+        if ($numberOfArguments > 2 || $numberOfArguments < 1) {
             throw new Exception('Invalid arguments. Use CLIENT_ID and CLIENT SECRET, or ACCESS_TOKEN');
         }
 
-        if ($i === 1) {
+        if ($numberOfArguments === 1) {
             $this->ll_access_token = func_get_arg(0);
         }
 
-        if ($i === 2) {
-            $this->terminal_code = func_get_arg(0);
-            $this->terminal_password = func_get_arg(1);
+        if ($numberOfArguments === 2) {
+            $this->terminalCode = func_get_arg(0);
+            $this->terminalPassword = func_get_arg(1);
         }
     }
 
-    public function setHelperData($cpHelper)
-    {
-        $this->_cpHelper = $cpHelper;
-    }
-
     /**
-     * Get Access Token for API use
-     */
-    public function getHost()
-    {
-        return $this->host;
-    }
-
-    /**
-     * Get Access Token for API use
+     * @throws Exception
      */
     public function getAccessToken()
     {
@@ -87,13 +77,22 @@ class Api
             return $this->ll_access_token;
         }
 
-        $app_client_values = $this->buildQuery([
-            'terminal_code' => $this->terminal_code,
-            'password' => $this->terminal_password,
+        $apiAuthParams = $this->buildQuery([
+            'terminal_code' => $this->terminalCode,
+            'password' => $this->terminalPassword,
             'grant_type' => 'password'
         ]);
 
-        $authResponse = RestClient::post($this->getHost() . "/api/auth/token", $app_client_values, "application/x-www-form-urlencoded");
+        $authResponse = RestClient::post(
+            $this->getHost() . '/api/auth/token',
+            $apiAuthParams,
+            'application/x-www-form-urlencoded'
+        );
+
+        if (!isset($authResponse['status'])) {
+            throw new LocalizedException(__('Invalid auth response'));
+        }
+
         if ((int)$authResponse['status'] !== 200) {
             $message = '';
             if (isset($authResponse['response']['message'])) {
@@ -102,18 +101,24 @@ class Api
             throw new Exception($message, $authResponse['status']);
         }
 
-        $this->access_data = $authResponse['response'];
+        $this->accessData = $authResponse['response'];
 
-        $this->ll_access_token = $this->access_data['access_token'];
+        $this->ll_access_token = $this->accessData['access_token'];
 
         return $this->ll_access_token;
     }
 
-    public function performRefund($data)
+    /**
+     * @throws Exception
+     */
+    public function refund($data)
     {
-        return $this->post("/api/refunds", $data);
+        return $this->post('/api/refunds', $data);
     }
 
+    /**
+     * @throws Exception
+     */
     public function createParams($preference)
     {
         $access_token = $this->getAccessToken();
@@ -124,9 +129,12 @@ class Api
             self::AUTH_HEADER_PREFIX . $access_token
         ];
 
-        return RestClient::post($this->getHost() . "/checkout/preferences", $preference, self::CONTENT_TYPE, $extra_params);
+        return RestClient::post($this->getHost() . '/checkout/preferences', $preference, self::CONTENT_TYPE, $extra_params);
     }
 
+    /**
+     * @throws Exception
+     */
     public function checkDiscountCampaigns($transaction_amount, $payer_email, $coupon_code)
     {
         $accessToken = $this->getAccessToken();
@@ -135,6 +143,9 @@ class Api
         return RestClient::get($url, null, [self::AUTH_HEADER_PREFIX . $accessToken]);
     }
 
+    /**
+     * @throws Exception
+     */
     public function get($uri, $params = null, $authenticate = true)
     {
         $params = is_array($params) ? $params : [];
@@ -147,13 +158,16 @@ class Api
         $uri = $this->getHost() . $uri;
 
         if (count($params) > 0) {
-            $uri .= (strpos($uri, "?") === false) ? "?" : "&";
+            $uri .= (strpos($uri, '?') === false) ? '?' : '&';
             $uri .= $this->buildQuery($params);
         }
 
         return RestClient::get($uri, null, [self::AUTH_HEADER_PREFIX . $access_token]);
     }
 
+    /**
+     * @throws Exception
+     */
     public function post($uri, $data, $urlParams = null)
     {
         $url = $this->buildUrl($uri, $urlParams);
@@ -170,6 +184,30 @@ class Api
         return RestClient::patch($url, $data, self::CONTENT_TYPE, $extraParams);
     }
 
+    /**
+     * @throws Exception
+     */
+    public function put($uri, $data, $params = null)
+    {
+        return RestClient::put(
+            $this->getUriWithParams($uri, $params),
+            $data,
+            $this->buildExtraParams()
+        );
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function delete($uri, $params = null)
+    {
+        return RestClient::delete(
+            $this->getUriWithParams($uri, $params),
+            null,
+            $this->buildExtraParams()
+        );
+    }
+
     private function buildUrl($uri, $urlParams = null)
     {
         $url = $this->getHost() . $uri;
@@ -177,7 +215,7 @@ class Api
         $urlParams = is_array($urlParams) ? $urlParams : [];
 
         if (count($urlParams) > 0) {
-            $url .= (strpos($url, "?") === false) ? "?" : "&";
+            $url .= (strpos($url, '?') === false) ? '?' : '&';
             $url .= $this->buildQuery($urlParams);
         }
 
@@ -189,31 +227,14 @@ class Api
         return [self::AUTH_HEADER_PREFIX . $this->getAccessToken()];
     }
 
-    public function put($uri, $data, $params = null)
+    private function getUriWithParams($uri, $params = null)
     {
-        return RestClient::put(
-            $this->getUriWithParams($uri, $params),
-            $data,
-            $this->buildExtraParams()
-        );
-    }
-
-    public function delete($uri, $params = null)
-    {
-        return RestClient::delete(
-            $this->getUriWithParams($uri, $params),
-            null,
-            $this->buildExtraParams()
-        );
-    }
-
-    private function getUriWithParams($uri, $params = null) {
         $params = is_array($params) ? $params : [];
 
         $uri = $this->getHost() . $uri;
 
         if (count($params) > 0) {
-            $uri .= (strpos($uri, "?") === false) ? "?" : "&";
+            $uri .= (strpos($uri, '?') === false) ? '?' : '&';
             $uri .= $this->buildQuery($params);
         }
 
@@ -227,7 +248,7 @@ class Api
      */
     private function buildQuery($params)
     {
-        if (function_exists("http_build_query")) {
+        if (function_exists('http_build_query')) {
             return http_build_query($params);
         }
 
@@ -236,7 +257,7 @@ class Api
             $elements[] = "$name=" . urlencode($value);
         }
 
-        return implode("&", $elements);
+        return implode('&', $elements);
     }
 
     /**
@@ -252,7 +273,7 @@ class Api
      */
     public function setTerminalCode($terminalCode)
     {
-        $this->terminal_code = $terminalCode;
+        $this->terminalCode = $terminalCode;
     }
 
     /**
@@ -260,7 +281,7 @@ class Api
      */
     public function setTerminalPassword($terminalPassword)
     {
-        $this->terminal_password = $terminalPassword;
+        $this->terminalPassword = $terminalPassword;
     }
 
     /**
@@ -277,5 +298,15 @@ class Api
     public function setType($type)
     {
         $this->_type = $type;
+    }
+
+    public function setHelperData($cpHelper)
+    {
+        $this->_cpHelper = $cpHelper;
+    }
+
+    public function getHost()
+    {
+        return $this->host;
     }
 }

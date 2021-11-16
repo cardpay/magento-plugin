@@ -10,6 +10,7 @@ use Cardpay\Core\Model\Core;
 use Exception;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\DB\TransactionFactory;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\CreditmemoFactory;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
@@ -52,7 +53,6 @@ class Payment extends TopicsAbstract
     private $transaction;
 
     /**
-     * Payment constructor.
      * @param cpHelper $cpHelper
      * @param ScopeConfigInterface $scopeConfig
      * @param Core $coreModel
@@ -117,26 +117,26 @@ class Payment extends TopicsAbstract
 
         $order = $this->getOrderByIncrementId($orderId);
 
-        // Does not repeat the return of payment, if it is done through the Unlimint
+        // does not repeat the return of payment, if it is done through the Unlimint
         if ($order->getExternalRequest()) {
             return;
         }
 
-        //get payment order object
+        // get payment order object
         $paymentOrder = $order->getPayment();
         $paymentMethod = $paymentOrder->getMethodInstance()->getCode();
-        if (!in_array($paymentMethod, ['cardpay_custom', 'cardpay_customticket', 'cardpay_custom_bank_transfer', 'cardpay_basic'])) {
+        if (!in_array($paymentMethod, ['cardpay_custom', ConfigData::BOLETO_PAYMENT_METHOD, ConfigData::BANKCARD_PAYMENT_METHOD, 'cardpay_basic'])) {
             return;
         }
 
-        //Check refund available
+        // check refund available
         $refundAvailable = $this->scopeConfig->getValue(ConfigData::PATH_ORDER_REFUND_AVAILABLE, ScopeInterface::SCOPE_STORE);
         if (0 === (int)$refundAvailable) {
             $this->cpHelper->log(__FUNCTION__ . ' - Refund is disabled', ConfigData::CUSTOM_LOG_PREFIX);
             throw new Exception(__('Refund is disabled'));
         }
 
-        //Get amount refund
+        // get amount refund
         $amountRefund = $amount;
         if ($amountRefund <= 0) {
             throw new Exception(__('The refunded amount must be greater than 0.'));
@@ -247,8 +247,9 @@ class Payment extends TopicsAbstract
 
     /**
      * @param Order $order
+     * @param array $paymentData
      * @return bool
-     * @throws Exception
+     * @throws LocalizedException
      */
     public function createInvoice($order, $paymentData)
     {
@@ -304,5 +305,29 @@ class Payment extends TopicsAbstract
             $this->cpHelper->log(__('ERROR - Notifications Payment getPaymentData'), self::LOG_NAME, $e->getMessage());
             return null;
         }
+    }
+
+    /**
+     * @param cpHelper $cpHelper
+     */
+    public function setCpHelper(cpHelper $cpHelper): void
+    {
+        $this->cpHelper = $cpHelper;
+    }
+
+    /**
+     * @param Transaction $transaction
+     */
+    public function setTransaction(Transaction $transaction): void
+    {
+        $this->transaction = $transaction;
+    }
+
+    /**
+     * @param InvoiceSender $invoiceSender
+     */
+    public function setInvoiceSender(InvoiceSender $invoiceSender): void
+    {
+        $this->invoiceSender = $invoiceSender;
     }
 }

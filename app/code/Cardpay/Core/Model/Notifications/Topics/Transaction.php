@@ -22,7 +22,7 @@ class Transaction
 
     /**
      * @param Data $helperData
-     * @param BuilderInterface $builderInterface
+     * @param BuilderInterface $transactionBuilder
      */
     public function __construct(
         Data             $helperData,
@@ -54,8 +54,7 @@ class Transaction
 
             $message = __('The authorized amount is %1.', $formattedPrice);
 
-            $trans = $this->transactionBuilder;
-            $transaction = $trans->setPayment($payment)
+            $transaction = $this->transactionBuilder->setPayment($payment)
                 ->setOrder($order)
                 ->setTransactionId($paymentData['id'])
                 ->setAdditionalInformation(

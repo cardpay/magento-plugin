@@ -2,21 +2,26 @@
 
 namespace Cardpay\Core\Helper;
 
+use Cardpay\Core\Helper\Message\MessageInterface;
 use Cardpay\Core\Lib\Api;
 use Cardpay\Core\Lib\RestClient;
 use Cardpay\Core\Logger\Logger;
+use Cardpay\Core\Model\Payment\BankCardPayment;
+use Cardpay\Core\Model\Payment\BoletoPayment;
 use Exception;
 use Magento\Backend\Block\Store\Switcher;
 use Magento\Framework\App\Config\Initial;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Composer\ComposerInformation;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Module\ResourceInterface;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Framework\UrlInterface;
 use Magento\Framework\View\LayoutFactory;
 use Magento\Payment\Model\Config;
 use Magento\Payment\Model\Method\Factory;
+use Magento\Sales\Model\Order;
 use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Status\Collection;
 use Magento\Store\Model\App\Emulation;
@@ -29,9 +34,6 @@ use Magento\Store\Model\ScopeInterface;
  */
 class Data extends \Magento\Payment\Helper\Data
 {
-    /**
-     *sandbox url
-     */
     const SANDBOX_URL = 'https://sandbox.cardpay.com';
     const PRODUCTION_URL = 'https://cardpay.com';
 
@@ -49,16 +51,14 @@ class Data extends \Magento\Payment\Helper\Data
      *type
      */
     const TYPE = 'magento';
-    //end const platform
 
     /**
      * payment calculator
      */
     const STATUS_ACTIVE = 'active';
-    const PAYMENT_TYPE_CREDIT_CARD = 'credit_card';
 
     /**
-     * @var \Cardpay\Core\Helper\Message\MessageInterface
+     * @var MessageInterface
      */
     protected $_messageInterface;
 
@@ -83,6 +83,10 @@ class Data extends \Magento\Payment\Helper\Data
      * @var Switcher
      */
     protected $_switcher;
+
+    /**
+     * @var ComposerInformation
+     */
     protected $_composerInformation;
 
     /**
@@ -90,6 +94,9 @@ class Data extends \Magento\Payment\Helper\Data
      */
     protected $_moduleResource;
 
+    /**
+     * @var TimezoneInterface
+     */
     protected $_timezoneInterface;
 
     /**
@@ -126,6 +133,7 @@ class Data extends \Magento\Payment\Helper\Data
     )
     {
         parent::__construct($context, $layoutFactory, $paymentMethodFactory, $appEmulation, $paymentConfig, $initialConfig);
+
         $this->_messageInterface = $messageInterface;
         $this->_mpLogger = $logger;
         $this->_statusFactory = $statusFactory;
@@ -165,25 +173,33 @@ class Data extends \Magento\Payment\Helper\Data
         }
 
         // mask PANs
-        $stringPansMasked = preg_replace("/(\d{6})\d{0,9}(\d{4})/i", '${1}...${2}', $string);
+        $stringPansMasked = preg_replace("/(\d{6})\d{0,9}(\d{4})/", '${1}...${2}', $string);
 
         // mask password
         return preg_replace("/password=.+&/i", 'password=***&', $stringPansMasked);    //NOSONAR
     }
 
     /**
-     * @param null $accessToken
+     * @param Order $order
+     * @param string $terminalCode
+     * @param string $terminalPassword
      * @return Api
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException
      */
-    public function getApiInstance($terminalCode = null, $terminalPassword = null)
+    public function getApiInstance($order = null, $terminalCode = null, $terminalPassword = null)
     {
-        if (is_null($terminalCode)) {
-            $terminalCode = $this->getTerminalCode();
+        if (!is_null($order) && is_null($terminalCode) && is_null($terminalPassword)) {
+            if (BankCardPayment::isBankCardPaymentMethod($order)) {
+                $terminalCode = ConfigData::PATH_BANKCARD_TERMINAL_CODE;
+                $terminalPassword = ConfigData::PATH_BANKCARD_TERMINAL_PASSWORD;
+            } else if (BoletoPayment::isBoletoPaymentMethod($order)) {
+                $terminalCode = ConfigData::PATH_BOLETO_TERMINAL_CODE;
+                $terminalPassword = ConfigData::PATH_BOLETO_TERMINAL_PASSWORD;
+            }
         }
 
-        if (is_null($terminalPassword)) {
-            $terminalPassword = $this->getTerminalPassword();
+        if (is_null($terminalCode) || is_null($terminalPassword)) {
+            throw new Exception('Invalid API credentials');
         }
 
         $api = new Api($terminalCode, $terminalPassword);
@@ -192,9 +208,9 @@ class Data extends \Magento\Payment\Helper\Data
         $api->setPlatform(self::PLATFORM_OPENPLATFORM);
         $api->setType(self::TYPE);
 
-        $api->setHost($this->getHost());
-        $api->setTerminalCode($this->scopeConfig->getValue(ConfigData::PATH_TERMINAL_CODE, ScopeInterface::SCOPE_STORE));
-        $api->setTerminalPassword($this->scopeConfig->getValue(ConfigData::PATH_TERMINAL_PASSWORD, ScopeInterface::SCOPE_STORE));
+        $api->setHost($this->getApiHost($terminalCode));
+        $api->setTerminalCode($this->scopeConfig->getValue($terminalCode, ScopeInterface::SCOPE_STORE));
+        $api->setTerminalPassword($this->scopeConfig->getValue($terminalPassword, ScopeInterface::SCOPE_STORE));
 
         RestClient::setHelperData($this);
         RestClient::setModuleVersion((string)$this->getModuleVersion());
@@ -204,32 +220,6 @@ class Data extends \Magento\Payment\Helper\Data
         RestClient::setSponsorID($this->scopeConfig->getValue('payment/cardpay/sponsor_id', ScopeInterface::SCOPE_STORE));
 
         return $api;
-    }
-
-    public function getTerminalCode($scopeCode = ScopeInterface::SCOPE_STORE)
-    {
-        return $this->scopeConfig->getValue(ConfigData::PATH_TERMINAL_CODE, $scopeCode);
-    }
-
-    public function getTerminalPassword($scopeCode = ScopeInterface::SCOPE_STORE)
-    {
-        return $this->scopeConfig->getValue(ConfigData::PATH_TERMINAL_PASSWORD, $scopeCode);
-    }
-
-    public function getCallbackSecret($scopeCode = ScopeInterface::SCOPE_STORE)
-    {
-        return $this->scopeConfig->getValue(ConfigData::PATH_CALLBACK_SECRET, $scopeCode);
-    }
-
-    public function getHost($scopeCode = ScopeInterface::SCOPE_STORE)
-    {
-        $sandbox = $this->scopeConfig->getValue(ConfigData::PATH_SANDBOX, $scopeCode);
-
-        if (!$sandbox) {
-            return self::PRODUCTION_URL;
-        } else {
-            return self::SANDBOX_URL;
-        }
     }
 
     /**
@@ -256,7 +246,7 @@ class Data extends \Magento\Payment\Helper\Data
             $order->setDiscountCouponAmount($couponAmount * -1);
             $order->setBaseDiscountCouponAmount($couponAmount * -1);
         } else {
-            //if a discount was applied and should not be considered
+            // if a discount was applied and should not be considered
             $paidAmount += $couponAmount;
         }
 
@@ -276,9 +266,9 @@ class Data extends \Magento\Payment\Helper\Data
      *
      * @return mixed
      */
-    public function setPayerInfo(&$payment)
+    public function setPayerInfo($payment)
     {
-        $this->log("setPayerInfo", ConfigData::CUSTOM_LOG_PREFIX, $payment);
+        $this->log('setPayerInfo', ConfigData::CUSTOM_LOG_PREFIX, $payment);
 
         if ($payment['payment_method_id']) {
             $payment["payment_method"] = $payment['payment_method_id'];
@@ -318,8 +308,8 @@ class Data extends \Magento\Payment\Helper\Data
     /**
      * Return sum of fields separated with |
      *
-     * @param $fullValue
-     *
+     * @param $data
+     * @param $field
      * @return int
      */
     protected function _getMultiCardValue($data, $field)
@@ -331,9 +321,8 @@ class Data extends \Magento\Payment\Helper\Data
         $amountValues = explode('|', $data[$field]);
         $statusValues = explode('|', $data['status']);
         foreach ($amountValues as $key => $value) {
-            $value = (float)str_replace(' ', '', $value);
-            if (str_replace(' ', '', $statusValues[$key]) == 'approved') {
-                $finalValue = $finalValue + $value;
+            if ('approved' === trim($statusValues[$key])) {
+                $finalValue += (float)trim($value);
             }
         }
 
@@ -401,20 +390,14 @@ class Data extends \Magento\Payment\Helper\Data
 
         $type = isset($additionalInfo['payment_data']) ? 'payment_data' : 'recurring_data';
 
-        if (isset($additionalInfo[$type]) && isset($additionalInfo[$type]['id'])) {
+        if (isset($additionalInfo[$type]['id'])) {
             return $additionalInfo[$type]['id'];
         }
 
         return null;
     }
 
-    public function getTimezone()
-    {
-        return ($this->_timezoneInterface);
-    }
-
     /**
-     * @param string $dateTime
      * @return string $dateTime as time zone
      */
     public function getTimeAccordingToTimeZone()
@@ -456,10 +439,38 @@ class Data extends \Magento\Payment\Helper\Data
         return $requestParams;
     }
 
+    /**
+     * @return TimezoneInterface
+     */
+    public function getTimezone()
+    {
+        return $this->_timezoneInterface;
+    }
+
     public function getStoreManager()
     {
         $objectManager = ObjectManager::getInstance();
 
         return $objectManager->get('Magento\Store\Model\StoreManagerInterface');
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function getApiHost($terminalCode)
+    {
+        if (ConfigData::PATH_BANKCARD_TERMINAL_CODE === $terminalCode) {
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_BANKCARD_SANDBOX, ScopeInterface::SCOPE_STORE));
+        } else if (ConfigData::PATH_BOLETO_TERMINAL_CODE === $terminalCode) {
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_BOLETO_SANDBOX, ScopeInterface::SCOPE_STORE));
+        } else {
+            throw new Exception('Unable to get API host');
+        }
+
+        if ($isSandbox) {
+            return self::SANDBOX_URL;
+        }
+
+        return self::PRODUCTION_URL;
     }
 }

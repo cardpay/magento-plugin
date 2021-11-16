@@ -2,6 +2,9 @@
 /**
  * @var Cardpay\Core\Block\CustomTicket\Success $block
  */
+
+use Cardpay\Core\Helper\ConfigData;
+
 $order = $this->getOrder();
 $total = $this->getTotal();
 $payment = $this->getPayment();
@@ -10,7 +13,7 @@ $payment_method = $this->getPaymentMethod();
 ?>
 
 <div id="box-cardpay">
-    <?php if ($payment_method == 'cardpay_customticket') { ?>
+    <?php if ($payment_method === ConfigData::BOLETO_PAYMENT_METHOD) { ?>
         <h2 class="cardpay-title"><?php /* @escapeNotVerified */
             echo __('Thank you for your purchase!'); ?></h2>
 

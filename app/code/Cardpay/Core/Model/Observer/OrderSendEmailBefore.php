@@ -1,7 +1,9 @@
 <?php
 
-namespace Cardpay\Core\Observer;
+namespace Cardpay\Core\Model\Observer;
 
+use Cardpay\Core\Model\Payment\BankCardPayment;
+use Cardpay\Core\Model\Payment\BoletoPayment;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 
@@ -17,8 +19,9 @@ class OrderSendEmailBefore implements ObserverInterface
         if (is_array($transport)) {
             return;
         }
-        if ($transport->getOrder()->getPayment()->getMethod() == \Cardpay\Core\Model\Custom\Payment::CODE ||
-            $transport->getOrder()->getPayment()->getMethod() == \Cardpay\Core\Model\CustomTicket\Payment::CODE) {
+
+        $method = (string)$transport->getOrder()->getPayment()->getMethod();
+        if ($method === BankCardPayment::CODE || $method === BoletoPayment::CODE) {
             $payment_html = preg_replace('#<(' . implode('|', ["tr"]) . ')(?:[^>]+)?>.*?</\1>#s', '', $transport->getPaymentHtml());
             $transport->setPaymentHtml($payment_html);
             $observer->setTransport($transport);

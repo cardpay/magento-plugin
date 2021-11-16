@@ -7,13 +7,18 @@ use Cardpay\Core\Helper\ConfigData;
 use Cardpay\Core\Helper\Data as dataHelper;
 use Cardpay\Core\Helper\Message\MessageInterface;
 use Cardpay\Core\Helper\Response;
+use Cardpay\Core\Lib\Api;
+use Cardpay\Core\Model\Api\V1\Exception;
 use Magento\Catalog\Helper\Image;
 use Magento\Customer\Model\Session;
 use Magento\Framework\Api\AttributeValueFactory;
 use Magento\Framework\Api\ExtensionAttributesFactory;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\App\ProductMetadataInterface;
+use Magento\Framework\DataObject;
 use Magento\Framework\DB\TransactionFactory;
+use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Exception\NoSuchEntityException;
 use Magento\Framework\Model\Context;
 use Magento\Framework\Registry;
 use Magento\Framework\UrlInterface;
@@ -21,6 +26,8 @@ use Magento\Payment\Helper\Data;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\AbstractMethod;
 use Magento\Payment\Model\Method\Logger;
+use Magento\Quote\Model\Quote;
+use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Email\Sender\InvoiceSender;
 use Magento\Sales\Model\Order\Email\Sender\OrderSender;
 use Magento\Sales\Model\OrderFactory;
@@ -89,12 +96,12 @@ class Core extends AbstractMethod
     /**
      * {@inheritdoc}
      */
-    protected $_canUseInternal = true;
+    protected $_canUseInternal;
 
     /**
      * {@inheritdoc}
      */
-    protected $_canUseCheckout = true;
+    protected $_canUseCheckout;
 
     /**
      * {@inheritdoc}
@@ -112,7 +119,7 @@ class Core extends AbstractMethod
     protected $_storeManager;
 
     /**
-     * @var \Cardpay\Core\Helper\
+     * @var dataHelper
      */
     protected $_coreHelper;
 
@@ -125,19 +132,6 @@ class Core extends AbstractMethod
      * @var OrderFactory
      */
     protected $_orderFactory;
-
-    /**
-     * @var
-     */
-    protected $_accessToken;
-    /**
-     * @var
-     */
-    protected $terminalCode;
-    /**
-     * @var
-     */
-    protected $terminalPassword;
 
     /**
      * @var MessageInterface
@@ -218,7 +212,8 @@ class Core extends AbstractMethod
      * @param UrlInterface $urlBuilder
      * @param Image $helperImage
      * @param \Magento\Checkout\Model\Session $checkoutSession
-     * @param dataHelper $helperData
+     * @param Version $version
+     * @param ProductMetadataInterface $productMetadata
      */
     public function __construct(
         StoreManagerInterface           $storeManager,
@@ -276,11 +271,11 @@ class Core extends AbstractMethod
     /**
      * Retrieves Quote
      *
-     * @param integer $quoteId
-     *
-     * @return \Magento\Quote\Model\Quote
+     * @return Quote
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
-    protected function _getQuote()
+    protected function getQuote()
     {
         return $this->_checkoutSession->getQuote();
     }
@@ -290,9 +285,9 @@ class Core extends AbstractMethod
      *
      * @param integer $incrementId
      *
-     * @return \Magento\Sales\Model\Order
+     * @return Order
      */
-    public function _getOrder($incrementId)
+    public function getOrder($incrementId)
     {
         return $this->_orderFactory->create()->loadByIncrementId($incrementId);
     }
@@ -300,44 +295,46 @@ class Core extends AbstractMethod
     /**
      * Return array with data of payment of order loaded with order_id param
      *
-     * @param $order_id
+     * @param $orderId
      *
      * @return array
      */
-    public function getInfoPaymentByOrder($order_id)
+    public function getInfoPaymentByOrder($orderId)
     {
-        $order = $this->_getOrder($order_id);
+        $order = $this->getOrder($orderId);
         $payment = $order->getPayment();
         $info_payments = [];
         $fields = [
-            ["field" => "cardholder_name", "title" => "CardHolder Name: %1"],
-            ["field" => "trunc_card", "title" => "Card Number: %1"],
-            ["field" => "payment_method", "title" => "Payment Method: %1"],
-            ["field" => "expiration_date", "title" => "Expiration Date: %1"],
-            ["field" => "installments", "title" => "Installments: %1"],
-            ["field" => "statement_descriptor", "title" => "Statement Descriptor: %1"],
-            ["field" => "payment_id", "title" => "Payment id (Cardpay): %1"],
-            ["field" => "status", "title" => "Payment Status: %1"],
-            ["field" => "status_detail", "title" => "Payment Detail: %1"],
-            ["field" => "activation_uri", "title" => "Generate Ticket"],
-            ["field" => "payment_id_detail", "title" => "Unlimint Payment Id: %1"],
-            ["field" => "id", "title" => "Collection Id: %1"],
+            ['field' => 'cardholder_name', 'title' => 'CardHolder Name: %1'],
+            ['field' => 'trunc_card', 'title' => 'Card Number: %1'],
+            ['field' => 'payment_method', 'title' => 'Payment Method: %1'],
+            ['field' => 'expiration_date', 'title' => 'Expiration Date: %1'],
+            ['field' => 'installments', 'title' => 'Installments: %1'],
+            ['field' => 'statement_descriptor', 'title' => 'Statement Descriptor: %1'],
+            ['field' => 'payment_id', 'title' => 'Payment id (Cardpay): %1'],
+            ['field' => 'status', 'title' => 'Payment Status: %1'],
+            ['field' => 'status_detail', 'title' => 'Payment Detail: %1'],
+            ['field' => 'activation_uri', 'title' => 'Generate Ticket'],
+            ['field' => 'payment_id_detail', 'title' => 'Unlimint Payment Id: %1'],
+            ['field' => 'id', 'title' => 'Collection Id: %1'],
         ];
 
         foreach ($fields as $field) {
-            if ($payment->getAdditionalInformation($field['field']) != "") {
-                $text = __($field['title'], $payment->getAdditionalInformation($field['field']));
+            $additionalInformation = $payment->getAdditionalInformation($field['field']);
+            if (!empty($additionalInformation)) {
+                $text = __($field['title'], $additionalInformation);
                 $info_payments[$field['field']] = [
-                    "text" => $text,
-                    "value" => $payment->getAdditionalInformation($field['field'])
+                    'text' => $text,
+                    'value' => $additionalInformation
                 ];
             }
         }
 
-        if ($payment->getAdditionalInformation('payer_identification_type') != "") {
-            $text = __($payment->getAdditionalInformation('payer_identification_type'));
-            $info_payments[$payment->getAdditionalInformation('payer_identification_type')] = [
-                "text" => $text . ': ' . $payment->getAdditionalInformation('payer_identification_number')
+        $idType = $payment->getAdditionalInformation('payer_identification_type');
+        if (!empty($idType)) {
+            $text = __($idType);
+            $info_payments[$idType] = [
+                'text' => $text . ': ' . $payment->getAdditionalInformation('payer_identification_number')
             ];
         }
 
@@ -353,57 +350,52 @@ class Core extends AbstractMethod
      */
     protected function validStatusTwoPayments($status)
     {
-        $array_status = explode(" | ", $status);
-        $status_verif = true;
-        $status_final = "";
-        foreach ($array_status as $status) {
-            if ($status_final == "") {
-                $status_final = $status;
-            } else {
-                if ($status_final != $status) {
-                    $status_verif = false;
-                }
+        $arrayStatus = explode(' | ', $status);
+        $isStatusVerified = true;
+        $finalStatus = '';
+        foreach ($arrayStatus as $statusExploded) {
+            if (empty($finalStatus)) {
+                $finalStatus = $statusExploded;
+            } else if ((string)$finalStatus !== (string)$statusExploded) {
+                $isStatusVerified = false;
             }
         }
 
-        if ($status_verif === false) {
-            $status_final = "other";
+        if ($isStatusVerified === false) {
+            $finalStatus = 'other';
         }
 
-        return $status_final;
+        return $finalStatus;
     }
 
     /**
      * Return array message depending on status
      *
      * @param $status
-     * @param $status_detail
+     * @param $statusDetail
      * @param $payment_method
      * @param $installment
      * @param $amount
      *
      * @return array
      */
-    public function getMessageByStatus($status, $status_detail, $payment_method, $installment, $amount)
+    public function getMessageByStatus($status, $statusDetail, $payment_method, $installment, $amount)
     {
         $status = $this->validStatusTwoPayments($status);
-        $status_detail = $this->validStatusTwoPayments($status_detail);
+        $statusDetail = $this->validStatusTwoPayments($statusDetail);
 
-        $message = [
-            "title" => "",
-            "message" => ""
-        ];
+        $message = ['title' => '', 'message' => ''];
 
         $rawMessage = $this->_statusMessage->getMessage($status);
         $message['title'] = __($rawMessage['title']);
 
-        if ($status == 'rejected') {
-            if ($status_detail == 'cc_rejected_invalid_installments') {
-                $message['message'] = __($this->_statusDetailMessage->getMessage($status_detail), strtoupper($payment_method), $installment);
-            } elseif ($status_detail == 'cc_rejected_call_for_authorize') {
-                $message['message'] = __($this->_statusDetailMessage->getMessage($status_detail), strtoupper($payment_method), $amount);
+        if ($status === 'rejected') {
+            if ((string)$statusDetail === 'cc_rejected_invalid_installments') {
+                $message['message'] = __($this->_statusDetailMessage->getMessage($statusDetail), strtoupper($payment_method), $installment);
+            } elseif ((string)$statusDetail === 'cc_rejected_call_for_authorize') {
+                $message['message'] = __($this->_statusDetailMessage->getMessage($statusDetail), strtoupper($payment_method), $amount);
             } else {
-                $message['message'] = __($this->_statusDetailMessage->getMessage($status_detail), strtoupper($payment_method));
+                $message['message'] = __($this->_statusDetailMessage->getMessage($statusDetail), strtoupper($payment_method));
             }
         } else {
             $message['message'] = __($rawMessage['message']);
@@ -456,10 +448,10 @@ class Core extends AbstractMethod
                 $product = $item->getProduct();
 
                 $dataItems[] = [
-                    "name" => $product->getName(),
-                    "description" => $product->getName(),
-                    "count" => (int)number_format($item->getQtyOrdered(), 0, '.', ''),
-                    "price" => (float)number_format($item->getPrice(), 2, '.', '')
+                    'name' => $product->getName(),
+                    'description' => $product->getName(),
+                    'count' => (int)number_format($item->getQtyOrdered(), 0, '.', ''),
+                    'price' => (float)number_format($item->getPrice(), 2, '.', '')
                 ];
             }
         }
@@ -470,35 +462,36 @@ class Core extends AbstractMethod
     /**
      * Return array with request params data by default to custom method
      *
-     * @param array $payment_info
-     *
+     * @param array $paymentInfo
+     * @param null $quote
+     * @param null $order
      * @return array
+     * @throws LocalizedException
+     * @throws NoSuchEntityException
      */
     public function getDefaultRequestParams($paymentInfo = [], $quote = null, $order = null)
     {
-        $this->_coreHelper->log("getDefaultRequestParams -> start");
+        $this->_coreHelper->log('getDefaultRequestParams -> start');
 
         if (!$quote) {
-            $quote = $this->_getQuote();
+            $quote = $this->getQuote();
         }
 
         $orderId = $quote->getReservedOrderId();
         if (!$order) {
-            $order = $this->_getOrder($orderId);
+            $order = $this->getOrder($orderId);
         }
 
         $orderIncId = $order->getIncrementId();
         $customer = $this->_customerSession->getCustomer();
-        $billingAddress = $quote->getBillingAddress();
-        $billingAddressData = $billingAddress->getData();
         $customerInfo = $this->getCustomerInfo($customer, $order);
         $currencyCode = $this->_storeManager->getStore()->getCurrentCurrency()->getCode();
 
-        $this->_coreHelper->log("getDefaultRequestParams -> init");
+        $this->_coreHelper->log('getDefaultRequestParams -> init');
 
         $requestParams = [];
         $requestParams['request']['id'] = time();
-        $requestParams['request']['time'] = date("c");
+        $requestParams['request']['time'] = date('c');
 
         $requestParams['merchant_order']['id'] = $order->getIncrementId();
         $requestParams['merchant_order']['description'] = __(
@@ -517,26 +510,31 @@ class Core extends AbstractMethod
             $requestParams['customer']['identity'] = $paymentInfo['cpf'];
         }
 
-        $phone = trim($billingAddressData['telephone']);
-        if (strlen($phone) < 8) {
-            $phone = str_pad($phone, 8, '0');
+        $billingAddress = $quote->getBillingAddress();
+        $billingAddressData = $billingAddress->getData();
+        if (!empty($billingAddressData['telephone'])) {
+            $billingPhone = trim($billingAddressData['telephone']);
+            if (strlen($billingPhone) < 5) {
+                $billingPhone = str_pad($billingPhone, 5, '0');
+            }
+
+            $requestParams['customer']['phone'] = $billingPhone;
         }
-        $requestParams['customer']['phone'] = $phone;
 
         if ($order->canShip() && !is_null($order->getShippingAddress())) {
             $shipping = $order->getShippingAddress()->getData();
 
-            $sPhone = trim($shipping['telephone']);
-            if (strlen($sPhone) < 8) {
-                $sPhone = str_pad($sPhone, 8, '0');
+            $shippingPhone = trim($shipping['telephone']);
+            if (strlen($shippingPhone) < 5) {
+                $shippingPhone = str_pad($shippingPhone, 5, '0');
             }
 
             $requestParams['merchant_order']['shipping_address'] = [
-                "addr_line_1" => $shipping['street'],
-                "city" => $shipping['city'],
-                "country" => $shipping['country_id'],
-                "phone" => $sPhone,
-                "zip" => $shipping['postcode'],
+                'addr_line_1' => $shipping['street'],
+                'city' => $shipping['city'],
+                'country' => $shipping['country_id'],
+                'phone' => $shippingPhone,
+                'zip' => $shipping['postcode'],
             ];
         }
 
@@ -552,37 +550,41 @@ class Core extends AbstractMethod
         return $requestParams;
     }
 
-    public function getApiInstance()
+    /**
+     * @param Order $order
+     *
+     * @throws \Exception
+     */
+    public function getApiInstance($order = null)
     {
-        if (!$this->terminalCode) {
-            $this->terminalCode = $this->_coreHelper->getTerminalCode();
+        if (is_null($order)) {
+            $orderId = $this->getQuote()->getReservedOrderId();
+            $order = $this->getOrder($orderId);
         }
 
-        if (!$this->terminalPassword) {
-            $this->terminalPassword = $this->_coreHelper->getTerminalPassword();
-        }
-
-        return $this->_coreHelper->getApiInstance($this->terminalCode, $this->terminalPassword);
+        return $this->_coreHelper->getApiInstance($order);
     }
 
     /**
-     * Return response of api to a preference
+     * Return response of API to a preference
      *
      * @param $requestParams
      *
      * @return array
-     * @throws \Cardpay\Core\Model\Api\V1\Exception
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws Exception
+     * @throws LocalizedException|\Exception
      */
-    public function postPayment($requestParams)
+    public function postPayment($requestParams, $order = null)
     {
         $url = "/api/payments";
         if (isset($requestParams['recurring_data'])) {
             $url = "/api/installments";
         }
 
-        $api = $this->getApiInstance();
-
+        /**
+         * @var Api
+         */
+        $api = $this->getApiInstance($order);
         $response = $api->post($url, $requestParams);
 
         $this->_coreHelper->log('Core Post Payment Return', 'cardpay', $response);
@@ -596,16 +598,19 @@ class Core extends AbstractMethod
      * @param $preference
      *
      * @return array
-     * @throws \Cardpay\Core\Model\Api\V1\Exception
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws Exception
+     * @throws LocalizedException|\Exception
      */
     public function postRefund($idPayment)
     {
+        /**
+         * @var Api
+         */
         $api = $this->getApiInstance();
 
-        $response = $api->performRefund($idPayment);
+        $response = $api->refund($idPayment);
 
-        $this->_coreHelper->log("Core Cancel Payment Return", 'cardpay', $response);
+        $this->_coreHelper->log('Core Cancel Payment Return', 'cardpay', $response);
 
         return $response;
     }
@@ -628,9 +633,7 @@ class Core extends AbstractMethod
 
         // set default error
         $messageErrorToClient = $errors['NOT_IDENTIFIED'];
-        if (isset($response['response']) &&
-            isset($response['response']['cause']) &&
-            count($response['response']['cause']) > 0) {
+        if (isset($response['response']['cause']) && count($response['response']['cause']) > 0) {
 
             // get first error
             $cause = $response['response']['cause'][0];
@@ -672,20 +675,16 @@ class Core extends AbstractMethod
     /**
      *  Return info of payment returned by CP api
      *
-     * @param $payment_id
+     * @param $order
+     * @param $paymentId
      *
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws \Exception
      */
-    public function getPaymentV1($payment_id)
+    public function getApiPayment($order, $paymentId)
     {
-        if (!$this->_accessToken) {
-            $this->_accessToken = $this->_scopeConfig->getValue(ConfigData::PATH_TERMINAL_PASSWORD, ScopeInterface::SCOPE_STORE);
-        }
-
-        $api = $this->_coreHelper->getApiInstance($this->_accessToken);
-
-        return $api->get("/api/payments/" . $payment_id);
+        $api = $this->_coreHelper->getApiInstance($order);
+        return $api->get('/api/payments/' . $paymentId);
     }
 
     /**
@@ -696,7 +695,7 @@ class Core extends AbstractMethod
         $customer = $this->_customerSession->getCustomer();
         $email = $customer->getEmail();
         if (empty($email)) {
-            $quote = $this->_getQuote();
+            $quote = $this->getQuote();
             $email = $quote->getBillingAddress()->getEmail();
         }
 
@@ -706,78 +705,39 @@ class Core extends AbstractMethod
     /**
      * @return float
      */
-    public function getAmount($quote = null)
+    public function getAmount()
     {
-        if (!$quote) {
-            $quote = $this->_getQuote();
-        }
-
-        return $quote->getBaseGrandTotal();
-    }
-
-    /**
-     * Check if an applied coupon is valid
-     *
-     * @param $coupon_id
-     * @param $email
-     *
-     * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
-     */
-    public function validCoupon($coupon_id, $email = null)
-    {
-        $transaction_amount = $this->getAmount();
-        $payer_email = $this->getEmailCustomer();
-        $coupon_code = $coupon_id;
-
-        if (!empty($payer_email)) {
-            $payer_email = $email;
-        }
-
-        $api = $this->getApiInstance();
-
-        $details_discount = $api->checkDiscountCampaigns($transaction_amount, $payer_email, $coupon_code);
-
-        //add value on return api discount
-        $details_discount['response']['transaction_amount'] = $transaction_amount;
-        $details_discount['response']['params'] = [
-            'transaction_amount' => $transaction_amount,
-            'payer_email' => $payer_email,
-            'coupon_code' => $coupon_code
-        ];
-
-        return $details_discount;
+        return $this->getQuote()->getBaseGrandTotal();
     }
 
     /**
      * Return info of order returned by CP api
      *
-     * @param $merchant_order_id
+     * @param $merchantOrderId
      *
      * @return array
-     * @throws \Magento\Framework\Exception\LocalizedException
+     * @throws LocalizedException|\Exception
      */
-    public function getMerchantOrder($merchant_order_id)
+    public function getMerchantOrder($merchantOrderId)
     {
         $api = $this->getApiInstance();
 
-        return $api->get("/merchant_orders/" . $merchant_order_id);
+        return $api->get('/merchant_orders/' . $merchantOrderId);
     }
 
-    public function getPayment($payment_id)
+    public function getPayment($paymentId)
     {
         $api = $this->getApiInstance();
 
-        return $api->get("/api/payments/" . $payment_id);
+        return $api->get('/api/payments/' . $paymentId);
     }
 
     /**
      * Refund specified amount for payment
      *
-     * @param \Magento\Framework\DataObject|InfoInterface $payment
+     * @param DataObject|InfoInterface $payment
      * @param float $amount
      * @return $this
-     * @throws \Magento\Framework\Exception\LocalizedException
      * @api
      */
     public function refund(InfoInterface $payment, $amount)
@@ -787,37 +747,32 @@ class Core extends AbstractMethod
 
     private function assignRequestData($paymentInfo, $currencyCode, $requestParams)
     {
-        $installments = 1;
+        $numberOfInstallments = 1;
         if (isset($paymentInfo['installments'])) {
-            $installments = (int)$paymentInfo['installments'];
+            $numberOfInstallments = (int)$paymentInfo['installments'];
         }
 
-        $dynamicDescriptor = trim($this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_DESCRIPTOR, ScopeInterface::SCOPE_STORE));
         $areInstallmentsEnabled = (1 === (int)($this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_INSTALLMENT, ScopeInterface::SCOPE_STORE)));
-
-        if ($areInstallmentsEnabled && $installments > 1) {
-            // installment
-            $requestParams['recurring_data'] = [
+        if ($areInstallmentsEnabled && $numberOfInstallments > 1) {
+            $sectionName = 'recurring_data';     // installment
+            $requestParams[$sectionName] = [
                 'installment_type' => 'MF_HOLD',
-                'amount' => $this->getAmount(),
-                'currency' => $currencyCode,
                 'initiator' => 'cit',
                 'interval' => '30',
                 'period' => 'day',
-                'payments' => $installments,
+                'payments' => $numberOfInstallments,
                 'trans_type' => '01'           // Goods/Service Purchase
             ];
-            if (!empty($dynamicDescriptor)) {
-                $requestParams['recurring_data']['dynamic_descriptor'] = $dynamicDescriptor;
-            }
-
         } else {
-            // regular payment
-            $requestParams['payment_data']['amount'] = $this->getAmount();
-            $requestParams['payment_data']['currency'] = $currencyCode;
-            if (!empty($dynamicDescriptor)) {
-                $requestParams['payment_data']['dynamic_descriptor'] = $dynamicDescriptor;
-            }
+            $sectionName = 'payment_data';      // regular payment
+        }
+
+        $requestParams[$sectionName]['amount'] = $this->getAmount();
+        $requestParams[$sectionName]['currency'] = $currencyCode;
+
+        $dynamicDescriptor = trim($this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_DESCRIPTOR, ScopeInterface::SCOPE_STORE));
+        if (!empty($dynamicDescriptor)) {
+            $requestParams[$sectionName]['dynamic_descriptor'] = $dynamicDescriptor;
         }
 
         return $requestParams;

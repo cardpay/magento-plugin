@@ -129,7 +129,7 @@ class Payment extends AbstractMethod
         try {
             $response = $this->_basic->makePreference();
 
-            if ($response['status'] == 200 || $response['status'] == 201) {
+            if ((int)$response['status'] === 200 || (int)$response['status'] === 201) {
                 $payment = $response['response'];
 
                 $init_point = $payment['init_point'];

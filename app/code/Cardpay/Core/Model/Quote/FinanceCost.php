@@ -2,7 +2,10 @@
 
 namespace Cardpay\Core\Model\Quote;
 
+use Magento\Checkout\Model\Session;
 use Magento\Customer\Helper\Address;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Registry;
 use Magento\Quote\Api\Data\ShippingAssignmentInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address\Total;
@@ -17,31 +20,31 @@ class FinanceCost extends AbstractTotal
 {
 
     /**
-     * @var \Magento\Framework\Registry
+     * @var Registry
      */
     protected $_registry;
 
     /**
-     * @var \Magento\Checkout\Model\Session
+     * @var Session
      */
     protected $_checkoutSession;
 
     /**
      * Request object
      *
-     * @var \Magento\Framework\App\RequestInterface
+     * @var RequestInterface
      */
     protected $_request;
 
     /**
      * FinanceCost constructor.
      *
-     * @param \Magento\Framework\Registry $registry
+     * @param Registry $registry
      */
     public function __construct(
-        \Magento\Framework\Registry             $registry,
-        \Magento\Checkout\Model\Session         $checkoutSession,
-        \Magento\Framework\App\RequestInterface $request
+        Registry         $registry,
+        Session          $checkoutSession,
+        RequestInterface $request
     )
     {
         $this->setCode('finance_cost');
@@ -49,7 +52,6 @@ class FinanceCost extends AbstractTotal
         $this->_checkoutSession = $checkoutSession;
         $this->_request = $request;
     }
-
 
     /**
      * Determine if should apply subtotal
@@ -63,9 +65,9 @@ class FinanceCost extends AbstractTotal
     {
         $items = $shippingAssignment->getItems();
 
-        return ($address->getAddressType() == Address::TYPE_SHIPPING
+        return ((string)$address->getAddressType() === Address::TYPE_SHIPPING
             && count($items)
-            && $this->_request->getModuleName() == 'cardpay'
+            && $this->_request->getModuleName() === 'cardpay'
         );
     }
 

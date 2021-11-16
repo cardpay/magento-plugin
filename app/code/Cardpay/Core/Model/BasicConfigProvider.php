@@ -15,20 +15,47 @@ use Magento\Framework\View\Asset\Repository;
 use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Store\Model\ScopeInterface;
 
-/**
- * Class BasicConfigProvider
- * @package Cardpay\Core\Model
- */
 class BasicConfigProvider implements ConfigProviderInterface
 {
+    /**
+     * @var string
+     */
     protected $methodCode = Basic\Payment::CODE;
-    protected $_scopeConfig;
-    protected $_methodInstance;
-    protected $_checkoutSession;
-    protected $_assetRepo;
-    protected $_productMetaData;
-    protected $_coreHelper;
-    protected $_context;
+
+    /**
+     * @var ScopeConfigInterface
+     */
+    protected $scopeConfig;
+
+    /**
+     * @var \Magento\Payment\Model\MethodInterface
+     */
+    protected $methodInstance;
+
+    /**
+     * @var Session
+     */
+    protected $checkoutSession;
+
+    /**
+     * @var Repository
+     */
+    protected $assetRepo;
+
+    /**
+     * @var ProductMetadataInterface
+     */
+    protected $productMetaData;
+
+    /**
+     * @var Data
+     */
+    protected $coreHelper;
+
+    /**
+     * @var Context
+     */
+    protected $context;
 
     /**
      * BasicConfigProvider constructor.
@@ -51,14 +78,13 @@ class BasicConfigProvider implements ConfigProviderInterface
         Data                     $coreHelper
     )
     {
-        $this->_methodInstance = $paymentHelper->getMethodInstance($this->methodCode);
-        $this->_scopeConfig = $scopeConfig;
-        $this->_checkoutSession = $checkoutSession;
-        $this->_assetRepo = $assetRepo;
-        $this->_productMetaData = $productMetadata;
-        $this->_coreHelper = $coreHelper;
-        $this->_context = $context;
-
+        $this->methodInstance = $paymentHelper->getMethodInstance($this->methodCode);
+        $this->scopeConfig = $scopeConfig;
+        $this->checkoutSession = $checkoutSession;
+        $this->assetRepo = $assetRepo;
+        $this->productMetaData = $productMetadata;
+        $this->coreHelper = $coreHelper;
+        $this->context = $context;
     }
 
     /**
@@ -67,7 +93,7 @@ class BasicConfigProvider implements ConfigProviderInterface
     public function getConfig()
     {
         try {
-            if (!$this->_methodInstance->isAvailable()) {
+            if (is_null($this->methodInstance) || !$this->methodInstance->isAvailable()) {
                 return [];
             }
 
@@ -76,37 +102,37 @@ class BasicConfigProvider implements ConfigProviderInterface
             return [
                 'payment' => [
                     $this->methodCode => [
-                        'active' => $this->_scopeConfig->getValue(ConfigData::PATH_BASIC_ACTIVE, ScopeInterface::SCOPE_STORE),
-                        'actionUrl' => $this->_context->getUrl()->getUrl(Basic\Payment::ACTION_URL),
+                        'active' => $this->scopeConfig->getValue(ConfigData::PATH_BASIC_ACTIVE, ScopeInterface::SCOPE_STORE),
+                        'actionUrl' => $this->context->getUrl()->getUrl(Basic\Payment::ACTION_URL),
                         'banner_info' => $bannerInfo,
-                        'logEnabled' => $this->_scopeConfig->getValue(ConfigData::PATH_ADVANCED_LOG, ScopeInterface::SCOPE_STORE),
-                        'auto_return' => $this->_scopeConfig->getValue(ConfigData::PATH_BASIC_AUTO_RETURN, ScopeInterface::SCOPE_STORE),
-                        'exclude_payments' => $this->_scopeConfig->getValue(ConfigData::PATH_BASIC_EXCLUDE_PAYMENT_METHODS, ScopeInterface::SCOPE_STORE),
-                        'order_status' => $this->_scopeConfig->getValue(ConfigData::PATH_BASIC_ORDER_STATUS, ScopeInterface::SCOPE_STORE),
-                        'loading_gif' => $this->_assetRepo->getUrl('Cardpay_Core::images/loading.gif'),
-                        'logoUrl' => $this->_assetRepo->getUrl("Cardpay_Core::images/cp_logo.jpg"),
-                        'redirect_image' => $this->_assetRepo->getUrl("Cardpay_Core::images/redirect_checkout.png"),
-                        'platform_version' => $this->_productMetaData->getVersion(),
-                        'module_version' => $this->_coreHelper->getModuleVersion()
+                        'logEnabled' => $this->scopeConfig->getValue(ConfigData::PATH_ADVANCED_LOG, ScopeInterface::SCOPE_STORE),
+                        'auto_return' => $this->scopeConfig->getValue(ConfigData::PATH_BASIC_AUTO_RETURN, ScopeInterface::SCOPE_STORE),
+                        'exclude_payments' => $this->scopeConfig->getValue(ConfigData::PATH_BASIC_EXCLUDE_PAYMENT_METHODS, ScopeInterface::SCOPE_STORE),
+                        'order_status' => $this->scopeConfig->getValue(ConfigData::PATH_BASIC_ORDER_STATUS, ScopeInterface::SCOPE_STORE),
+                        'loading_gif' => $this->assetRepo->getUrl('Cardpay_Core::images/loading.gif'),
+                        'logoUrl' => $this->assetRepo->getUrl('Cardpay_Core::images/cp_logo.jpg'),
+                        'redirect_image' => $this->assetRepo->getUrl('Cardpay_Core::images/redirect_checkout.png'),
+                        'platform_version' => $this->productMetaData->getVersion(),
+                        'module_version' => $this->coreHelper->getModuleVersion()
                     ],
                 ],
             ];
 
         } catch (Exception $e) {
-            $this->_coreHelper->log("BasicConfigProvider ERROR: " . $e->getMessage(), 'BasicConfigProvider');
+            $this->coreHelper->log('BasicConfigProvider ERROR: ' . $e->getMessage(), 'BasicConfigProvider');
             return [];
         }
     }
 
-    public function makeBannerCheckout()
+    private function makeBannerCheckout()
     {
-        $accessToken = $this->_scopeConfig->getValue(ConfigData::PATH_TERMINAL_PASSWORD, ScopeInterface::SCOPE_WEBSITE);
-        $excludePaymentMethods = $this->_scopeConfig->getValue(ConfigData::PATH_BASIC_EXCLUDE_PAYMENT_METHODS, ScopeInterface::SCOPE_STORE);
+        $accessToken = $this->scopeConfig->getValue(ConfigData::PATH_BANKCARD_TERMINAL_PASSWORD, ScopeInterface::SCOPE_WEBSITE);
+        $excludePaymentMethods = $this->scopeConfig->getValue(ConfigData::PATH_BASIC_EXCLUDE_PAYMENT_METHODS, ScopeInterface::SCOPE_STORE);
 
-        $excludePaymentMethods = explode(",", $excludePaymentMethods);
+        $excludePaymentMethods = explode(',', $excludePaymentMethods);
 
         try {
-            $paymentMethods = RestClient::get("/v1/payment_methods", null, ["Authorization: Bearer " . $accessToken]);
+            $paymentMethods = RestClient::get('/v1/payment_methods', null, ['Authorization: Bearer ' . $accessToken]);
 
             //validate active payments methods
             $debit = 0;
@@ -117,25 +143,25 @@ class BasicConfigProvider implements ConfigProviderInterface
             foreach ($paymentMethods['response'] as $pm) {
                 if (!in_array($pm['id'], $excludePaymentMethods)) {
                     $choMethods[] = $pm;
-                    if ($pm['payment_type_id'] == 'credit_card') {
-                        $credit += 1;
-                    } elseif ($pm['payment_type_id'] == 'debit_card' || $pm['payment_type_id'] == 'prepaid_card') {
-                        $debit += 1;
+                    if ((string)$pm['payment_type_id'] === 'credit_card') {
+                        ++$credit;
+                    } elseif ((string)$pm['payment_type_id'] === 'debit_card' || (string)$pm['payment_type_id'] === 'prepaid_card') {
+                        ++$debit;
                     } else {
-                        $ticket += 1;
+                        ++$ticket;
                     }
                 }
             }
 
             return [
-                "debit" => $debit,
-                "credit" => $credit,
-                "ticket" => $ticket,
-                "checkout_methods" => $choMethods
+                'debit' => $debit,
+                'credit' => $credit,
+                'ticket' => $ticket,
+                'checkout_methods' => $choMethods
             ];
 
         } catch (Exception $e) {
-            $this->_coreHelper->log("makeBannerCheckout:: An error occurred at the time of obtaining the ticket payment methods: " . $e);
+            $this->coreHelper->log('makeBannerCheckout:: An error occurred at the time of obtaining the ticket payment methods: ' . $e);
             return [];
         }
     }

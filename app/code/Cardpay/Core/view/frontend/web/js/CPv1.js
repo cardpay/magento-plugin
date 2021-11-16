@@ -30,61 +30,61 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
         },
 
         inputs_to_create_discount: [
-            "couponCode",
-            "applyCoupon"
+            'couponCode',
+            'applyCoupon'
         ],
 
         inputs_to_create_token: [
-            "cardNumber",
-            "cardExpirationMonth",
-            "cardExpirationYear",
-            "cardholderName",
-            "securityCode",
-            "docType",
-            "docNumber"
+            'cardNumber',
+            'cardExpirationMonth',
+            'cardExpirationYear',
+            'cardholderName',
+            'securityCode',
+            'docType',
+            'docNumber'
         ],
 
         inputs_to_create_token_customer_and_card: [
-            "paymentMethodSelector",
-            "securityCode"
+            'paymentMethodSelector',
+            'securityCode'
         ],
 
         selectors: {
-            couponCode: "#couponCode",
-            applyCoupon: "#applyCouponCard",
-            mpCouponApplyed: "#mpCouponApplyed",
-            mpCouponError: "#mpCouponError",
+            couponCode: '#couponCode',
+            applyCoupon: '#applyCouponCard',
+            mpCouponApplyed: '#mpCouponApplyed',
+            mpCouponError: '#mpCouponError',
 
-            paymentMethodSelector: "#paymentMethodSelector",
-            pmCustomerAndCards: "#payment-methods-for-customer-and-cards",
-            pmListOtherCards: "#payment-methods-list-other-cards",
-            mpSecurityCodeCustomerAndCard: "#mp-securityCode-customer-and-card",
+            paymentMethodSelector: '#paymentMethodSelector',
+            pmCustomerAndCards: '#payment-methods-for-customer-and-cards',
+            pmListOtherCards: '#payment-methods-list-other-cards',
+            mpSecurityCodeCustomerAndCard: '#mp-securityCode-customer-and-card',
 
-            cardNumber: "#cardNumber",
-            cardExpirationMonth: "#cardExpirationMonth",
-            cardExpirationYear: "#cardExpirationYear",
-            cardholderName: "#cardholderName",
-            securityCode: "#securityCode",
-            cpf: "#cpf",
-            cpfBoleto: "#cpf_boleto",
-            docType: "#docType",
-            docNumber: "#docNumber",
-            issuer: "#issuer",
-            installments: "#installments",
+            cardNumber: '#cardNumber',
+            cardExpirationMonth: '#cardExpirationMonth',
+            cardExpirationYear: '#cardExpirationYear',
+            cardholderName: '#cardholderName',
+            securityCode: '#securityCode',
+            cpf: '#cpf',
+            cpfBoleto: '#cpf_boleto',
+            docType: '#docType',
+            docNumber: '#docNumber',
+            issuer: '#issuer',
+            installments: '#installments',
 
-            mpDoc: ".mp-doc",
-            mpIssuer: ".mp-issuer",
-            mpDocType: ".mp-docType",
-            mpDocNumber: ".mp-docNumber",
+            mpDoc: '.mp-doc',
+            mpIssuer: '.mp-issuer',
+            mpDocType: '.mp-docType',
+            mpDocNumber: '.mp-docNumber',
 
-            paymentMethodId: "#paymentMethodId",
-            amount: "#amount",
-            token: "#token",
-            campaign_id: "#campaign_id",
-            campaign: "#campaign",
-            discount: "#discount",
-            cardTruncated: "#cardTruncated",
-            site_id: "#site_id",
+            paymentMethodId: '#paymentMethodId',
+            amount: '#amount',
+            token: '#token',
+            campaign_id: '#campaign_id',
+            campaign: '#campaign',
+            discount: '#discount',
+            cardTruncated: '#cardTruncated',
+            site_id: '#site_id',
             CustomerAndCard: '#CustomerAndCard',
             MpGatewayMode: '#MpGatewayMode',
 
@@ -95,52 +95,53 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
             taxTextCFT: '#mp-tax-cft-text',
             taxTextTEA: '#mp-tax-tea-text',
 
-            box_loading: "#mp-box-loading",
-            submit: "#btnSubmit",
+            box_loading: '#mp-box-loading',
+            submit: '#btnSubmit',
             form: '#cardpay-form',
             formBoleto: '#cardpay-form-boleto',
             formDiv: '#cardpay-form',
             formCoupon: '#cardpay-form-coupon',
             formCustomerAndCard: '#cardpay-form-customer-and-card',
-            utilities_fields: "#cardpay-utilities"
+            utilities_fields: '#cardpay-utilities'
         },
         text: {
-            choose: "Choose",
-            other_bank: "Other Bank",
-            discount_info1: "You will save",
-            discount_info2: "with discount from",
-            discount_info3: "Total of your purchase:",
-            discount_info4: "Total of your purchase with discount:",
-            discount_info5: "*Uppon payment approval",
-            discount_info6: "Terms and Conditions of Use",
-            coupon_empty: "Please, inform your coupon code",
-            apply: "Apply",
-            remove: "Remove"
+            choose: 'Choose',
+            other_bank: 'Other Bank',
+            discount_info1: 'You will save',
+            discount_info2: 'with discount from',
+            discount_info3: 'Total of your purchase:',
+            discount_info4: 'Total of your purchase with discount:',
+            discount_info5: 'Upon payment approval',
+            discount_info6: 'Terms and Conditions of Use',
+            coupon_empty: 'Please, inform your coupon code',
+            apply: 'Apply',
+            remove: 'Remove'
         },
         paths: {
-            loading: "images/loading.gif",
-            check: "images/check.png",
-            error: "images/error.png"
+            loading: 'images/loading.gif',
+            check: 'images/check.png',
+            error: 'images/error.png'
         }
     }
 
     CPv1.getBin = function () {
-        var cardSelector = document.querySelector(CPv1.selectors.paymentMethodSelector);
-        if (cardSelector && cardSelector[cardSelector.options.selectedIndex].value != "-1") {
-            var first_six_digits = cardSelector[cardSelector.options.selectedIndex].getAttribute('first_six_digits');
-            if (first_six_digits) {
-                return first_six_digits;
+        const cardSelector = document.querySelector(CPv1.selectors.paymentMethodSelector);
+        const selectedValue = String(cardSelector[cardSelector.options.selectedIndex].value);
+        if (cardSelector && selectedValue !== "-1") {
+            const firstSixDigits = cardSelector[cardSelector.options.selectedIndex].getAttribute('first_six_digits');
+            if (firstSixDigits) {
+                return firstSixDigits;
             }
         }
 
-        var ccNumber = document.querySelector(CPv1.selectors.cardNumber);
+        const ccNumber = document.querySelector(CPv1.selectors.cardNumber);
         return ccNumber.value.replace(/[ .-]/g, '').slice(0, 6);
     }
 
     CPv1.clearOptions = function () {
-        var bin = CPv1.getBin();
+        const bin = CPv1.getBin();
 
-        if (bin.length == 0) {
+        if (bin.length === 0) {
             CPv1.hideIssuer();
 
             var selectorInstallments = document.querySelector(CPv1.selectors.installments),
@@ -155,8 +156,7 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
     }
 
     CPv1.setPaymentMethodInfo = function (status, response) {
-        if (status == 200) {
-            //guessing
+        if (parseInt(status) === 200) {
             document.querySelector(CPv1.selectors.paymentMethodId).value = response[0].id;
             document.querySelector(CPv1.selectors.cardNumber).style.background = "url(" + response[0].secure_thumbnail + ") 98% 50% no-repeat #fff";
 
@@ -165,58 +165,20 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
                 additionalInfo = response[0].additional_info_needed;
 
             for (var i = 0; i < additionalInfo.length; i++) {
-                if (additionalInfo[i] == "issuer_id") {
+                if (String(additionalInfo[i]) === "issuer_id") {
                     issuerMandatory = true;
                 }
             }
 
-            if (issuerMandatory) {
-                var payment_method_id = response[0].id;
-                CPv1.getIssuersPaymentMethod(payment_method_id);
-            } else {
+            if (!issuerMandatory) {
                 CPv1.hideIssuer();
             }
         }
     }
 
-    CPv1.changePaymetMethodSelector = function () {
-        var payment_method_id = document.querySelector(CPv1.selectors.paymentMethodSelector).value;
-        CPv1.getIssuersPaymentMethod(payment_method_id);
-    }
-
     /*
     * Issuers
     */
-    CPv1.getIssuersPaymentMethod = function (payment_method_id) {
-        if (payment_method_id != -1) {
-            CPv1.addListenerEvent(document.querySelector(CPv1.selectors.issuer), 'change', CPv1.setInstallmentsByIssuerId);
-        }
-    }
-
-    CPv1.setInstallmentsByIssuerId = function (status, response) {
-        var issuerId = document.querySelector(CPv1.selectors.issuer).value;
-        var amount = CPv1.getAmount();
-
-        if (issuerId == -1 || issuerId == "") {
-            return;
-        }
-
-        var params_installments = {
-            "bin": CPv1.getBin(),
-            "amount": amount,
-            "issuer_id": issuerId
-        }
-
-        if (CPv1.site_id == "MLM") {
-            params_installments = {
-                "payment_method_id": document.querySelector(CPv1.selectors.paymentMethodSelector).value,
-                "amount": amount,
-                "issuer_id": issuerId
-            }
-        }
-
-    }
-
     CPv1.hideIssuer = function () {
         var $issuer = document.querySelector(CPv1.selectors.issuer);
         var opt = document.createElement('option');
@@ -233,15 +195,15 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
     */
     CPv1.setInstallmentInfo = function (status, response) {
         var selectorInstallments = document.querySelector(CPv1.selectors.installments);
-        var gateway_mode = CPv1.gateway_mode;
+        const gatewayMode = CPv1.gateway_mode;
 
         if (response.length > 0) {
             let payerCosts = response[0].payer_costs;
 
-            if (gateway_mode) {
+            if (gatewayMode) {
                 for (var x in response) {
                     var installments = response[x];
-                    if (installments.processing_mode == 'gateway') {
+                    if (String(installments.processing_mode) === 'gateway') {
                         payerCosts = installments.payer_costs
                         document.querySelector(CPv1.selectors.gateway_mode).value = installments.merchant_account_id;
                     }
@@ -251,7 +213,7 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
             const htmlOption = getHtmlOption(payerCosts);
 
             // not take the user's selection if equal
-            if (selectorInstallments.innerHTML != htmlOption) {
+            if (String(selectorInstallments.innerHTML) !== htmlOption) {
                 selectorInstallments.innerHTML = htmlOption;
             }
 
@@ -262,7 +224,7 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
     }
 
     function getDataInput(payerCosts, i) {
-        if (CPv1.site_id == 'MLA') {
+        if (String(CPv1.site_id) === 'MLA') {
             const tax = payerCosts[i].labels;
             if (tax.length > 0) {
                 for (let l = 0; l < tax.length; l++) {
@@ -288,21 +250,6 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
     }
 
     /*
-    * Customer & Cards
-    */
-    CPv1.cardsHandler = function () {
-        var cardSelector = document.querySelector(CPv1.selectors.paymentMethodSelector);
-
-        if (cardSelector.options.selectedIndex < 0) {
-            return;
-        }
-
-        if (CPv1.site_id == "MLM") {
-            CPv1.setInstallmentsByIssuerId();
-        }
-    }
-
-    /*
     * Payment Methods
     */
 
@@ -311,25 +258,24 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
         var paymentMethodsSelector = document.querySelector(CPv1.selectors.paymentMethodSelector)
         var mainPaymentMethodSelector = document.querySelector(CPv1.selectors.paymentMethodSelector)
 
-        //set loading
+        // set loading
         mainPaymentMethodSelector.style.background = "url(" + CPv1.paths.loading + ") 95% 50% no-repeat #fff";
 
-        //if customer and card
-        var paymentCustomerAndCard = document.querySelector(CPv1.selectors.pmCustomerAndCards)
-        var customerCard = false;
-        for (var x = 0; paymentMethodsSelector.length > x; x++) {
-            if (paymentMethodsSelector[x].getAttribute("type_checkout") == 'customer_and_card') {
+        // if customer and card
+        let customerCard = false;
+        for (let x = 0; paymentMethodsSelector.length > x; x++) {
+            const checkoutType = String(paymentMethodsSelector[x].getAttribute('type_checkout'));
+            if (checkoutType === 'customer_and_card') {
                 customerCard = true;
             }
         }
 
         if (customerCard || CPv1.customer_and_card.status) {
             paymentMethodsSelector = document.querySelector(CPv1.selectors.pmListOtherCards)
-            paymentMethodsSelector.innerHTML = "";
+            paymentMethodsSelector.innerHTML = '';
         } else {
-            paymentMethodsSelector.innerHTML = "";
-
-            var option = new Option(CPv1.text.choose + ELLIPSIS, '-1');
+            paymentMethodsSelector.innerHTML = '';
+            const option = new Option(CPv1.text.choose + ELLIPSIS, '-1');
             fragment.appendChild(option);
         }
     }
@@ -339,17 +285,17 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
     */
     CPv1.createTokenByEvent = function () {
         var $inputs = CPv1.getForm().querySelectorAll(DATA_CHECKOUT_SELECTOR);
-        var $inputs_to_create_token = CPv1.getInputsToCreateToken();
+        var $inputsToCreateToken = CPv1.getInputsToCreateToken();
 
         for (var x = 0; x < $inputs.length; x++) {
             var element = $inputs[x];
 
-            //add events only in the required fields
-            if ($inputs_to_create_token.indexOf(element.getAttribute("data-checkout")) > -1) {
-                var event = "focusout";
+            // add events only in the required fields
+            if ($inputsToCreateToken.indexOf(element.getAttribute('data-checkout')) > -1) {
+                let event = 'focusout';
 
-                if (element.nodeName == "SELECT") {
-                    event = "change";
+                if (String(element.nodeName) === 'SELECT') {
+                    event = 'change';
                 }
 
                 CPv1.addListenerEvent(element, event, CPv1.validateInputsCreateToken);
@@ -372,7 +318,7 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
         CPv1.addListenerEvent(document.querySelector(CPv1.selectors.form), 'submit', CPv1.doPay);
     }
 
-    var doSubmit = false;
+    let doSubmit = false;
 
     CPv1.doPay = function (event) {
         event.preventDefault();
@@ -380,25 +326,27 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
             CPv1.createToken();
             return false;
         }
+
+        return true;
     }
 
     CPv1.validateInputsCreateToken = function () {
-        var valid_to_create_token = true;
+        var validToCreateToken = true;
         var $inputs = CPv1.getForm().querySelectorAll(DATA_CHECKOUT_SELECTOR);
-        var $inputs_to_create_token = CPv1.getInputsToCreateToken();
+        var $inputsToCreateToken = CPv1.getInputsToCreateToken();
 
         for (var x = 0; x < $inputs.length; x++) {
             var element = $inputs[x];
 
-            //check is a input to create token
-            if ($inputs_to_create_token.indexOf(element.getAttribute("data-checkout")) > -1) {
-                if (element.value == -1 || element.value == "") {
-                    valid_to_create_token = false;
-                } //end if check values
-            } //end if check data-checkout
+            // check is a input to create token
+            if ($inputsToCreateToken.indexOf(element.getAttribute("data-checkout")) > -1) {
+                if (parseInt(element.value) === -1 || String(element.value) === "") {
+                    validToCreateToken = false;
+                } // end if check values
+            } // end if check data-checkout
         }
 
-        if (valid_to_create_token) {
+        if (validToCreateToken) {
             CPv1.createToken();
         }
     }
@@ -406,7 +354,7 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
     CPv1.createToken = function () {
         CPv1.hideErrors();
 
-        //show loading
+        // show loading
         document.querySelector(CPv1.selectors.box_loading).style.background = "url(" + CPv1.paths.loading + ") 0 50% no-repeat #fff";
 
         return false;
@@ -415,7 +363,8 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
     CPv1.sdkResponseHandler = function (status, response) {
         document.querySelector(CPv1.selectors.box_loading).style.background = "";
 
-        if (status != 200 && status != 201) {
+        const intStatus = parseInt(status);
+        if (intStatus !== 200 && intStatus !== 201) {
             CPv1.showErrors(response);
         } else {
             var token = document.querySelector(CPv1.selectors.token);
@@ -434,7 +383,7 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
     }
 
     /*
-    * useful functions
+    * Useful functions
     */
     CPv1.resetBackgroundCard = function () {
         document.querySelector(CPv1.selectors.paymentMethodSelector).style.background = "no-repeat #fff";
@@ -474,20 +423,20 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
         }
     }
 
-    CPv1.truncateCard = function (response_card_token) {
-        var first_six_digits;
-        var last_four_digits;
+    CPv1.truncateCard = function (responseCardToken) {
+        let firstSixDigits;
+        let lastFourDigits;
 
         if (CPv1.customer_and_card.status) {
             var cardSelector = document.querySelector(CPv1.selectors.paymentMethodSelector);
-            first_six_digits = cardSelector[cardSelector.options.selectedIndex].getAttribute("first_six_digits").match(/.{1,4}/g)
-            last_four_digits = cardSelector[cardSelector.options.selectedIndex].getAttribute("last_four_digits")
+            firstSixDigits = cardSelector[cardSelector.options.selectedIndex].getAttribute("first_six_digits").match(/.{1,4}/g)
+            lastFourDigits = cardSelector[cardSelector.options.selectedIndex].getAttribute("last_four_digits")
         } else {
-            first_six_digits = response_card_token.first_six_digits.match(/.{1,4}/g)
-            last_four_digits = response_card_token.last_four_digits
+            firstSixDigits = responseCardToken.first_six_digits.match(/.{1,4}/g)
+            lastFourDigits = responseCardToken.last_four_digits
         }
 
-        return first_six_digits[0] + " " + first_six_digits[1] + "** **** " + last_four_digits;
+        return firstSixDigits[0] + " " + firstSixDigits[1] + "** **** " + lastFourDigits;
     }
 
     CPv1.getAmount = function () {
@@ -504,7 +453,7 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
     CPv1.showErrors = function (response) {
         var $form = CPv1.getForm();
 
-        for (var x = 0; x < response.cause.length; x++) {
+        for (let x = 0; x < response.cause.length; x++) {
             var error = response.cause[x];
             var $span = $form.querySelector('#mp-error-' + error.code);
             if ($span) {
@@ -520,8 +469,7 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
         for (let x = 0; x < document.querySelectorAll(DATA_CHECKOUT_SELECTOR).length; x++) {
             const $field = document.querySelectorAll(DATA_CHECKOUT_SELECTOR)[x];
             $field.classList.remove("mp-error-input");
-
-        } //end for
+        }
 
         for (var errorNumber = 0; errorNumber < document.querySelectorAll('.mp-error').length; errorNumber++) {
             const $span = document.querySelectorAll('.mp-error')[errorNumber];
@@ -547,20 +495,20 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
     }
 
     CPv1.showTaxes = function () {
-        var selectorIsntallments = document.querySelector(CPv1.selectors.installments);
-        var tax = selectorIsntallments.options[selectorIsntallments.selectedIndex].getAttribute('data-tax');
+        const selectorInstallments = document.querySelector(CPv1.selectors.installments);
+        const tax = selectorInstallments.options[selectorInstallments.selectedIndex].getAttribute('data-tax');
 
-        var cft = ""
-        var tea = ""
+        let cft = ''
+        let tea = ''
 
         if (tax != null) {
-            var tax_split = tax.split('|');
-            cft = tax_split[0].replace('_', ' ');
-            tea = tax_split[1].replace('_', ' ');
+            const taxSplit = tax.split('|');
+            cft = String(taxSplit[0].replace('_', ' '));
+            tea = taxSplit[1].replace('_', ' ');
 
-            if (cft == "CFT 0,00%" && tea == "TEA 0,00%") {
-                cft = ""
-                tea = ""
+            if (cft === 'CFT 0,00%' && tea === 'TEA 0,00%') {
+                cft = ''
+                tea = ''
             }
         }
 
@@ -584,7 +532,7 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
 
         options.requestedMethod = options.method;
 
-        if (useXDomain && options.method == "PUT") {
+        if (useXDomain && String(options.method) === "PUT") {
             options.method = "POST";
             options.url += "&_method=PUT";
         }
@@ -665,23 +613,20 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
     * Initialization function
     */
 
-    CPv1.Initialize = function (site_id, terminal_code, coupon_mode, discount_action_url, payer_email) {
+    CPv1.Initialize = function (siteId, terminalCode, couponMode, discountActionUrl, payerEmail) {
         // sets
-        CPv1.site_id = site_id
-        CPv1.terminal_code = terminal_code
-        CPv1.coupon_of_discounts.default = coupon_mode
-        CPv1.coupon_of_discounts.discount_action_url = discount_action_url
-        CPv1.coupon_of_discounts.payer_email = payer_email
+        CPv1.site_id = siteId
+        CPv1.terminal_code = terminalCode
+        CPv1.coupon_of_discounts.default = couponMode
+        CPv1.coupon_of_discounts.discount_action_url = discountActionUrl
+        CPv1.coupon_of_discounts.payer_email = payerEmail
 
         // initialize events
         CPv1.InitializeEvents();
 
         // flow: customer & cards
         const selectorPmCustomerAndCards = document.querySelector(CPv1.selectors.pmCustomerAndCards);
-        if (selectorPmCustomerAndCards && CPv1.customer_and_card.default && selectorPmCustomerAndCards.childElementCount > 0) {
-            CPv1.addListenerEvent(document.querySelector(CPv1.selectors.paymentMethodSelector), 'change', CPv1.cardsHandler);
-            CPv1.cardsHandler();
-        } else {
+        if (!selectorPmCustomerAndCards || !CPv1.customer_and_card.default || !parseInt(selectorPmCustomerAndCards.childElementCount) > 0) {
             // if customer & cards is disabled or customer does not have cards
             CPv1.customer_and_card.status = false;
             document.querySelector(CPv1.selectors.formCustomerAndCard).style.display = 'none';
@@ -708,7 +653,7 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
     }
 
     function mlmFlow() {
-        if (CPv1.site_id == "MLM") {
+        if (String(CPv1.site_id) === "MLM") {
             document.querySelector(CPv1.selectors.mpDoc).style.display = 'none';
 
             if (!CPv1.customer_and_card.status) {
@@ -722,28 +667,25 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
             if (CPv1.inputs_to_create_token.includes("docNumber")) {
                 CPv1.inputs_to_create_token.splice(CPv1.inputs_to_create_token.indexOf("docNumber"), 1);
             }
-
-            CPv1.addListenerEvent(document.querySelector(CPv1.selectors.paymentMethodSelector), 'change', CPv1.changePaymetMethodSelector);
         }
     }
 
     function cpbAndMcoFlow() {
-        if (CPv1.site_id == "CPB") {
+        if (String(CPv1.site_id) === "CPB") {
             document.querySelector(CPv1.selectors.mpDocType).style.display = 'none';
             document.querySelector(CPv1.selectors.mpIssuer).style.display = 'none';
-            // ajust css
-            document.querySelector(CPv1.selectors.docNumber).classList.remove("mp-col-75");
-            document.querySelector(CPv1.selectors.docNumber).classList.add("mp-col-100");
-        } else if (CPv1.site_id == "MCO") {
+            document.querySelector(CPv1.selectors.docNumber).classList.remove('mp-col-75');
+            document.querySelector(CPv1.selectors.docNumber).classList.add('mp-col-100');
+        } else if (String(CPv1.site_id) === 'MCO') {
             document.querySelector(CPv1.selectors.mpIssuer).style.display = 'none';
-        } else if (CPv1.site_id == "MLA") {
-            document.querySelector(CPv1.selectors.boxInstallmentsSelector).classList.remove("mp-col-100");
-            document.querySelector(CPv1.selectors.boxInstallmentsSelector).classList.add("mp-col-70");
+        } else if (String(CPv1.site_id) === 'MLA') {
+            document.querySelector(CPv1.selectors.boxInstallmentsSelector).classList.remove('mp-col-100');
+            document.querySelector(CPv1.selectors.boxInstallmentsSelector).classList.add('mp-col-70');
             document.querySelector(CPv1.selectors.taxCFT).style.display = 'block';
             document.querySelector(CPv1.selectors.taxTEA).style.display = 'block';
 
             CPv1.addListenerEvent(document.querySelector(CPv1.selectors.installments), 'change', CPv1.showTaxes);
-        } else if (CPv1.site_id == "MLC") {
+        } else if (String(CPv1.site_id) === 'MLC') {
             document.querySelector(CPv1.selectors.mpIssuer).style.display = 'none';
         }
     }

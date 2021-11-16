@@ -2,15 +2,21 @@
 
 namespace Cardpay\Core\Controller\Checkout;
 
+use Cardpay\Core\Helper\ConfigData;
 use Cardpay\Core\Helper\Data;
+use Cardpay\Core\Lib\Api;
 use Magento\Checkout\Model\Session;
+use Magento\Directory\Model\CurrencyFactory;
 use Magento\Framework\App\Action\Action;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\App\Request\Http;
 use Magento\Framework\App\RequestInterface;
 use Magento\Framework\Controller\Result\JsonFactory;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Api\CartRepositoryInterface;
+use Magento\Quote\Model\Quote;
+use Magento\Sales\Model\OrderFactory;
 
 class Installments extends Action
 {
@@ -41,13 +47,19 @@ class Installments extends Action
      */
     private $request;
 
+    /**
+     * @var OrderFactory
+     */
+    protected $orderFactory;
+
     public function __construct(
         Context                 $context,
         Http                    $request,
         Session                 $checkoutSession,
         Data                    $dataHelper,
         JsonFactory             $resultJsonFactory,
-        CartRepositoryInterface $quoteRepository
+        CartRepositoryInterface $quoteRepository,
+        OrderFactory            $orderFactory
     )
     {
         parent::__construct($context);
@@ -57,6 +69,7 @@ class Installments extends Action
         $this->checkoutSession = $checkoutSession;
         $this->resultJsonFactory = $resultJsonFactory;
         $this->quoteRepository = $quoteRepository;
+        $this->orderFactory = $orderFactory;
     }
 
     public function execute()
@@ -64,42 +77,42 @@ class Installments extends Action
         $cartId = $this->request->getParam('cartId');
         if (empty($cartId)) {
             $this->dataHelper->log('Cart id is not provided, unable to get installment options');
-            return array();
+            return [];
         }
 
         /**
-         * @var \Magento\Quote\Model\Quote $quote
+         * @var Quote $quote
          */
         $quote = $this->quoteRepository->getActive($cartId);
         if (is_null($quote)) {
             $this->dataHelper->log('Empty quote, unable to get installment options');
-            return array();
+            return [];
         }
 
         $response = $this->getApiResponse($quote);
         if (empty($response)) {
             $this->dataHelper->log('Empty response, unable to get installment options');
-            return array();
+            return [];
         }
         if (!isset($response['response']['options'])) {
             $this->dataHelper->log('No options in response, unable to get installment options');
-            return array();
+            return [];
         }
 
-        $installments = array(
+        $installments = [
             'currency' => $this->getCurrencySymbol(),
             'options' => $this->getInstallmentOptions($response, $quote->getGrandTotal())
-        );
+        ];
 
-        $jsonFactory = $this->resultJsonFactory->create();
-        return $jsonFactory->setData($installments);
+        $json = $this->resultJsonFactory->create();
+        return $json->setData($installments);
     }
 
     private function getInstallmentOptions($response, $grandTotal)
     {
         $optionsResponse = $response['response']['options'];
 
-        $options = array();
+        $options = [];
         foreach ($optionsResponse as $option) {
             if (!isset($option['installments'], $option['amount'])) {
                 continue;
@@ -108,19 +121,19 @@ class Installments extends Action
             $installments = $option['installments'];
             $amount = $option['amount'];
 
-            $options[] = array(
+            $options[] = [
                 'installments' => $installments,
                 'amount' => $this->formatAmount($amount)
-            );
+            ];
         }
 
         return array_merge(
-            array(
-                array(
+            [
+                [
                     'installments' => 1,
                     'amount' => $this->formatAmount($grandTotal)
-                )
-            ),
+                ]
+            ],
             $options
         );
     }
@@ -135,20 +148,29 @@ class Installments extends Action
     }
 
     /**
-     * @var \Magento\Quote\Model\Quote $quote
+     * @throws LocalizedException|\Exception
+     * @var Quote $quote
      */
-    private function getApiResponse($quote)
+    public function getApiResponse($quote)
     {
         $currency = $quote->getQuoteCurrencyCode();
         $requestId = uniqid('', true);
 
-        $params = array(
+        $params = [
             'currency' => $currency,
             'request_id' => $requestId,
             'total_amount' => $quote->getGrandTotal()
+        ];
+
+        /**
+         * @var Api
+         */
+        $api = $this->dataHelper->getApiInstance(
+            null,
+            ConfigData::PATH_BANKCARD_TERMINAL_CODE,
+            ConfigData::PATH_BANKCARD_TERMINAL_PASSWORD
         );
 
-        $api = $this->dataHelper->getApiInstance();
         return $api->get('/api/installments/options_calculator', $params);
     }
 
@@ -158,7 +180,7 @@ class Installments extends Action
         if (!is_null($quote)) {
             $currencyCode = $quote->getQuoteCurrencyCode();
             $objectManager = ObjectManager::getInstance();
-            $currency = $objectManager->create('Magento\Directory\Model\CurrencyFactory')->create()->load($currencyCode);
+            $currency = $objectManager->create(CurrencyFactory::class)->create()->load($currencyCode);
             return $currency->getCurrencySymbol();
         }
 

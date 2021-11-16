@@ -23,11 +23,20 @@ class MerchantOrder extends TopicsAbstract
 {
     const LOG_NAME = 'notification_merchant_order';
 
+    /**
+     * @var cpHelper
+     */
     protected $cpHelper;
+
+    /**
+     * @var ScopeConfigInterface
+     */
     protected $scopeConfig;
+
+    /**
+     * @var Core
+     */
     protected $coreModel;
-    protected $payAmount = 0;
-    protected $payIndex = 0;
 
     /**
      * MerchantOrder constructor.
@@ -88,22 +97,22 @@ class MerchantOrder extends TopicsAbstract
     public function getPaymentData($id, $type = null)
     {
         try {
-            if ($type === Notifications::TYPE_NOTIFICATION_WEBHOOK) {
+            if ((string)$type === Notifications::TYPE_NOTIFICATION_WEBHOOK) {
                 $response = $this->coreModel->getPayment($id);
-                if (empty($response) || ($response['status'] != 200 && $response['status'] != 201)) {
+                if (empty($response) || ((int)$response['status'] !== 200 && (int)$response['status'] !== 201)) {
                     throw new Exception(__('CP API PAYMENT Invalid Response'), 400);
                 }
                 $id = $response['order']['id'];
             }
 
             $response = $this->coreModel->getMerchantOrder($id);
-            $this->cpHelper->log("Response API CP merchant_order", self::LOG_NAME, $response);
+            $this->cpHelper->log('Response API CP merchant_order', self::LOG_NAME, $response);
             if (!$this->isValidResponse($response)) {
                 throw new Exception(__('CP API Invalid Response'), 400);
             }
 
             $merchantOrder = $response['response'];
-            if (count($merchantOrder['payments']) == 0) {
+            if (count((int)$merchantOrder['payments']) === 0) {
                 throw new Exception(__('CP API Payments Not Found'), 400);
             }
 
@@ -123,22 +132,10 @@ class MerchantOrder extends TopicsAbstract
             $shipmentData = (isset($merchantOrder['shipments'][0])) ? $merchantOrder['shipments'][0] : [];
             return ['merchantOrder' => $merchantOrder, 'payments' => $payments, 'shipmentData' => $shipmentData];
         } catch (Exception $e) {
-            $this->cpHelper->log(__("ERROR - Notifications MerchantOrder getPaymentData"), self::LOG_NAME, $e->getMessage());
+            $this->cpHelper->log(__('ERROR - Notifications MerchantOrder getPaymentData'), self::LOG_NAME, $e->getMessage());
         }
-        
-        return [];
-    }
 
-    /**
-     * @param $payment
-     * @param $key
-     */
-    public function payAmount($payment, $key)
-    {
-        if ($payment['status'] === 'approved') {
-            $this->payAmount += $payment['transaction_amount'];
-            $this->payIndex = $key;
-        }
+        return [];
     }
 
     /**
@@ -178,7 +175,7 @@ class MerchantOrder extends TopicsAbstract
             $lastPaymentIndex = $this->_getLastPaymentIndex($merchantOrderPayments, $statusList);
 
             $response = ['key' => $lastPaymentIndex, 'status' => 'approved', 'final' => true];
-            $this->dataHelper->log("Order Setted Approved: " . json_encode($arrayLog), ConfigData::LOG_FILENAME, $response);
+            $this->dataHelper->log('Order Setted Approved: ' . json_encode($arrayLog), ConfigData::LOG_FILENAME, $response);
 
         } elseif ($totalPending >= $totalOrder) {
             // return last status inserted
@@ -186,7 +183,7 @@ class MerchantOrder extends TopicsAbstract
             $lastPaymentIndex = $this->_getLastPaymentIndex($merchantOrderPayments, $statusList);
 
             $response = ['key' => $lastPaymentIndex, 'status' => 'pending', 'final' => false];
-            $this->dataHelper->log("Order Setted Pending: " . json_encode($arrayLog), ConfigData::LOG_FILENAME, $response);
+            $this->dataHelper->log('Order Setted Pending: ' . json_encode($arrayLog), ConfigData::LOG_FILENAME, $response);
 
         } else {
             // return last status inserted
@@ -195,7 +192,7 @@ class MerchantOrder extends TopicsAbstract
             $statusReturned = $merchantOrderPayments[$lastPaymentIndex]['status'];
 
             $response = ['key' => $lastPaymentIndex, 'status' => $merchantOrderPayments[$lastPaymentIndex]['status'], 'final' => true];
-            $this->dataHelper->log("Order set other status: " . $statusReturned, ConfigData::LOG_FILENAME, $response);
+            $this->dataHelper->log('Order set other status: ' . $statusReturned, ConfigData::LOG_FILENAME, $response);
         }
 
         return $response;
@@ -216,7 +213,7 @@ class MerchantOrder extends TopicsAbstract
                 $dates[] = ['key' => $key, 'value' => $payment['last_modified']];
             }
         }
-        usort($dates, [$class, "_dateCompare"]);
+        usort($dates, [$class, '_dateCompare']);
         if ($dates) {
             $lastModified = array_pop($dates);
             return $lastModified['key'];
@@ -235,11 +232,11 @@ class MerchantOrder extends TopicsAbstract
     {
         $payment = $data['payments'][$data['statusFinal']['key']];
         $orderPayment = $order->getPayment();
-        $orderPayment->setAdditionalInformation("paymentResponse", $payment);
+        $orderPayment->setAdditionalInformation('paymentResponse', $payment);
         $orderPayment->save();
 
         if ($this->checkStatusAlreadyUpdated($order, $data)) {
-            $message = "[Already updated] " . $this->getMessage($payment);
+            $message = '[Already updated] ' . $this->getMessage($payment);
             $this->dataHelper->log($message);
             return ['text' => $message, 'code' => Response::HTTP_OK];
         }

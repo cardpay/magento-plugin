@@ -8,26 +8,48 @@ use Cardpay\Core\Model\Core;
 use Cardpay\Core\Model\Notifications\Notifications;
 use Exception;
 use Magento\Framework\App\Action\Context;
-use Magento\Framework\App\ResponseInterface;
-use Magento\Framework\Controller\ResultInterface;
 use Magento\Framework\Webapi\Rest\Request;
 use Magento\Sales\Model\OrderFactory;
 
 class Basic extends NotificationBase
 {
-    const LOG_NAME = 'basic_notification';
+    public const LOG_NAME = 'basic_notification';
 
-    protected $paymentFactory;
-    protected $coreHelper;
-    protected $coreModel;
     protected $_finalStatus = ['rejected', 'cancelled', 'refunded', 'charged_back'];
+
     protected $_notFinalStatus = ['authorized', 'process', 'in_mediation'];
+
+    /**
+     * @var Payment
+     */
+    protected $paymentFactory;
+
+    /**
+     * @var Data
+     */
+    protected $coreHelper;
+
+    /**
+     * @var Core
+     */
+    protected $coreModel;
+
+    /**
+     * @var OrderFactory
+     */
     protected $orderFactory;
+
+    /**
+     * @var Notifications
+     */
     protected $notifications;
+
+    /**
+     * @var Request
+     */
     protected $request;
 
     /**
-     * Basic constructor
      * @param Context $context
      * @param Payment $paymentFactory
      * @param Data $coreHelper
@@ -56,14 +78,12 @@ class Basic extends NotificationBase
     }
 
     /**
-     * @return ResponseInterface|ResultInterface|void
+     * @return void
      */
     public function execute()
     {
-        $request = $this->request;
-
         try {
-            $requestParams = $this->notifications->getRequestParams($request);
+            $requestParams = $this->notifications->getRequestParams($this->request);
 
             $topicClass = $this->notifications->getPayment();
             $data = $this->notifications->getPaymentInformation($topicClass, $requestParams);
@@ -77,7 +97,7 @@ class Basic extends NotificationBase
             }
 
             $order = $this->orderFactory->create()->loadByIncrementId($merchantOrder["external_reference"]);
-            if (empty($order) || empty($order->getId())) {
+            if (is_null($order) || empty($order->getId())) {
                 throw new Exception(__('Error Order Not Found in Magento: ') . $merchantOrder["external_reference"], 400);
             }
             if ($order->getStatus() === 'canceled') {
@@ -92,10 +112,10 @@ class Basic extends NotificationBase
 
             $statusResponse = $topicClass->updateOrder($order, $data);
 
-            $this->setResponseHttp($statusResponse['code'], $statusResponse['text'], $request->getBodyParams());
+            $this->setResponseHttp($statusResponse['code'], $statusResponse['text'], $this->request->getBodyParams());
 
         } catch (Exception $e) {
-            $this->setResponseHttp($e->getCode(), $e->getMessage(), $request->getBodyParams());
+            $this->setResponseHttp($e->getCode(), $e->getMessage(), $this->request->getBodyParams());
         }
     }
 
@@ -106,14 +126,19 @@ class Basic extends NotificationBase
      */
     protected function setResponseHttp($httpStatus, $message, $data = [])
     {
-        $response = [
+        $responseParams = [
             'status' => $httpStatus,
             'message' => $message,
             'data' => $data
         ];
 
-        $this->getResponse()->setHeader('Content-Type', 'application/json', true);
-        $this->getResponse()->setBody(json_encode($response));
-        $this->getResponse()->setHttpResponseCode($httpStatus);
+        $response = $this->getResponse();
+        if (is_null($response)) {
+            return;
+        }
+
+        $response->setHeader('Content-Type', 'application/json', true);
+        $response->setBody(json_encode($responseParams));
+        $response->setHttpResponseCode($httpStatus);
     }
 }

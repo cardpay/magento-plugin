@@ -8,6 +8,7 @@ use Cardpay\Core\Model\Core;
 use Cardpay\Core\Model\Notifications\Topics\Transaction;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\Payment;
 use Magento\Sales\Model\Order\Payment\Transaction\BuilderInterface;
 
@@ -55,9 +56,14 @@ class PaymentStatusHandler
     public function changePaymentStatus($observer, $statusTo, $expectedResponseStatus)
     {
         /**
+         * @var Order
+         */
+        $order = $observer->getOrder();
+
+        /**
          * @var Payment $payment
          */
-        $payment = $observer->getOrder()->getPayment();
+        $payment = $order->getPayment();
 
         if (!isset($payment['additional_information']['paymentResponse'])) {
             throw new LocalizedException(__(self::ERROR_MESSAGE));
@@ -89,7 +95,7 @@ class PaymentStatusHandler
         $url = $apiEndpoint . $paymentResponse[$apiStructure]['id'];
         $requestParams = $this->getChangeStatusParams($observer, $statusTo, $apiStructure);
 
-        $api = $this->coreModel->getApiInstance();
+        $api = $this->coreModel->getApiInstance($order);
 
         $this->helperData->log('PaymentStatusHandler::changePaymentStatus, request: ' . print_r($requestParams, true));
         $response = $api->patch($url, $requestParams);
@@ -156,7 +162,7 @@ class PaymentStatusHandler
      */
     private function getChangeStatusParams($observer, $statusTo, $apiStructure)
     {
-        $requestParams = array();
+        $requestParams = [];
 
         $requestParams['request']['id'] = time();
         $requestParams['request']['time'] = date('c');

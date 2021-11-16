@@ -2,6 +2,9 @@
 /**
  * @var Cardpay\Core\Block\CustomTicket\Success $block
  */
+
+use Cardpay\Core\Helper\ConfigData;
+
 $order = $this->getOrder();
 $total = $this->getTotal();
 $payment = $this->getPayment();
@@ -22,8 +25,7 @@ if (!$this->checkExistCallback() && $this->getRedirectUserStatus()) {
 <?php } ?>
 
 <div id="box-cardpay">
-    <?php if ($payment_method === 'cardpay_custom_bank_transfer') { ?>
-
+    <?php if (ConfigData::BANKCARD_PAYMENT_METHOD === $payment_method) { ?>
         <?php if (!$this->checkExistCallback()) { ?>
             <h2 class="cardpay-title">
                 <?php /* @escapeNotVerified */
@@ -43,17 +45,14 @@ if (!$this->checkExistCallback() && $this->getRedirectUserStatus()) {
             </p>
 
             <?php if (isset($paymentResponse['transaction_details']) && $paymentResponse['transaction_details']['redirect_url']) { ?>
-
                 <a href="<?php echo $block->escapeUrl(urldecode($paymentResponse['transaction_details']['redirect_url'])); ?>"
                    id="btn-boleto-cardpay">
                     <?php /* @escapeNotVerified */
                     echo __('Pay'); ?>
                 </a>
-
             <?php } ?>
 
         <?php } else { ?>
-
             <?php
             $message_status = $this->getMessageByStatus($paymentResponse);
             if (isset($message_status['title']) && isset($message_status['message'])) {
@@ -93,7 +92,7 @@ if (!$this->checkExistCallback() && $this->getRedirectUserStatus()) {
         <?php } ?>
 
     <?php } else {
-        echo __('Error getting the link to the ticket. Please contact the seller.');
+        echo __('An error has occurred.');
     } ?>
 </div>
 

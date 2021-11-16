@@ -1,8 +1,8 @@
 {
   "name": "cardpay/core",
-  "description": "Unlimint payment method module",
+  "description": "Unlimint Magento plugin",
   "type": "magento2-module",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "license": [
     "OSL-3.0",
     "AFL-3.0"

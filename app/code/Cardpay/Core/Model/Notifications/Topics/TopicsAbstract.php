@@ -9,6 +9,8 @@ use Cardpay\Core\Helper\Response;
 use Exception;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\DB\TransactionFactory;
+use Magento\Framework\Exception\AlreadyExistsException;
+use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Phrase;
 use Magento\Sales\Model\Order;
 use Magento\Sales\Model\Order\CreditmemoFactory;
@@ -149,7 +151,7 @@ abstract class TopicsAbstract
     }
 
     /**
-     * @param $response
+     * @param array $response
      * @return bool
      */
     public function isValidResponse($response)
@@ -158,7 +160,7 @@ abstract class TopicsAbstract
             return false;
         }
 
-        if ($response['status'] == 200 || $response['status'] == 201) {
+        if ((int)$response['status'] === 200 || (int)$response['status'] === 201) {
             return true;
         }
 
@@ -169,12 +171,12 @@ abstract class TopicsAbstract
      * @param $order
      * @param $data
      * @return bool
-     * @throws \Magento\Framework\Exception\AlreadyExistsException
+     * @throws AlreadyExistsException
      */
     public function validateRefunded($order, $data)
     {
         $merchantOrder = $data['merchantOrder'];
-        if (isset($merchantOrder["amount_refunded"]) && $merchantOrder["amount_refunded"] > 0) {
+        if (isset($merchantOrder['amount_refunded']) && $merchantOrder['amount_refunded'] > 0) {
             $creditMemo = $this->generateCreditMemo($data, $order);
             if ($creditMemo === null) {
                 return false;
@@ -188,7 +190,7 @@ abstract class TopicsAbstract
      * @param $payment
      * @param $order
      * @return Order\Creditmemo|null
-     * @throws \Magento\Framework\Exception\AlreadyExistsException
+     * @throws AlreadyExistsException
      */
     public function generateCreditMemo($payment, $order)
     {
@@ -198,7 +200,7 @@ abstract class TopicsAbstract
 
         $previousRefund = 0;
         foreach ($creditMemos as $creditMemo) {
-            $previousRefund = $previousRefund + $creditMemo->getGrandTotal();
+            $previousRefund += $creditMemo->getGrandTotal();
         }
 
         $amountRefunded = $payment['refund_data']['amount'];
@@ -240,7 +242,7 @@ abstract class TopicsAbstract
     public function updateOrder($order, $data)
     {
         if ($this->checkStatusAlreadyUpdated($order, $data)) {
-            $this->dataHelper->log("Already updated", ConfigData::BASIC_LOG_PREFIX);
+            $this->dataHelper->log('Already updated', ConfigData::BASIC_LOG_PREFIX);
             return $order;
         }
         $this->updatePaymentInfo($order, $data);
@@ -294,7 +296,7 @@ abstract class TopicsAbstract
 
         $paymentStatus = $paymentOrder->save();
 
-        $this->dataHelper->log("Update Payment", ConfigData::BASIC_LOG_PREFIX, $paymentStatus->getData());
+        $this->dataHelper->log('Update Payment', ConfigData::BASIC_LOG_PREFIX, $paymentStatus->getData());
     }
 
     /**
@@ -307,7 +309,7 @@ abstract class TopicsAbstract
         $statusToUpdate = $this->getConfigStatus($paymentResponse);
         $commentsObject = $order->getStatusHistoryCollection(true);
         foreach ($commentsObject as $commentObj) {
-            if ($commentObj->getStatus() == $statusToUpdate) {
+            if ((string)$commentObj->getStatus() === (string)$statusToUpdate) {
                 $orderUpdated = true;
             }
         }
@@ -393,7 +395,7 @@ abstract class TopicsAbstract
 
     /**
      * @param $value
-     * @return mixed
+     * @return array|string|string[]|null
      */
     public function _getMulticardLastValue($value)
     {
@@ -416,26 +418,28 @@ abstract class TopicsAbstract
 
     /**
      * @param $order
-     * @param $message
+     * @param $paymentData
+     * @return bool
+     * @throws LocalizedException
      */
     public function createInvoice($order, $paymentData)
     {
-        if (!$order->hasInvoices()) {
-            $invoice = $this->invoiceService->prepareInvoice($order);
-            $invoice->register();
-            $invoice->pay();
-            $invoice->save();
-
-            $transaction = $this->transactionFactory->create();
-            $transaction->addObject($invoice);
-            $transaction->addObject($invoice->getOrder());
-            $transaction->save();
-
-            $this->invoiceSender->send($invoice);
-
-            return true;
+        if ($order->hasInvoices()) {
+            return false;
         }
 
-        return false;
+        $invoice = $this->invoiceService->prepareInvoice($order);
+        $invoice->register();
+        $invoice->pay();
+        $invoice->save();
+
+        $transaction = $this->transactionFactory->create();
+        $transaction->addObject($invoice);
+        $transaction->addObject($invoice->getOrder());
+        $transaction->save();
+
+        $this->invoiceSender->send($invoice);
+
+        return true;
     }
 }

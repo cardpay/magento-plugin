@@ -1,17 +1,20 @@
 <?php
 
-namespace Cardpay\Core\Observer;
+namespace Cardpay\Core\Model\Observer;
 
 use Cardpay\Core\Helper\ConfigData;
 use Cardpay\Core\Helper\Data;
+use Cardpay\Core\Lib\Api;
 use Magento\Backend\Model\Session;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\LocalizedException;
+use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Phrase;
 use Magento\Sales\Model\Order;
+use Magento\Sales\Model\Order\Creditmemo;
 use Magento\Store\Model\ScopeInterface;
 
 /**
@@ -32,7 +35,7 @@ class RefundObserverBeforeSave implements ObserverInterface
     protected $session;
 
     /**
-     * @var \Magento\Framework\Message\ManagerInterface
+     * @var ManagerInterface
      */
     protected $messageManager;
 
@@ -63,6 +66,9 @@ class RefundObserverBeforeSave implements ObserverInterface
 
     }
 
+    /**
+     * @throws LocalizedException
+     */
     public function execute(Observer $observer)
     {
         $creditMemo = $observer->getData('creditmemo');
@@ -72,7 +78,7 @@ class RefundObserverBeforeSave implements ObserverInterface
 
     /**
      * @param $order      Order
-     * @param $creditMemo \Magento\Sales\Model\Order\Creditmemo
+     * @param $creditMemo Creditmemo
      * @throws LocalizedException
      */
     protected function creditMemoRefundBeforeSave($order, $creditMemo)
@@ -89,24 +95,24 @@ class RefundObserverBeforeSave implements ObserverInterface
         }
 
         // check refund available
-        $refundAvailable = $this->scopeConfig->getValue(ConfigData::PATH_ORDER_REFUND_AVAILABLE, ScopeInterface::SCOPE_STORE);
-        if ($refundAvailable == 0) {
-            $this->dataHelper->log("RefundObserverBeforeSave::creditMemoRefundBeforeSave - Refund is disabled", ConfigData::CUSTOM_LOG_PREFIX);
-            $this->throwRefundException(__("Refund is disabled"));
+        $refundAvailable = (int)$this->scopeConfig->getValue(ConfigData::PATH_ORDER_REFUND_AVAILABLE, ScopeInterface::SCOPE_STORE);
+        if ($refundAvailable === 0) {
+            $this->dataHelper->log('RefundObserverBeforeSave::creditMemoRefundBeforeSave - Refund is disabled', ConfigData::CUSTOM_LOG_PREFIX);
+            $this->throwRefundException(__('Refund is disabled'));
             return;
         }
 
         // get refund amount
         $amountToRefund = $creditMemo->getGrandTotal();
         if ($amountToRefund <= 0) {
-            $this->throwRefundException(__("The refunded amount must be greater than 0."));
+            $this->throwRefundException(__('The refunded amount must be greater than 0.'));
             return;
         }
 
         // get payment info
-        $paymentResponse = $paymentOrder->getAdditionalInformation("paymentResponse");
+        $paymentResponse = $paymentOrder->getAdditionalInformation('paymentResponse');
         if (!isset($paymentResponse['payment_data']['id'])) {
-            $this->throwRefundException(__("Refund can not be executed because the payment id was not found."));
+            $this->throwRefundException(__('Refund can not be executed because the payment id was not found.'));
             return;
         }
 
@@ -119,13 +125,13 @@ class RefundObserverBeforeSave implements ObserverInterface
     private function isPaymentMethodValid($order)
     {
         // get payment order object
-        $paymentOrder = $order->getPayment();
-        $paymentMethod = $paymentOrder->getMethodInstance()->getCode();
+        $payment = $order->getPayment();
+        $paymentMethod = (string)$payment->getMethodInstance()->getCode();
 
-        return $paymentMethod == 'cardpay_custom'
-            || $paymentMethod == 'cardpay_customticket'
-            || $paymentMethod == 'cardpay_custom_bank_transfer'
-            || $paymentMethod == 'cardpay_basic';
+        return $paymentMethod === 'cardpay_custom'
+            || $paymentMethod === ConfigData::BANKCARD_PAYMENT_METHOD
+            || $paymentMethod === ConfigData::BOLETO_PAYMENT_METHOD
+            || $paymentMethod === 'cardpay_basic';
     }
 
     /**
@@ -136,19 +142,22 @@ class RefundObserverBeforeSave implements ObserverInterface
      */
     private function performRefund(string $paymentID, Order $order, float $amountToRefund)
     {
-        $api = $this->dataHelper->getApiInstance();
+        /**
+         * @var Api
+         */
+        $api = $this->dataHelper->getApiInstance($order);
 
         $refundRequestParams = $this->dataHelper->getRefundRequestParams($paymentID, $order, $amountToRefund);
         $this->dataHelper->log('Refund request', ConfigData::CUSTOM_LOG_PREFIX, $refundRequestParams);
 
-        $responseRefund = $api->performRefund($refundRequestParams);
+        $responseRefund = $api->refund($refundRequestParams);
 
-        if (!is_null($responseRefund) || $responseRefund['status'] == 200 || $responseRefund['status'] == 201) {
-            $successMessageRefund = "Cardpay - " . __('Refund of %1 was processed successfully.', $amountToRefund);
+        if (!is_null($responseRefund) || (int)$responseRefund['status'] === 200 || (int)$responseRefund['status'] === 201) {
+            $successMessageRefund = 'Cardpay - ' . __('Refund of %1 was processed successfully.', $amountToRefund);
             $this->messageManager->addSuccessMessage($successMessageRefund);
-            $this->dataHelper->log("RefundObserverBeforeSave::creditMemoRefundBeforeSave - " . $successMessageRefund, ConfigData::CUSTOM_LOG_PREFIX, $responseRefund);
+            $this->dataHelper->log('RefundObserverBeforeSave::creditMemoRefundBeforeSave - ' . $successMessageRefund, ConfigData::CUSTOM_LOG_PREFIX, $responseRefund);
         } else {
-            $this->throwRefundException(__("Could not process the refund, The Cardpay API returned an unexpected error. Check the log files."), $responseRefund);
+            $this->throwRefundException(__('Could not process the refund, The Cardpay API returned an unexpected error. Check the log files.'), $responseRefund);
         }
     }
 
@@ -157,7 +166,7 @@ class RefundObserverBeforeSave implements ObserverInterface
      */
     protected function throwRefundException($message, $data = [])
     {
-        $this->dataHelper->log("RefundObserverBeforeSave::sendRefundRequest - " . $message, ConfigData::CUSTOM_LOG_PREFIX, $data);
+        $this->dataHelper->log('RefundObserverBeforeSave::sendRefundRequest - ' . $message, ConfigData::CUSTOM_LOG_PREFIX, $data);
         throw new LocalizedException(new Phrase('Cardpay - ' . $message));
     }
 }

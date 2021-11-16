@@ -6,6 +6,7 @@ use Cardpay\Core\Helper\ConfigData;
 use Magento\Checkout\Model\Session;
 use Magento\Customer\Helper\Address;
 use Magento\Framework\App\Config\ScopeConfigInterface;
+use Magento\Framework\Registry;
 use Magento\Quote\Api\Data\ShippingAssignmentInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Quote\Model\Quote\Address\Total;
@@ -20,7 +21,7 @@ use Magento\Store\Model\ScopeInterface;
 class DiscountCoupon extends AbstractTotal
 {
     /**
-     * @var \Magento\Framework\Registry
+     * @var Registry
      */
     protected $_registry;
 
@@ -31,7 +32,7 @@ class DiscountCoupon extends AbstractTotal
     /**
      * DiscountCoupon constructor.
      *
-     * @param \Magento\Framework\Registry $registry
+     * @param Registry $registry
      */
     public function __construct(
         Session              $checkoutSession,
@@ -51,7 +52,7 @@ class DiscountCoupon extends AbstractTotal
      *
      * @return bool
      */
-    protected function _getDiscountCondition($address, $shippingAssignment)
+    protected function _getDiscountCondition($address)
     {
 
         $condition = true;
@@ -62,7 +63,7 @@ class DiscountCoupon extends AbstractTotal
             $condition = false;
         }
 
-        if ($address->getAddressType() != Address::TYPE_SHIPPING) {
+        if ((string)$address->getAddressType() !== Address::TYPE_SHIPPING) {
             $condition = false;
         }
 
@@ -99,11 +100,9 @@ class DiscountCoupon extends AbstractTotal
 
         $balance = 0;
 
-        if ($this->_getDiscountCondition($address, $shippingAssignment)) {
-
+        if ($this->_getDiscountCondition($address)) {
             parent::collect($quote, $shippingAssignment, $total);
             $balance = $this->_getDiscountAmount();
-
         }
 
         //sets
@@ -114,7 +113,6 @@ class DiscountCoupon extends AbstractTotal
         $total->setDiscountCouponDescription($this->getCode());
         $total->setDiscountCouponAmount($balance);
         $total->setBaseDiscountCouponAmount($balance);
-
 
         $total->addTotalAmount($this->getCode(), $address->getDiscountCouponAmount());
         $total->addBaseTotalAmount($this->getCode(), $address->getBaseDiscountCouponAmount());

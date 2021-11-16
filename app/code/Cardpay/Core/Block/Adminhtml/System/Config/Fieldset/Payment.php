@@ -77,7 +77,7 @@ class Payment extends Fieldset
             $siteId = strtoupper($this->scopeConfig->getValue(ConfigData::PATH_SITE_ID, ScopeInterface::SCOPE_STORE));
 
             //hide payment method if not Chile or Colombia
-            if ($siteId != "MLC" && $siteId != "MCO") {
+            if ($siteId !== "MLC" && $siteId !== "MCO") {
 
                 //get is active
                 $statusPaymentMethod = $this->scopeConfig->isSetFlag(ConfigData::PATH_CUSTOM_BANK_TRANSFER_ACTIVE, ScopeInterface::SCOPE_STORE);
@@ -87,7 +87,7 @@ class Payment extends Fieldset
                     $path = ConfigData::PATH_CUSTOM_BANK_TRANSFER_ACTIVE;
                     $value = 0;
 
-                    if ($this->switcher->getWebsiteId() == 0) {
+                    if ((int)$this->switcher->getWebsiteId() === 0) {
                         $this->configResource->saveConfig($path, $value, 'default', 0);
                     } else {
                         $this->configResource->saveConfig($path, $value, 'websites', $this->switcher->getWebsiteId());

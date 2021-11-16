@@ -4,10 +4,6 @@ namespace Cardpay\Core\Block\Basic;
 
 use Magento\Framework\View\Element\Template;
 
-/**
- * Class Failure
- * @package Cardpay\Core\Block\Basic
- */
 class Failure extends Template
 {
     /**
@@ -24,6 +20,6 @@ class Failure extends Template
      */
     public function getErrorMessage()
     {
-        return __("The order was not successful!");
+        return __('The order was not successful!');
     }
 }

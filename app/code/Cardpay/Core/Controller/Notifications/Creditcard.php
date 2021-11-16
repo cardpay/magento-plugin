@@ -12,81 +12,94 @@ use Magento\Framework\Webapi\Rest\Request;
 
 class Creditcard extends NotificationBase
 {
-    const LOG_NAME = 'creditcard_notification';
-
-    protected $coreHelper;
-    protected $coreModel;
-    protected $_order;
-    protected $_notifications;
-    protected $_wRequest;
+    // callback responses
+    private const SUCCESSFUL_RESPONSE = "OK";
+    private const UNSUCCESSFUL_RESPONSE = "NOT OK";
 
     /**
-     * Creditcard constructor.
+     * @var Data
+     */
+    protected $coreHelper;
+
+    /**
+     * @var Core
+     */
+    protected $coreModel;
+
+    /**
+     * @var Notifications
+     */
+    protected $_notifications;
+
+    /**
+     * @var Request
+     */
+    protected $_request;
+
+    /**
      * @param Context $context
      * @param Data $coreHelper
      * @param Core $coreModel
+     * @param Notifications $notifications
+     * @param Request $request
      */
-    public function __construct(Context $context, Data $coreHelper, Core $coreModel, Notifications $notifications, Request $wRequest)
+    public function __construct(Context $context, Data $coreHelper, Core $coreModel, Notifications $notifications, Request $request)
     {
         $this->coreHelper = $coreHelper;
         $this->coreModel = $coreModel;
         $this->_notifications = $notifications;
-        $this->_wRequest = $wRequest;
+        $this->_request = $request;
+
         parent::__construct($context);
     }
 
     public function execute()
     {
         try {
-            $request = $this->_wRequest;
+            $request = $this->_request;
 
-            $requestValues = $this->_notifications->getRequestParams($request);
+            $requestData = $this->_notifications->getRequestParams($request);
             $notificationPayment = $this->_notifications->getPayment();
 
-            if ($requestValues['method'] !== 'BANKCARD') {
-                $message = 'Unlimint - Invalid Notification Parameters, Invalid Type.';
-                $this->setResponseHttp(Response::HTTP_BAD_REQUEST, $message, $request->getBodyParams());
-            }
-
-            $requestParams = $request->getBodyParams();
+            $body = $request->getContent();
+            $requestParams = json_decode($body, true);
 
             $response = null;
-            if ($requestValues['type'] === 'refund_data') {
+            if ($requestData['type'] === 'refund_data') {
                 $notificationPayment->refund($requestParams);
             } else {
                 $response = $notificationPayment->updateStatusOrderByPayment($requestParams);
             }
-            if (isset($response['httpStatus'], $response['message'], $response['data'])) {
-                $this->setResponseHttp($response['httpStatus'], $response['message'], $response['data']);
+            if (isset($response['httpStatus'])) {
+                $this->setResponseHttp($response['httpStatus'], self::SUCCESSFUL_RESPONSE);
             }
 
         } catch (Exception $e) {
+            $this->coreHelper->log('Creditcard::execute error: ' . $e->getMessage());
+
             $statusResponse = Response::HTTP_INTERNAL_ERROR;
 
             if (method_exists($e, 'getCode')) {
                 $statusResponse = $e->getCode();
             }
 
-            $message = 'Unlimint - There was an error processing the notification. Could not handle the error.';
-            $this->setResponseHttp($statusResponse, $message, ['exception_error' => $e->getMessage()]);
+            $this->setResponseHttp($statusResponse, self::UNSUCCESSFUL_RESPONSE);
         }
     }
 
     /**
      * @param $httpStatus
      * @param $message
-     * @param array $data
      */
-    protected function setResponseHttp($httpStatus, $message, $data = [])
+    protected function setResponseHttp($httpStatus, $message)
     {
-        $response = [
-            'status' => $httpStatus,
-            'message' => $message,
-            'data' => $data
-        ];
+        $response = $this->getResponse();
+        if (is_null($response)) {
+            return;
+        }
 
-        $this->getResponse()->setHeader('Content-Type', 'application/json', true);
-        $this->getResponse()->setBody(json_encode($response));
-        $this->getResponse()->setHttpResponseCode($httpStatus);
+        $response->setHeader('Content-Type', 'application/json', true);
+        $response->setHttpResponseCode($httpStatus);
+        $response->setBody($message);
     }
 }

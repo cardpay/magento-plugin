@@ -10,38 +10,66 @@
             <comment>It is a requirement that you have a SSL certificate, and the payment form to be provided under an HTTPS page.</comment>
         </field>
 
-        <field id="title" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="mode" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Terminal Code</label>
+            <config_path>payment/cardpay_custom/terminal_code</config_path>
+        </field>
+
+        <field id="access_token" translate="label comment" type="password" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Terminal Password</label>
+            <config_path>payment/cardpay_custom/terminal_password</config_path>
+            <comment>Get your credentials, visit the unlimint.com</comment>
+        </field>
+
+        <field id="callback_secret" translate="label" type="password" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Callback Secret</label>
+            <config_path>payment/cardpay_custom/callback_secret</config_path>
+        </field>
+
+        <field id="sandbox" translate="label comment" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Test Environment</label>
+            <config_path>payment/cardpay_custom/sandbox</config_path>
+            <comment>In test mode, the data is sent to the sandbox.</comment>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+        </field>
+
+        <field id="title" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Payment Title</label>
             <config_path>payment/cardpay_custom/title</config_path>
         </field>
 
-        <field id="capture" translate="label comment" type="select" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="capture" translate="label comment" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Capture Payment</label>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
             <config_path>payment/cardpay_custom/capture</config_path>
             <comment>If set to 'No', the amount will not be captured but only blocked. With 'No' option selected payments will be captured automatically in 7 days from the time of creating the preauthorized transaction. In installment case with 'No' option selected installments will be declined automatically in 7 days from the time of creating the preauthorized transaction.</comment>
         </field>
 
-        <field id="installment" translate="label comment" type="select" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="installment" translate="label comment" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Installment Enabled</label>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
             <config_path>payment/cardpay_custom/installment</config_path>
         </field>
 
-        <field id="sort_order" translate="label comment" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="title" translate="label" type="text" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Payment Title</label>
+            <config_path>payment/cardpay_custom/title</config_path>
+        </field>
+
+        <field id="sort_order" translate="label comment" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Checkout Position</label>
             <frontend_class>validate-number</frontend_class>
             <config_path>payment/cardpay_custom/sort_order</config_path>
             <comment>This setting will be the position in which the payment method will be available to the buyer.</comment>
         </field>
 
-        <field id="ask_cpf" translate="label comment" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="ask_cpf" translate="label comment" type="select" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Ask CPF</label>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
             <config_path>payment/cardpay_custom/ask_cpf</config_path>
         </field>
 
-        <field id="title" translate="label" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="descriptor" translate="label" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Dynamic Descriptor</label>
             <config_path>payment/cardpay_custom/descriptor</config_path>
             <validate>validate-length maximum-length-22</validate>

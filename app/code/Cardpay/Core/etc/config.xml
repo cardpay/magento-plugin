@@ -7,35 +7,38 @@
                 <useccv>1</useccv>
                 <cctypes>AE,VI,MC,DI,JCB</cctypes>
                 <ccfields>csc,expdate,acct</ccfields>
-                <model>Cardpay\Core\Model\Custom\Payment</model>
+                <model>Cardpay\Core\Model\Payment\BankCardPayment</model>
                 <title translate="label">Credit Card - Unlimint</title>
                 <allowspecific>0</allowspecific>
-                <sort_order>-2</sort_order>
+                <sort_order>1</sort_order>
                 <payment_action>authorize</payment_action>
                 <binary_mode>0</binary_mode>
                 <gateway_mode>0</gateway_mode>
                 <capture>1</capture>
                 <installment>0</installment>
+                <sandbox>1</sandbox>
+                <ask_cpf>0</ask_cpf>
             </cardpay_custom>
             <cardpay_customticket>
                 <active>0</active>
-                <model>Cardpay\Core\Model\CustomTicket\Payment</model>
+                <model>Cardpay\Core\Model\Payment\BoletoPayment</model>
                 <title translate="label">Boleto - Unlimint</title>
                 <allowspecific>0</allowspecific>
-                <sort_order>-1</sort_order>
+                <sort_order>2</sort_order>
                 <payment_action>authorize</payment_action>
                 <coupon_cardpay>0</coupon_cardpay>
+                <sandbox>1</sandbox>
             </cardpay_customticket>
             <cardpay>
-                <order_status_approved>processing</order_status_approved>
                 <order_status_authorized>processing</order_status_authorized>
+                <order_status_cancelled>cancelled</order_status_cancelled>
+                <order_status_rejected>cancelled</order_status_rejected>
+                <order_status_chargeback>holded</order_status_chargeback>
                 <order_status_in_process>processing</order_status_in_process>
                 <order_status_pending>pending_payment</order_status_pending>
-                <order_status_rejected>cancelled</order_status_rejected>
-                <order_status_cancelled>cancelled</order_status_cancelled>
-                <order_status_chargeback>payment_review</order_status_chargeback>
-                <order_status_in_mediation>pending</order_status_in_mediation>
+                <order_status_approved>complete</order_status_approved>
                 <order_status_refunded>closed</order_status_refunded>
+                <order_status_in_mediation>pending</order_status_in_mediation>
                 <order_status_partially_refunded>holded</order_status_partially_refunded>
                 <refund_available>1</refund_available>
                 <cancel_payment>0</cancel_payment>

@@ -1,6 +1,6 @@
 <?php
 
-namespace Cardpay\Core\Model\CustomTicket;
+namespace Cardpay\Core\Model\Payment;
 
 use Cardpay\Core\Helper\ConfigData;
 use Cardpay\Core\Helper\Response;
@@ -8,39 +8,32 @@ use Exception;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Api\Data\CartInterface;
+use Magento\Quote\Model\Quote;
+use Magento\Sales\Model\Order;
 use Magento\Store\Model\ScopeInterface;
 
-/**
- * Class Payment
- *
- * @package Cardpay\Core\Model\CustomTicket
- */
-class Payment extends \Cardpay\Core\Model\Custom\Payment
+class BoletoPayment extends UnlimintPayment
 {
     /**
      * Define payment method code
      */
-    const CODE = 'cardpay_customticket';
+    const CODE = ConfigData::BOLETO_PAYMENT_METHOD;
 
     protected $_isOffline = true;
 
     protected $_code = self::CODE;
 
     protected $fields_febraban = [
-        "firstName", "lastName", "docType", "docNumber", "address", "addressNumber", "addressCity", "addressState", "addressZipcode"
+        'firstName', 'lastName', 'docType', 'docNumber', 'address', 'addressNumber', 'addressCity', 'addressState', 'addressZipcode'
     ];
 
     /**
      * @param DataObject $data
-     * @return $this|\Cardpay\Core\Model\Custom\Payment
+     * @return $this|BoletoPayment
      * @throws LocalizedException
      */
     public function assignData(DataObject $data)
     {
-        if (!($data instanceof DataObject)) {
-            $data = new DataObject($data);
-        }
-
         $infoForm = $data->getData();
 
         if (isset($infoForm['additional_data'])) {
@@ -50,13 +43,18 @@ class Payment extends \Cardpay\Core\Model\Custom\Payment
             $additionalData = $infoForm['additional_data'];
 
             $info = $this->getInfoInstance();
-            $info->setAdditionalInformation('method', $infoForm['method']);
-            $info->setAdditionalInformation('payment_method', $additionalData['payment_method_ticket']);
-            $info->setAdditionalInformation('payment_method_id', $additionalData['payment_method_ticket']);
-            $info->setAdditionalInformation('cpf', preg_replace('/[^0-9]+/', '', $additionalData['cpf']));   // leave only digits
 
-            if (!empty($additionalData['coupon_code'])) {
-                $info->setAdditionalInformation('coupon_code', $additionalData['coupon_code']);
+            if (!empty($infoForm['method'])) {
+                $info->setAdditionalInformation('method', $infoForm['method']);
+            }
+
+            if (!empty($additionalData['payment_method_ticket'])) {
+                $info->setAdditionalInformation('payment_method', $additionalData['payment_method_ticket']);
+                $info->setAdditionalInformation('payment_method_id', $additionalData['payment_method_ticket']);
+            }
+
+            if (!empty($additionalData['cpf'])) {
+                $info->setAdditionalInformation('cpf', preg_replace('/[^0-9]+/', '', $additionalData['cpf']));   // leave only digits
             }
 
             foreach ($this->fields_febraban as $key) {
@@ -72,13 +70,22 @@ class Payment extends \Cardpay\Core\Model\Custom\Payment
     /**
      * @param string $paymentAction
      * @param object $stateObject
+     * @throws \Cardpay\Core\Model\Api\V1\Exception
+     * @throws LocalizedException
      */
     public function initialize($paymentAction, $stateObject)
     {
         try {
-            $this->_helperData->log("CustomPaymentTicket::initialize - Ticket: init prepare post payment", self::LOG_NAME);
+            $this->_helperData->log("BoletoPayment::initialize - Ticket: init prepare post payment", self::LOG_NAME);
 
+            /**
+             * @var Quote
+             */
             $quote = $this->_getQuote();
+
+            /**
+             * @var Order
+             */
             $order = $this->getInfoInstance()->getOrder();
             $payment = $order->getPayment();
 
@@ -88,23 +95,19 @@ class Payment extends \Cardpay\Core\Model\Custom\Payment
             }
 
             $requestParams = $this->_coreModel->getDefaultRequestParams($paymentInfo, $quote, $order);
-            $requestParams['payment_method'] = 'BOLETO';
+            $requestParams['payment_method'] = ConfigData::BOLETO_API_PAYMENT_METHOD;
+            $requestParams['customer']['full_name'] = trim($order->getCustomerName());
 
-            $customer = $this->_customerSession->getCustomer();
-            if ($customer != null) {
-                $requestParams['customer']['full_name'] = trim($customer->getFirstname() . ' ' . $customer->getLastname());
-            }
-
-            $this->_helperData->log("CustomPaymentTicket::initialize - Preference to POST", 'cardpay.log', $requestParams);
+            $this->_helperData->log("BoletoPayment::initialize - Preference to POST", 'cardpay.log', $requestParams);
         } catch (Exception $e) {
-            $this->_helperData->log("CustomPaymentTicket::initialize - There was an error retrieving the information to create the payment, more details: " . $e->getMessage());
+            $this->_helperData->log("BoletoPayment::initialize - There was an error retrieving the information to create the payment, more details: " . $e->getMessage());
             throw new LocalizedException(__(Response::PAYMENT_CREATION_ERRORS['INTERNAL_ERROR_MODULE']));
         }
 
-        $response = $this->_coreModel->postPayment($requestParams);
-        $this->_helperData->log("CustomPaymentTicket::initialize - POST RESPONSE", self::LOG_NAME, $response);
+        $response = $this->_coreModel->postPayment($requestParams, $order);
+        $this->_helperData->log("BoletoPayment::initialize - POST RESPONSE", self::LOG_NAME, $response);
 
-        if (isset($response['status']) && ($response['status'] == 200 || $response['status'] == 201)) {
+        if (isset($response['status']) && ((int)$response['status'] === 200 || (int)$response['status'] === 201)) {
             $payment = $response['response'];
             $this->getInfoInstance()->setAdditionalInformation("paymentResponse", $payment);
             return true;
@@ -113,11 +116,11 @@ class Payment extends \Cardpay\Core\Model\Custom\Payment
         $messageErrorToClient = $this->_coreModel->getMessageError($response);
 
         $arrayLog = [
-            "response" => $response,
-            "message" => $messageErrorToClient
+            'response' => $response,
+            'message' => $messageErrorToClient
         ];
 
-        $this->_helperData->log("CustomPaymentTicket::initialize - The API returned an error while creating the payment, more details: " . json_encode($arrayLog));
+        $this->_helperData->log('BoletoPayment::initialize - The API returned an error while creating the payment, more details: ' . json_encode($arrayLog));
 
         throw new LocalizedException(__($messageErrorToClient));
     }
@@ -137,6 +140,9 @@ class Payment extends \Cardpay\Core\Model\Custom\Payment
         return $tickets;
     }
 
+    /**
+     * @throws LocalizedException
+     */
     function setOrderSubtotals($data)
     {
         $total = $data['transaction_details']['total_paid_amount'];
@@ -163,11 +169,34 @@ class Payment extends \Cardpay\Core\Model\Custom\Payment
      */
     public function isAvailable(CartInterface $quote = null)
     {
-        $isActive = $this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_TICKET_ACTIVE, ScopeInterface::SCOPE_STORE);
-        if (empty($isActive)) {
+        $isActive = (int)$this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_TICKET_ACTIVE, ScopeInterface::SCOPE_STORE);
+        if (0 === $isActive) {
             return false;
         }
 
-        return parent::isPaymentMethodAvailable();
+        return $this->isPaymentMethodAvailable(ConfigData::PATH_BOLETO_TERMINAL_CODE, ConfigData::PATH_BOLETO_TERMINAL_PASSWORD);
+    }
+
+    /**
+     * @param Order $order
+     * @throws LocalizedException
+     */
+    public static function isBoletoPaymentMethod($order)
+    {
+        if (is_null($order)) {
+            return false;
+        }
+
+        /**
+         * @var Order\Payment
+         */
+        $payment = $order->getPayment();
+        if (is_null($payment) || is_null($payment->getMethodInstance())) {
+            return false;
+        }
+
+        $paymentMethod = $payment->getMethodInstance()->getCode();
+
+        return ConfigData::BOLETO_PAYMENT_METHOD === $paymentMethod;
     }
 }

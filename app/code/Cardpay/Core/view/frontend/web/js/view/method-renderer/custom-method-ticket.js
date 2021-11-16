@@ -29,10 +29,10 @@ define(
             validateHandler: null,
 
             initializeMethod: function () {
-                var cardpay_site_id = window.checkoutConfig.payment[this.getCode()]['country']
-                var cardpay_coupon = window.checkoutConfig.payment[this.getCode()]['discount_coupon'];
-                var cardpay_url = "/cardpay/api/coupon";
-                var payer_email = "";
+                const cardpay_site_id = String(window.checkoutConfig.payment[this.getCode()]['country']);
+                const cardpay_coupon = window.checkoutConfig.payment[this.getCode()]['discount_coupon'];
+                const cardpay_url = "/cardpay/api/coupon";
+                let payer_email = "";
 
                 if (typeof quote == 'object' && typeof quote.guestEmail == 'string') {
                     payer_email = quote.guestEmail
@@ -54,7 +54,7 @@ define(
                     }
                 }
 
-                if (cardpay_site_id == 'CPB') {
+                if (cardpay_site_id === 'CPB') {
                     this.setBillingAddress();
                 }
 
@@ -95,12 +95,10 @@ define(
             },
 
             getInitialTotal: function () {
-                var initialTotal = quote.totals().base_subtotal
+                return quote.totals().base_subtotal
                     + quote.totals().base_shipping_incl_tax
                     + quote.totals().base_tax_amount
                     + quote.totals().base_discount_amount;
-
-                return initialTotal;
             },
 
             setValidateHandler: function (handler) {
@@ -112,7 +110,7 @@ define(
             },
 
             getLogoUrl: function () {
-                if (window.checkoutConfig.payment[this.getCode()] != undefined) {
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
                     return configPayment['logoUrl'];
                 }
                 return '';
@@ -127,7 +125,7 @@ define(
             },
 
             existBanner: function () {
-                if (window.checkoutConfig.payment[this.getCode()] != undefined) {
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
                     if (window.checkoutConfig.payment[this.getCode()]['bannerUrl'] != null) {
                         return true;
                     }
@@ -136,7 +134,7 @@ define(
             },
 
             getBannerUrl: function () {
-                if (window.checkoutConfig.payment[this.getCode()] != undefined) {
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
                     return window.checkoutConfig.payment[this.getCode()]['bannerUrl'];
                 }
                 return '';
@@ -161,21 +159,21 @@ define(
             },
 
             getInitialGrandTotal: function () {
-                if (configPayment != undefined) {
+                if (typeof configPayment !== 'undefined') {
                     return configPayment['grand_total'];
                 }
                 return '';
             },
 
             getSuccessUrl: function () {
-                if (configPayment != undefined) {
+                if (typeof configPayment !== 'undefined') {
                     return configPayment['success_url'];
                 }
                 return '';
             },
 
             getPaymentSelected: function () {
-                if (this.getCountTickets() == 1) {
+                if (parseInt(this.getCountTickets()) === 1) {
                     var input = document.getElementsByName("cardpay_custom_ticket[payment_method_ticket]")[0];
                     return input.value;
                 }
@@ -189,7 +187,7 @@ define(
             },
 
             getBoletoLogoURL: function () {
-                if (window.checkoutConfig.payment[this.getCode()] != undefined) {
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
                     return window.checkoutConfig.payment[this.getCode()]['boleto_logo_url'];
                 }
 
@@ -210,7 +208,7 @@ define(
                     }
                 };
 
-                if (this.getCountryId() == 'CPB' && this.getCountTickets() > 0) {
+                if (String(this.getCountryId()) === 'CPB' && this.getCountTickets() > 0) {
                     dataObj.additional_data.firstName = document.querySelector(CPv1Ticket.selectors.firstName).value
                     dataObj.additional_data.lastName = document.querySelector(CPv1Ticket.selectors.lastName).value
                     dataObj.additional_data.docType = CPv1Ticket.getDocTypeSelected();
@@ -349,33 +347,33 @@ define(
                 cpf = cpf.replace(/[\s.-]*/igm, '')
                 if (
                     !cpf ||
-                    cpf.length != 11 ||
-                    cpf == "00000000000" ||
-                    cpf == "11111111111" ||
-                    cpf == "22222222222" ||
-                    cpf == "33333333333" ||
-                    cpf == "44444444444" ||
-                    cpf == "55555555555" ||
-                    cpf == "66666666666" ||
-                    cpf == "77777777777" ||
-                    cpf == "88888888888" ||
-                    cpf == "99999999999"
+                    cpf.length !== 11 ||
+                    cpf === "00000000000" ||
+                    cpf === "11111111111" ||
+                    cpf === "22222222222" ||
+                    cpf === "33333333333" ||
+                    cpf === "44444444444" ||
+                    cpf === "55555555555" ||
+                    cpf === "66666666666" ||
+                    cpf === "77777777777" ||
+                    cpf === "88888888888" ||
+                    cpf === "99999999999"
                 ) {
                     return false
                 }
 
-                var sum = 0
-                var remainder
-                for (var i = 1; i <= 9; i++) {
+                let sum = 0
+                let remainder
+                for (let i = 1; i <= 9; i++) {
                     sum = sum + parseInt(cpf.substring(i - 1, i)) * (11 - i)
                 }
 
-                remainder = (sum * 10) % 11
-                if ((remainder == 10) || (remainder == 11)) {
+                remainder = parseInt((sum * 10) % 11)
+                if ((remainder === 10) || (remainder === 11)) {
                     remainder = 0
                 }
 
-                if (remainder != parseInt(cpf.substring(9, 10))) {
+                if (remainder !== parseInt(cpf.substring(9, 10))) {
                     return false
                 }
 
@@ -384,12 +382,12 @@ define(
                     sum = sum + parseInt(cpf.substring(k - 1, k)) * (12 - k)
                 }
 
-                remainder = (sum * 10) % 11
-                if ((remainder == 10) || (remainder == 11)) {
+                remainder = parseInt((sum * 10) % 11)
+                if ((remainder === 10) || (remainder === 11)) {
                     remainder = 0
                 }
 
-                return remainder == parseInt(cpf.substring(10, 11));
+                return remainder === parseInt(cpf.substring(10, 11));
             },
 
             showError: function (code) {

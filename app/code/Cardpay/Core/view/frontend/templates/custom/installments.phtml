@@ -9,6 +9,8 @@ if (empty($installmentsURL)) {
     return;
 }
 
+$firstOptionText = __('Select number of installments');
+
 $scriptString = <<<script
     function assignInstallmentOptions() {
         let installmentSelect = document.getElementById('installments');
@@ -18,7 +20,7 @@ $scriptString = <<<script
 
         let firstOption = document.createElement('option');
         firstOption.value = '';
-        firstOption.text = 'Select number of installments';
+        firstOption.text = '$firstOptionText';
 
         installmentSelect.appendChild(firstOption);
 

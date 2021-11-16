@@ -567,3 +567,95 @@ textarea.has-error {
     text-align: center !important;
     color: #333333 !important;
 }
+
+/* Card brands */
+.card-brand-visa {
+    background-image: url("data:image/svg+xml,%3Csvg width='54' height='35' viewBox='0 0 54 35' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M54 32.4956C54 33.6092 53.1074 34.5 51.9917 34.5H2.00826C0.89256 34.5 0 33.6092 0 32.4956V2.50437C0 1.39083 0.89256 0.5 2.00826 0.5H51.9917C53.1074 0.5 54 1.39083 54 2.50437V32.4956Z' fill='%231A1F71'/%3E%3Cpath d='M20.5289 10.3925L14.5041 24.7478H10.562L7.58675 13.2933C7.43799 12.6239 7.21485 12.3263 6.69419 12.0288C5.80163 11.5825 4.31402 11.0619 3.04956 10.8387L3.12394 10.3925H9.44625C10.2644 10.3925 11.0082 10.9131 11.157 11.8801L12.719 20.2106L16.5868 10.4668H20.5289V10.3925ZM35.9256 20.0619C35.9256 16.2685 30.719 16.0453 30.719 14.409C30.719 13.8883 31.2396 13.3677 32.281 13.2189C32.8016 13.1445 34.2892 13.0701 35.9256 13.8883L36.595 10.8387C35.7025 10.5412 34.5868 10.1693 33.0992 10.1693C29.4545 10.1693 26.8512 12.1032 26.8512 14.9296C26.8512 17.0123 28.7107 18.128 30.1239 18.7974C31.5372 19.4668 32.0578 19.9131 32.0578 20.5825C32.0578 21.5495 30.9421 21.9958 29.8264 21.9958C27.9669 21.9958 26.8512 21.4751 26.033 21.1032L25.3636 24.2272C26.2562 24.5991 27.8182 24.971 29.4545 24.971C33.3223 24.971 35.8512 23.0371 35.9256 20.0619ZM45.595 24.7478H49.0165L46.0413 10.3925H42.8429C42.0991 10.3925 41.5041 10.8387 41.281 11.4338L35.7025 24.7478H39.5702L40.314 22.5908H45.0744L45.595 24.7478ZM41.4297 19.69L43.3636 14.3346L44.4793 19.69H41.4297ZM25.8099 10.3925L22.7603 24.7478H19.0413L22.0909 10.3925H25.8099Z' fill='white'/%3E%3C/svg%3E%0A");
+    position: relative;
+    padding-right: 25px;
+    right: 31px;
+    top: 2px;
+    background-size: contain;
+    background-repeat: no-repeat;
+}
+
+.card-brand-mastercard {
+    background: url(../images/card_brands_sprite.png) no-repeat -227px -218px;
+    position: relative;
+    padding-right: 48px;
+    padding-bottom: 8px;
+    right: 51px;
+    top: -4px;
+}
+
+.card-brand-maestro {
+    background: url(../images/card_brands_sprite.png) no-repeat -227px -148px;
+    position: relative;
+    padding-right: 42px;
+    padding-bottom: 8px;
+    right: 44px;
+    top: -3px;
+}
+
+.card-brand-mir {
+    background: url(../images/card_brands_sprite.png) no-repeat -315px -275px;
+    position: relative;
+    padding-right: 50px;
+    padding-bottom: 8px;
+    right: 55px;
+    top: 1px;
+}
+
+.card-brand-discover {
+    background: url(../images/card_brands_sprite.png) no-repeat -373px -85px;
+    position: relative;
+    padding-right: 42px;
+    padding-bottom: 8px;
+    right: 46px;
+    top: -5px;
+}
+
+.card-brand-amex {
+    background: url(../images/card_brands_sprite.png) no-repeat -50px -5px;
+    position: relative;
+    padding-right: 42px;
+    padding-bottom: 8px;
+    right: 44px;
+    top: -4px;
+}
+
+.card-brand-dinersclub {
+    background: url(../images/card_brands_sprite.png) no-repeat -134px -235px;
+    position: relative;
+    padding-right: 90px;
+    padding-bottom: 8px;
+    right: 87px;
+    top: -4px;
+}
+
+.card-brand-jcb {
+    background: url(../images/card_brands_sprite.png) no-repeat -269px -65px;
+    position: relative;
+    padding-right: 42px;
+    padding-bottom: 8px;
+    right: 39px;
+    top: -3px;
+}
+
+.card-brand-unionpay {
+    background: url(../images/card_brands_sprite.png) no-repeat -318px -50px;
+    position: relative;
+    padding-right: 42px;
+    padding-bottom: 8px;
+    right: 45px;
+    top: -3px;
+}
+
+.card-brand-elo {
+    background: url(../images/card_brand_elo.svg) center;
+    position: relative;
+    padding-right: 42px;
+    padding-bottom: 8px;
+    right: 44px;
+    top: -3px;
+}

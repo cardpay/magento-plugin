@@ -41,6 +41,7 @@ Installation process will explain how to install the Magento 2 plugin via comman
 
 7. If you have problems with folder permission when accessing the store, you must review your permissions according to [the official Magento recommendations](https://devdocs.magento.com/guides/v2.4/install-gde/prereq/file-sys-perms-over.html)
 
+
 8. Check the plugin is successfully installed
 
 * Log in into **Admin panel** of Unlimint Magento plugin (using your admin credentials)
@@ -53,6 +54,14 @@ Installation process will explain how to install the Magento 2 plugin via comman
 
 9. The Unlimint Magento 2 plugin was successfully installed.
 
+## Unit tests (optional)
+
+For execution unit tests in Magento plugin, run the command in the console:
+
+ `php ./vendor/phpunit/phpunit/phpunit ./app/code/Cardpay/Core/Test/Unit`
+   
+This command executes an all tests from Test/Unit catalogue.
+
 ## Configuration
 
 This process explains how to set up and configure the Magento plugin to accept payments in supported payment methods
@@ -63,19 +72,21 @@ This process explains how to set up and configure the Magento plugin to accept p
 
 2. Navigate to **Stores** > **Configuration** and under the **Sales** section, click the **Payment Methods**. From here, you can configure the Unlimint payment methods
 
-3. To set up the credentials go to **Unlimint > Credentials.**
- * Set **Terminal code**, **terminal password**, **callback secret** values - it's merchant credentials for Unlimint APIv3 (how to obtain credentials see [here](https://www.unlimint.com/integration/))
+3. You need to enable payment methods in Magento plugin (Credit Card and Boleto)
+
+First, access the methods you want to enable by Unlimint support (it's a part of merchant onboarding process - see [here](https://www.unlimint.com/integration/))
+
+3.1. To enable payments via **Credit Card** do the following steps:
+
+![](readme_images/credit_card.png)
+
+![](readme_images/credit_card_2.png)
+
+ * Set **Enabled** to **Yes**
+ * Set **Terminal code**, **Terminal password**, **Callback secret** values - it should be merchant credentials in Unlimint APIv3 for this payment method (how to obtain credentials see [here](https://www.unlimint.com/integration/))
  * Test environment:
     * Set to **Yes** for Sandbox environment (for test purposes)
     * Set to **No** for Production environment
-
-![](readme_images/credentials.png)
-
-4. With your credentials filled in, you need to enable payment methods in Magento plugin. (Credit Card and Boleto)
- * First, access the methods you want to enable by Unlimint support (it's a part of merchant onboarding process - see [here](https://www.unlimint.com/integration/))
-
-4.1. To enable payments via **Credit Card** do the following steps:
- * Set **Enabled** to **Yes**
  * **Payment title** - Fill in the name of the payment method, will be presented for the customer in checkout
  * **Capture payment:**
    * Set to **Yes** - for completing payment automatically (one-phase payment),
@@ -89,20 +100,22 @@ This process explains how to set up and configure the Magento plugin to accept p
  * **Checkout position** - This setting value is the position of the payment method for the customer in checkout
  * **Ask CPF** - set to **Yes** if you require **CPF (Brazilian Tax Id)** of your customer in checkout
  * **Dynamic Descriptor** - in this setting is described dynamic_descriptor parameter in payment request - details about it see in [API documentation](https://integration.unlimint.com/#PaymentRequestPaymentData)
-   
-![](readme_images/credit_card.png)
 
-4.2. To enable payments via **Boleto**
-
- * Set **Enabled** to **Yes**
- * **Payment title** - Fill in the name of the payment method, will be presented for the customer in checkout
- * **Checkout position** - This setting value is the position of the payment method for the customer in checkout
+3.2. To enable payments via **Boleto**
 
 ![](readme_images/boleto.png)
 
+ * Set **Enabled** to **Yes** (by default it's disabled)
+ * Set **Terminal code**, **terminal password**, **callback secret** values - it should be merchant credentials in Unlimint APIv3 for this payment method (how to obtain credentials see [here](https://www.unlimint.com/integration/))
+ * Test environment:
+    * Set to **Yes** for Sandbox environment (for test purposes)
+    * Set to **No** for Production environment
+ * **Payment title** - Fill in the name of the payment method, will be presented for the customer in checkout
+ * **Checkout position** - This setting value is the position of the payment method for the customer in checkout
+
 That's it! The selected payment methods are successfully enabled in the checkout.
 
-4.3. Order statuses and refunds settings
+3.3. Order statuses and refunds settings
 
 Mapping of the order statuses is set by default and you need to change it ONLY if you have yours custom order statuses flow (not recommended to change).
 
@@ -110,7 +123,7 @@ Mapping of the order statuses is set by default and you need to change it ONLY i
 
 ![](readme_images/order_status.png)
 
-4.4. Advanced settings - Developer Options
+3.4. Advanced settings - Developer Options
 
 **Log to file** - It's a setting about Magento plugin system log (cardpay.log), this log file contains the plugin debug information, communication errors between plugin front-end and back-end.
 
