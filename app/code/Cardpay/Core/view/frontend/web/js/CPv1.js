@@ -36,9 +36,8 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
 
         inputs_to_create_token: [
             'cardNumber',
-            'cardExpirationMonth',
-            'cardExpirationYear',
             'cardholderName',
+            'cardExpirationDate',
             'securityCode',
             'docType',
             'docNumber'
@@ -61,9 +60,8 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
             mpSecurityCodeCustomerAndCard: '#mp-securityCode-customer-and-card',
 
             cardNumber: '#cardNumber',
-            cardExpirationMonth: '#cardExpirationMonth',
-            cardExpirationYear: '#cardExpirationYear',
             cardholderName: '#cardholderName',
+            cardExpirationDate: '#cardExpirationDate',
             securityCode: '#securityCode',
             cpf: '#cpf',
             cpfBoleto: '#cpf_boleto',

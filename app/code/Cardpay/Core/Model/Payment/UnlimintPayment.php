@@ -172,7 +172,7 @@ class UnlimintPayment extends Cc implements GatewayInterface
     /**
      * @var array
      */
-    public static $_excludeInputsOpc = ['issuer_id', 'card_expiration_month', 'card_expiration_year', 'card_holder_name', 'doc_type', 'doc_number'];
+    public static $_excludeInputsOpc = ['issuer_id', 'card_expiration_date', 'card_holder_name', 'doc_type', 'doc_number'];
 
     /**
      * @var string

@@ -55,15 +55,8 @@ class BankCardPayment extends UnlimintPayment
             $info->setAdditionalInformation('security_code', $additionalData['security_code']);
             $info->setAdditionalInformation('cpf', preg_replace('/[^0-9]+/', '', $additionalData['cpf']));   // leave only digits
 
-            if (!empty($additionalData['card_expiration_month']) && !empty($additionalData['card_expiration_year'])) {
-                $info->setAdditionalInformation(
-                    'expiration_date',
-                    str_pad($additionalData['card_expiration_month'],
-                        2,
-                        '0',
-                        STR_PAD_LEFT
-                    ) . "/" . $additionalData['card_expiration_year']
-                );
+            if (!empty($additionalData['card_expiration_date'])) {
+                $info->setAdditionalInformation('expiration_date', $additionalData['card_expiration_date']);
             }
 
             if (isset($additionalData['gateway_mode'])) {

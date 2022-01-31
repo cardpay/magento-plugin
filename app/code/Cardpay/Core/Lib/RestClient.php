@@ -16,7 +16,7 @@ use const true;
 class RestClient
 {
     private const CONTENT_TYPE = 'application/json';
-    private const USER_AGENT = 'UnlimintPlugin/1.0.4/Magento';
+    private const USER_AGENT = 'UnlimintPlugin/1.0.5/Magento';
 
     /**
      * @var Data

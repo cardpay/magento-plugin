@@ -41,15 +41,15 @@
             }, 'validation':[]}">
 
             <div id="cardpay-form">
-                <div class="mp-box-inputs mp-col-100">
+                <div class="mp-box-inputs mp-col-100" style="position:relative">
                     <label for="cardNumber"> <!-- ko i18n: 'Credit card number'--><!-- /ko --> <em>*</em></label>
                     <input type="text" id="cardNumber" data-checkout="cardNumber" autocomplete="off" maxlength="19"
                         minlength="13" required data-bind="event: { keyup: validateCreditCardNumber }"/>
+                    <span id="card-brand" class="card-brand"></span>
                     <span class="mp-error" id="mp-error-205" data-main="#cardNumber"> <!-- ko i18n: 'Parameter cardNumber can not be null/empty'-->
                         <!-- /ko --> </span>
                     <span class="mp-error" id="mp-error-card-number" data-main="#cardNumber"> <!-- ko i18n: 'Invalid Card Number'-->
                         <!-- /ko --> </span>
-                    <span id="card-brand" class="card-brand"></span>
                 </div>
 
                 <div class="mp-box-inputs mp-col-100">
@@ -66,48 +66,19 @@
                         <!-- /ko --> </span>
                 </div>
 
-                <div class="mp-box-inputs mp-line">
-                    <div class="mp-box-inputs mp-col-50">
-                        <label for="cardExpirationMonth"> <!-- ko i18n: 'Expiration month'--><!-- /ko --> <em>*</em></label>
+                <div class="mp-box-inputs mp-col-100">
+                    <label for="cardExpirationDate"> <!-- ko i18n: 'Expiration date'--><!-- /ko --> <em>*</em></label>
+                    <input type="text" id="cardExpirationDate" name="cardpay_custom[cardExpirationDate]"
+                           maxlength="7"
+                           data-checkout="cardExpirationDate"
+                           autocomplete="off"
+                           placeholder="MM/YYYY"
+                           data-bind="attr: {'data-validate': JSON.stringify({required:true})}, event: { keyup: formatCardExpirationDate, blur: validateCardExpirationDate }"/>
 
-                        <select id="cardExpirationMonth"
-                                data-checkout="cardExpirationMonth"
-                                name="cardpay_custom[cardExpirationMonth]"
-                                data-bind="attr: {
-                                            'data-container': getCode() + '-cc-month',
-                                            'data-validate': JSON.stringify({required:true})
-                                        },
-                                        enable: isActive($parents),
-                                        options: getCcMonthsValues(),
-                                        optionsValue: 'value',
-                                        optionsText: 'month',
-                                        optionsCaption: $t('Month'),
-                                        event: { change: validateExpirationDate }">
-                        </select>
-                    </div>
-
-                    <div class="mp-box-inputs mp-col-50">
-                        <label for="cardExpirationYear"> <!-- ko i18n: 'Expiration year'--><!-- /ko --> <em>*</em></label>
-                        <select id="cardExpirationYear"
-                                data-checkout="cardExpirationYear"
-                                name="cardpay_custom[cardExpirationYear]"
-                                data-bind="attr: {
-                                        'data-container': getCode() + '-cc-year',
-                                        'data-validate': JSON.stringify({required:true})
-                                    },
-                                    enable: isActive($parents),
-                                    options: getCcYearsValues(),
-                                    optionsValue: 'value',
-                                    optionsText: 'year',
-                                    optionsCaption: $t('Year'),
-                                    event: { change: validateExpirationDate }">
-                        </select>
-                    </div>
-
-                    <span class="mp-error" id="mp-error-208" data-main="#cardExpirationMonth"> <!-- ko i18n: 'Invalid Expiration Date'--><!-- /ko --> </span>
-                    <span class="mp-error" id="mp-error-325" data-main="#cardExpirationMonth"> <!-- ko i18n: 'Invalid Expiration Date'--><!-- /ko --> </span>
-                    <span class="mp-error" id="mp-error-209" data-main="#cardExpirationYear"> </span>
-                    <span class="mp-error" id="mp-error-326" data-main="#cardExpirationYear"> </span>
+                    <span class="mp-error" id="mp-error-208" data-main="#cardExpirationDate"> <!-- ko i18n: 'Parameter cardExpirationDate can not be null/empty'-->
+                        <!-- /ko --> </span>
+                    <span class="mp-error" id="mp-error-209" data-main="#cardExpirationDate"> <!-- ko i18n: 'Invalid Expiration Date'-->
+                        <!-- /ko --> </span>
                 </div>
 
                 <div class="mp-box-inputs mp-line">
@@ -154,7 +125,7 @@
             </div>
 
             <div>
-                <img data-bind="attr: {src: getCardBrandsLogoURL()}" alt="Credit card" width="110" height="35" style="margin-top: 15px;" />
+                <img data-bind="attr: {src: getCardBrandsLogoURL()}" alt="Credit card" width="109" height="35" style="margin-top: 15px;" />
             </div>
 
             <div class="mp-box-inputs mp-line">

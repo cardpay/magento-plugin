@@ -183,8 +183,7 @@ define(
                     'method': this.item.method,
                     'additional_data': {
                         'payment[method]': this.getCode(),
-                        'card_expiration_month': document.querySelector(CPv1.selectors.cardExpirationMonth).value,
-                        'card_expiration_year': document.querySelector(CPv1.selectors.cardExpirationYear).value,
+                        'card_expiration_date': document.querySelector(CPv1.selectors.cardExpirationDate).value,
                         'card_number': document.querySelector(CPv1.selectors.cardNumber).value,
                         'security_code': document.querySelector(CPv1.selectors.securityCode).value,
                         'card_holder_name': document.querySelector(CPv1.selectors.cardholderName).value,
@@ -279,8 +278,8 @@ define(
              */
             onlyNumbersInCardNumber: function (t, evt) {
                 var cardNumber = document.querySelector(CPv1.selectors.cardNumber);
-                if (cardNumber.value.match(/[^0-9]/g)) {
-                    cardNumber.value = cardNumber.value.replace(/[^0-9]/g, '');
+                if (cardNumber.value.match(/[^\d]/g)) {
+                    cardNumber.value = cardNumber.value.replace(/[^\d]/g, '');
                 }
             },
 
@@ -315,7 +314,7 @@ define(
                     },
                     {
                         cbType: "mir",
-                        pattern: /^220[0-4][0-9]+/,
+                        pattern: /^220[0-4][\d]+/,
                         cnLength: [16, 17, 18, 19],
                     },
                     {
@@ -405,20 +404,43 @@ define(
                 }
             },
 
-            validateExpirationDate: function (a, b) {
-                var self = this;
-                self.hideError('208');
+            formatCardExpirationDate: function (a, b) {
+                const expirationDateObj = document.querySelector(CPv1.selectors.cardExpirationDate);
+                if (!expirationDateObj || !expirationDateObj.value) {
+                    return;
+                }
 
-                const expirationMonth = parseInt(document.querySelector(CPv1.selectors.cardExpirationMonth).value);
-                const expirationYear = parseInt(document.querySelector(CPv1.selectors.cardExpirationYear).value);
-                if (expirationMonth > 0 && expirationYear > 0) {
-                    const currentTime = new Date()
-                    const currentYear = currentTime.getFullYear();
-                    const currentMonth = currentTime.getMonth() + 1;
+                expirationDateObj.value = expirationDateObj.value.replace(/\D/g, '')
+                    .replace(/(\d{2})(\d)/, "$1/$2")
+                    .replace(/(\d{2})(\d{2})$/, "$1$2");
+            },
 
-                    if ((expirationYear === currentYear) && (expirationMonth < currentMonth)) {
-                        self.showError('208');
-                    }
+            validateCardExpirationDate: function (a, b) {
+                const self = this;
+                const errorCode = '209';
+                self.hideError(errorCode);
+
+                const expirationValues = document.querySelector(CPv1.selectors.cardExpirationDate).value.split('/');
+                if (typeof expirationValues[0] === 'undefined' || typeof expirationValues[1] === 'undefined') {
+                    self.showError(errorCode);
+                    return;
+                }
+
+                const expirationMonth = parseInt(expirationValues[0]);
+                const expirationYear = parseInt(expirationValues[1]);
+                if (expirationMonth < 1 || expirationMonth > 12) {
+                    self.showError(errorCode);
+                    return;
+                }
+
+                const currentTime = new Date()
+                const currentYear = currentTime.getFullYear();
+                const currentMonth = currentTime.getMonth() + 1;
+
+                if (expirationYear < currentYear
+                    || (expirationYear > currentYear + 40)
+                    || (expirationYear === currentYear && expirationMonth < currentMonth)) {
+                    self.showError(errorCode);
                 }
             },
 
@@ -451,14 +473,14 @@ define(
 
             onlyNumbersInSecurityCode: function (t, evt) {
                 var securityCode = document.querySelector(CPv1.selectors.securityCode);
-                if (securityCode.value.match(/[^0-9]/g)) {
-                    securityCode.value = securityCode.value.replace(/[^0-9]/g, '');
+                if (securityCode.value.match(/[^\d]/g)) {
+                    securityCode.value = securityCode.value.replace(/[^\d]/g, '');
                 }
             },
 
             applyInputMask: function (a, b) { //NOSONAR
                 function doFormat(x, pattern, mask) {
-                    var strippedValue = x.replace(/[^0-9]/g, "");
+                    var strippedValue = x.replace(/[^\d]/g, "");
                     var chars = strippedValue.split('');
                     var count = 0;
 

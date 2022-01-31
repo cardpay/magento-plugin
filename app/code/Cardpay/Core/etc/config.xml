@@ -27,7 +27,7 @@
                 <sort_order>2</sort_order>
                 <payment_action>authorize</payment_action>
                 <coupon_cardpay>0</coupon_cardpay>
-                <sandbox>1</sandbox>
+                <sandbox_boleto>1</sandbox_boleto>
             </cardpay_customticket>
             <cardpay>
                 <order_status_authorized>processing</order_status_authorized>

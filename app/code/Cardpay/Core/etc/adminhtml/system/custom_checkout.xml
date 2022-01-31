@@ -51,11 +51,6 @@
             <config_path>payment/cardpay_custom/installment</config_path>
         </field>
 
-        <field id="title" translate="label" type="text" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
-            <label>Payment Title</label>
-            <config_path>payment/cardpay_custom/title</config_path>
-        </field>
-
         <field id="sort_order" translate="label comment" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Checkout Position</label>
             <frontend_class>validate-number</frontend_class>
