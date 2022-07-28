@@ -161,8 +161,7 @@ class Payment extends TopicsAbstract
     public function updateStatusOrderByPayment($requestParams)
     {
         $orderId = $requestParams['merchant_order']['id'];
-        $type = isset($requestParams['payment_data']) ? 'payment_data' : 'recurring_data';
-        $paymentData = $requestParams[$type];
+        $paymentData = $requestParams['payment_data'];
 
         /**
          * @var Order
@@ -172,6 +171,7 @@ class Payment extends TopicsAbstract
         if (!$order->getId()) {
             $message = 'Unlimint - The order was not found in Magento. You will not be able to follow the process without this information.';
             $this->cpHelper->log('updateStatusOrderByPayment', self::LOG_NAME, $message);
+
             return ['httpStatus' => Response::HTTP_NOT_FOUND, 'message' => $message, 'data' => $orderId];
         }
 

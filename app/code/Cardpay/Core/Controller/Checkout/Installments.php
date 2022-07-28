@@ -20,6 +20,9 @@ use Magento\Sales\Model\OrderFactory;
 
 class Installments extends Action
 {
+    private const INSTALLMENTS_MIN = 1;
+    private const INSTALLMENTS_MAX = 12;
+
     /**
      * @var Data
      */
@@ -89,53 +92,27 @@ class Installments extends Action
             return [];
         }
 
-        $response = $this->getApiResponse($quote);
-        if (empty($response)) {
-            $this->dataHelper->log('Empty response, unable to get installment options');
-            return [];
-        }
-        if (!isset($response['response']['options'])) {
-            $this->dataHelper->log('No options in response, unable to get installment options');
-            return [];
-        }
-
         $installments = [
             'currency' => $this->getCurrencySymbol(),
-            'options' => $this->getInstallmentOptions($response, $quote->getGrandTotal())
+            'options' => $this->getInstallmentOptions($quote->getGrandTotal())
         ];
 
         $json = $this->resultJsonFactory->create();
         return $json->setData($installments);
     }
 
-    private function getInstallmentOptions($response, $grandTotal)
+    private function getInstallmentOptions($grandTotal)
     {
-        $optionsResponse = $response['response']['options'];
-
         $options = [];
-        foreach ($optionsResponse as $option) {
-            if (!isset($option['installments'], $option['amount'])) {
-                continue;
-            }
 
-            $installments = $option['installments'];
-            $amount = $option['amount'];
-
+        for ($installments = self::INSTALLMENTS_MIN; $installments <= self::INSTALLMENTS_MAX; $installments++) {
             $options[] = [
                 'installments' => $installments,
-                'amount' => $this->formatAmount($amount)
+                'amount' => $this->formatAmount($grandTotal / $installments)
             ];
         }
 
-        return array_merge(
-            [
-                [
-                    'installments' => 1,
-                    'amount' => $this->formatAmount($grandTotal)
-                ]
-            ],
-            $options
-        );
+        return $options;
     }
 
     private function formatAmount($amount)
@@ -145,33 +122,6 @@ class Installments extends Action
         }
 
         return number_format($amount, 2);
-    }
-
-    /**
-     * @throws LocalizedException|\Exception
-     * @var Quote $quote
-     */
-    public function getApiResponse($quote)
-    {
-        $currency = $quote->getQuoteCurrencyCode();
-        $requestId = uniqid('', true);
-
-        $params = [
-            'currency' => $currency,
-            'request_id' => $requestId,
-            'total_amount' => $quote->getGrandTotal()
-        ];
-
-        /**
-         * @var Api
-         */
-        $api = $this->dataHelper->getApiInstance(
-            null,
-            ConfigData::PATH_BANKCARD_TERMINAL_CODE,
-            ConfigData::PATH_BANKCARD_TERMINAL_PASSWORD
-        );
-
-        return $api->get('/api/installments/options_calculator', $params);
     }
 
     private function getCurrencySymbol()

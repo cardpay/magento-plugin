@@ -63,9 +63,6 @@ class InvoiceRegisterObserver implements ObserverInterface
         if (isset($paymentResponse['payment_data'])) {
             return 'COMPLETED';
         }
-        if (isset($paymentResponse['recurring_data'])) {
-            return 'AUTHORIZED';
-        }
 
         throw new LocalizedException(__(PaymentStatusHandler::ERROR_MESSAGE));
     }

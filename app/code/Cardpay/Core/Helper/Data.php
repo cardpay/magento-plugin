@@ -56,6 +56,7 @@ class Data extends \Magento\Payment\Helper\Data
      * payment calculator
      */
     const STATUS_ACTIVE = 'active';
+    const PAYMENT_DATA = 'payment_data';
 
     /**
      * @var MessageInterface
@@ -130,8 +131,7 @@ class Data extends \Magento\Payment\Helper\Data
         ComposerInformation      $composerInformation,
         ResourceInterface        $moduleResource,
         TimezoneInterface        $timezone
-    )
-    {
+    ) {
         parent::__construct($context, $layoutFactory, $paymentMethodFactory, $appEmulation, $paymentConfig, $initialConfig);
 
         $this->_messageInterface = $messageInterface;
@@ -192,7 +192,7 @@ class Data extends \Magento\Payment\Helper\Data
             if (BankCardPayment::isBankCardPaymentMethod($order)) {
                 $terminalCode = ConfigData::PATH_BANKCARD_TERMINAL_CODE;
                 $terminalPassword = ConfigData::PATH_BANKCARD_TERMINAL_PASSWORD;
-            } else if (BoletoPayment::isBoletoPaymentMethod($order)) {
+            } elseif (BoletoPayment::isBoletoPaymentMethod($order)) {
                 $terminalCode = ConfigData::PATH_BOLETO_TERMINAL_CODE;
                 $terminalPassword = ConfigData::PATH_BOLETO_TERMINAL_PASSWORD;
             }
@@ -277,12 +277,14 @@ class Data extends \Magento\Payment\Helper\Data
         if ($payment['installments']) {
             $payment["installments"] = $payment['installments'];
         }
+
         if ($payment['id']) {
             $payment["payment_id_detail"] = $payment['id'];
         }
+
         if (isset($payment['trunc_card'])) {
             $payment["trunc_card"] = $payment['trunc_card'];
-        } else if (isset($payment['card']) && isset($payment['card']['last_four_digits'])) {
+        } elseif (isset($payment['card']) && isset($payment['card']['last_four_digits'])) {
             $payment["trunc_card"] = "xxxx xxxx xxxx " . $payment['card']["last_four_digits"];
         }
 
@@ -318,6 +320,7 @@ class Data extends \Magento\Payment\Helper\Data
         if (!isset($data[$field])) {
             return $finalValue;
         }
+
         $amountValues = explode('|', $data[$field]);
         $statusValues = explode('|', $data['status']);
         foreach ($amountValues as $key => $value) {
@@ -336,6 +339,7 @@ class Data extends \Magento\Payment\Helper\Data
             $store = $objectManager->get('Magento\Framework\Locale\Resolver');
             $locale = $store->getLocale();
             $locale = explode('_', $locale);
+
             return $locale[1];
         } catch (Exception $e) {
             return 'US';
@@ -388,10 +392,8 @@ class Data extends \Magento\Payment\Helper\Data
             $additionalInfo = $additionalInfo['paymentResponse'];
         }
 
-        $type = isset($additionalInfo['payment_data']) ? 'payment_data' : 'recurring_data';
-
-        if (isset($additionalInfo[$type]['id'])) {
-            return $additionalInfo[$type]['id'];
+        if (isset($additionalInfo[self::PAYMENT_DATA]['id'])) {
+            return $additionalInfo[self::PAYMENT_DATA]['id'];
         }
 
         return null;
@@ -429,7 +431,7 @@ class Data extends \Magento\Payment\Helper\Data
             $this->getStoreManager()->getStore()->getBaseUrl(UrlInterface::URL_TYPE_LINK)
         );
 
-        $requestParams['payment_data']['id'] = $paymentId;
+        $requestParams[self::PAYMENT_DATA]['id'] = $paymentId;
 
         $requestParams['customer']['email'] = $order->getCustomerEmail();
 
@@ -461,7 +463,7 @@ class Data extends \Magento\Payment\Helper\Data
     {
         if (ConfigData::PATH_BANKCARD_TERMINAL_CODE === $terminalCode) {
             $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_BANKCARD_SANDBOX, ScopeInterface::SCOPE_STORE));
-        } else if (ConfigData::PATH_BOLETO_TERMINAL_CODE === $terminalCode) {
+        } elseif (ConfigData::PATH_BOLETO_TERMINAL_CODE === $terminalCode) {
             $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_BOLETO_SANDBOX, ScopeInterface::SCOPE_STORE));
         } else {
             throw new Exception('Unable to get API host');

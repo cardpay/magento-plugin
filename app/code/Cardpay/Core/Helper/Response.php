@@ -21,12 +21,8 @@ class Response
     public const HTTP_INTERNAL_ERROR = 500;
 
     public const INFO_MERCHANT_ORDER_NOT_FOUND = 'Merchant Order not found';
-    public const INFO_STATUS_NOT_FINAL = 'Status not final';
     public const INFO_EXTERNAL_REFERENCE_NOT_FOUND = 'External reference not found';
     public const INFO_ORDER_CANCELED = 'The order is canceled';
-
-    public const TOPIC_RECURRING_PAYMENT = 'preapproval';
-    public const TOPIC_PAYMENT = 'payment';
 
     public const PAYMENT_CREATION_ERRORS = [
         '1' => 'Params Error.',

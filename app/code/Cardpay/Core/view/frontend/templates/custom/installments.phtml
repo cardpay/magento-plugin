@@ -28,34 +28,25 @@ $scriptString = <<<script
         xhttp.open('GET', '$installmentsURL', false);
         xhttp.send();
         const ajaxResponse = xhttp.responseText;
-        if (ajaxResponse == null || ajaxResponse == 'undefined') {
-            for (let n = 1; n <= 12; n++) {
+
+        const responseArray = JSON.parse(ajaxResponse);            
+        const currency = responseArray['currency'];
+        
+        const options = responseArray['options'];
+        options.forEach(function (installmentOption) {
+            if (installmentOption['installments'] != 'undefined' && installmentOption['amount'] != 'undefined') {
+                const installments = installmentOption['installments'];
+                const amount = installmentOption['amount'];
+
                 let option = document.createElement('option');
-                option.text = n;
-                option.value = n;
-                
+                option.text = installments + ' x ' + currency + amount;
+                option.value = installments;
+
                 installmentSelect.appendChild(option);
             }
-            
-        } else {
-            const responseArray = JSON.parse(ajaxResponse);            
-            const currency = responseArray['currency'];
-            
-            const options = responseArray['options'];
-            options.forEach(function (installmentOption) {
-                if (installmentOption['installments'] != 'undefined' && installmentOption['amount'] != 'undefined') {
-                    const installments = installmentOption['installments'];
-                    const amount = installmentOption['amount'];
-
-                    let option = document.createElement('option');
-                    option.text = installments + ' x ' + currency + amount;
-                    option.value = installments;
-
-                    installmentSelect.appendChild(option);
-                }
-            })
-        }
+        })
     }
 script;
 
-echo /* @noEscape */ $secureRenderer->renderTag('script', [], $scriptString, false);
+echo /* @noEscape */
+$secureRenderer->renderTag('script', [], $scriptString, false);

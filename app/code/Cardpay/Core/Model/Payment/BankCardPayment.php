@@ -38,6 +38,7 @@ class BankCardPayment extends UnlimintPayment
             if (empty($infoForm['additional_data'])) {
                 return $this;
             }
+
             $additionalData = $infoForm['additional_data'];
 
             if (isset($additionalData['one_click_pay']) && (int)$additionalData['one_click_pay'] === 1) {
@@ -115,12 +116,10 @@ class BankCardPayment extends UnlimintPayment
 
             $isOnePhasePayment = (1 === (int)$this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_CAPTURE, ScopeInterface::SCOPE_STORE));
             if (!$isOnePhasePayment) {
-                $sectionName = isset($requestParams['recurring_data']) ? 'recurring_data' : 'payment_data';     // 2 phase installment or payment
-                $requestParams[$sectionName]['preauth'] = 'true';
+                $requestParams['payment_data']['preauth'] = 'true';
             }
 
             return $requestParams;
-
         } catch (Exception $e) {
             $this->_helperData->log('CustomPayment::initialize - There was an error retrieving the information to create the payment, more details: ' . $e->getMessage());
             throw new LocalizedException(__(Response::PAYMENT_CREATION_ERRORS['INTERNAL_ERROR_MODULE']));
@@ -160,6 +159,7 @@ class BankCardPayment extends UnlimintPayment
         $response = $this->_coreModel->postPayment($requestParams, $order);
         if (isset($response['status']) && ((int)$response['status'] === 200 || (int)$response['status'] === 201)) {
             $this->getInfoInstance()->setAdditionalInformation('paymentResponse', $response['response']);
+
             return true;
         }
 
@@ -204,7 +204,7 @@ class BankCardPayment extends UnlimintPayment
         return $ip;
     }
 
-    function setOrderSubtotals($data)
+    public function setOrderSubtotals($data)
     {
         $total = $data['transaction_details']['total_paid_amount'];
         $order = $this->getInfoInstance()->getOrder();
