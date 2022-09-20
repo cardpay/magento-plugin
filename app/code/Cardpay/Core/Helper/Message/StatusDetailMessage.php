@@ -17,7 +17,7 @@ class StatusDetailMessage extends AbstractMessage
         "cc_rejected_bad_filled_card_number" => 'Check the card number.',
         "cc_rejected_bad_filled_date" => 'Check the expiration date.',
         "cc_rejected_bad_filled_other" => 'Check the data.',
-        "cc_rejected_bad_filled_security_code" => 'Check the CVV2/CVC2.',
+        "cc_rejected_bad_filled_security_code" => 'Check the security code.',
         "cc_rejected_blacklist" => 'We could not process your payment.',
         "cc_rejected_call_for_authorize" => 'You must authorize to %1 the payment of $ %2 to Cardpay.',
         "cc_rejected_card_disabled" => 'Call %1 to activate your card.<br/>The phone is on the back of your card.',

@@ -7,7 +7,6 @@ use Cardpay\Core\Helper\Response;
 use Exception;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
-use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\Cc;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Sales\Model\Order;
@@ -25,15 +24,6 @@ class BankCardPayment extends UnlimintPayment
     protected $fields = [
         'payment_method_id', 'identification_type', 'identification_number', 'financial_institution', 'entity_type'
     ];
-
-    protected function safeSetAdditionalInformation(InfoInterface $info, array $dataArray, array $keys)
-    {
-        foreach ($keys as $infoKey => $dataKey) {
-            if (isset($dataArray[$dataKey])) {
-                $info->setAdditionalInformation($infoKey, $dataArray[$dataKey]);
-            }
-        }
-    }
 
     /**
      * @param DataObject $data
@@ -58,25 +48,25 @@ class BankCardPayment extends UnlimintPayment
             $info = $this->getInfoInstance();
 
             $info->setAdditionalInformation($additionalData);
-            $this->safeSetAdditionalInformation(
-                $info,
-                $additionalData,
-                [
-                    'expiration_date' => 'card_expiration_date',
-                    'gateway_mode' => 'gateway_mode',
-                    'coupon_code' => 'coupon_code',
-                    'payment_method' => 'payment_method_id',
-                    'cardholder_name' => 'card_holder_name',
-                    'card_number' => 'card_number',
-                    'security_code' => 'security_code',
-                    'installments' => 'installments',
-                    'total_amount' => 'total_amount',
-                ]
-            );
-
             $info->setAdditionalInformation('method', $infoForm['method']);
             $info->setAdditionalInformation('payment_type_id', "credit_card");
-            $info->setAdditionalInformation('cpf', preg_replace('/[^0-9]+/', '', $additionalData['cpf'] ?? ''));   // leave only digits
+            $info->setAdditionalInformation('payment_method', $additionalData['payment_method_id']);
+            $info->setAdditionalInformation('cardholder_name', $additionalData['card_holder_name']);
+            $info->setAdditionalInformation('card_number', $additionalData['card_number']);
+            $info->setAdditionalInformation('security_code', $additionalData['security_code']);
+            $info->setAdditionalInformation('cpf', preg_replace('/[^0-9]+/', '', $additionalData['cpf']));   // leave only digits
+
+            if (!empty($additionalData['card_expiration_date'])) {
+                $info->setAdditionalInformation('expiration_date', $additionalData['card_expiration_date']);
+            }
+
+            if (isset($additionalData['gateway_mode'])) {
+                $info->setAdditionalInformation('gateway_mode', $additionalData['gateway_mode']);
+            }
+
+            if (!empty($additionalData['coupon_code'])) {
+                $info->setAdditionalInformation('coupon_code', $additionalData['coupon_code']);
+            }
         }
 
         return $this;
@@ -104,58 +94,31 @@ class BankCardPayment extends UnlimintPayment
             $order = $this->getInfoInstance()->getOrder();
             $payment = $order->getPayment();
             $paymentInfo = $this->getPaymentInfo($payment);
-            $paymentInfo['payment_method'] = ConfigData::BANK_CARD_API_PAYMENT_METHOD;
 
-            $requestParams = $this->_coreModel->getDefaultRequestParams($paymentInfo, $this->_getQuote(), $order, []);
+            $requestParams = $this->_coreModel->getDefaultRequestParams($paymentInfo, $this->_getQuote(), $order);
 
-            if ($this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_ASK_CPF)) {
-                $requestParams['customer']['identity'] = $payment->getAdditionalInformation('cpf');
-            }
-            $mode = $this->_scopeConfig->getValue(ConfigData::PATH_BANKCARD_API_ACCESS_MODE);
+            $requestParams['payment_method'] = ConfigData::BANK_CARD_API_PAYMENT_METHOD;
 
-            if ($mode === 'gateway') {
-                $requestParams['card_account']['card']['pan'] = $payment->getAdditionalInformation('card_number');
-                $requestParams['card_account']['card']['expiration'] = substr_replace($payment->getAdditionalInformation('expiration_date'), '20', 3, 0);
-                $requestParams['card_account']['card']['security_code'] = $payment->getAdditionalInformation('security_code');
-                $requestParams['card_account']['card']['holder'] = $payment->getAdditionalInformation('cardholder_name');
-                $requestParams['customer']['identity'] = $payment->getAdditionalInformation('cpf');
+            $requestParams['card_account']['card']['pan'] = $payment->getAdditionalInformation('card_number');
+            $requestParams['card_account']['card']['expiration'] = $payment->getAdditionalInformation('expiration_date');
+            $requestParams['card_account']['card']['security_code'] = $payment->getAdditionalInformation('security_code');
+            $requestParams['card_account']['card']['holder'] = $payment->getAdditionalInformation('cardholder_name');
 
-                $requestMasked = $requestParams;
+            $requestParams['customer']['identity'] = $payment->getAdditionalInformation('cpf');
 
-                $pan = $requestMasked['card_account']['card']['pan'];
-                $requestMasked['card_account']['card']['pan'] = substr($pan, 0, 6) . '...' . substr($pan, -4);
-                $requestMasked['card_account']['card']['security_code'] = '...';
+            $requestMasked = $requestParams;
 
-                $this->_helperData->log('CustomPayment::initialize - Credit Card: POST', self::LOG_NAME, $requestMasked);
-            }
+            $pan = $requestMasked['card_account']['card']['pan'];
+            $requestMasked['card_account']['card']['pan'] = substr($pan, 0, 6) . '...' . substr($pan, -4);
+            $requestMasked['card_account']['card']['security_code'] = '...';
 
-            $numInstallments = (int)$payment->getAdditionalInformation('installments');
-            $installmentType = $this->_scopeConfig->getValue(ConfigData::PATH_BANKCARD_INSTALLMENT_TYPE);
-            $areInstallmentsEnabled = (1 === (int)($this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_INSTALLMENT, ScopeInterface::SCOPE_STORE)));
-            $capturePayment = (1 === (int)$this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_CAPTURE, ScopeInterface::SCOPE_STORE));
-            if ((!$areInstallmentsEnabled) || $numInstallments === 1) {
-                $isPreAuth = !$capturePayment;
-            } else {
-                $isPreAuth = (
-                    ($installmentType !== 'IF') &&
-                    (!$capturePayment)
-                );
-            }
+            $this->_helperData->log('CustomPayment::initialize - Credit Card: POST', self::LOG_NAME, $requestMasked);
 
-            if ($isPreAuth) {
+            $isOnePhasePayment = (1 === (int)$this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_CAPTURE, ScopeInterface::SCOPE_STORE));
+            if (!$isOnePhasePayment) {
                 $requestParams['payment_data']['preauth'] = 'true';
             }
 
-            if ($numInstallments > 1) {
-                $requestParams['payment_data']['installments'] = $payment->getAdditionalInformation('installments');
-            }
-
-            if (($installmentType === 'IF') && ($payment->getAdditionalInformation('installments') > 1)) {
-                $requestParams['payment_data']['installment_amount'] = round(
-                    $payment->getAdditionalInformation('total_amount') / $payment->getAdditionalInformation('installments'),
-                    2
-                );
-            }
             return $requestParams;
         } catch (Exception $e) {
             $this->_helperData->log('CustomPayment::initialize - There was an error retrieving the information to create the payment, more details: ' . $e->getMessage());

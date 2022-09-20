@@ -1,9 +1,0 @@
-<?xml version="1.0"?>
-<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
-    <body>
-        <referenceContainer name="creditmemo_totals">
-            <block class="Cardpay\Core\Block\Sales\Order\Totals\FinanceCost" name="finance_cost"/>
-            <block class="Cardpay\Core\Block\Sales\Order\Totals\DiscountCoupon" name="discount_coupon"/>
-        </referenceContainer>
-    </body>
-</page>

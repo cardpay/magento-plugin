@@ -261,4 +261,3 @@ And push the button **Refund offline**
 ![](readme_images/refund_offline_memo.png)
 
 After completion of the **Refund offline** order status is changed to **Closed.**
-

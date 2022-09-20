@@ -26,10 +26,9 @@ define(
             },
             placeOrderHandler: null,
             validateHandler: null,
-            redirectAfterPlaceOrder: true,
+            redirectAfterPlaceOrder: false,
             initialGrandTotal: null,
-            iframePadding: 40,
-            maxIframeWidth: 1000,
+
             initApp: function () {
                 if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
                     CPv1.text.choose = $t('Choose');
@@ -56,18 +55,28 @@ define(
                 return 'cardpay_custom';
             },
 
-            getCheckoutConfigParam: function (key, defaultValue) {
-                if (typeof window.checkoutConfig.payment[this.getCode()] === 'undefined') {
-                    return defaultValue;
-                }
-                return window.checkoutConfig.payment[this.getCode()][key];
+            isActive: function () {
+                return true;
             },
+
+            getCardListCustomerCards: function () {
+                return [];
+            },
+
             existBanner: function () {
-                return (this.getCheckoutConfigParam('bannerUrl', null) !== null);
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
+                    if (window.checkoutConfig.payment[this.getCode()]['bannerUrl'] != null) {
+                        return true;
+                    }
+                }
+                return false;
             },
 
             getBannerUrl: function () {
-                return this.getCheckoutConfigParam('bannerUrl', '');
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
+                    return window.checkoutConfig.payment[this.getCode()]['bannerUrl'];
+                }
+                return '';
             },
 
             getGrandTotal: function () {
@@ -82,47 +91,76 @@ define(
             },
 
             getBaseUrl: function () {
-                return this.getCheckoutConfigParam('base_url', '');
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
+                    return window.checkoutConfig.payment[this.getCode()]['base_url'];
+                }
+                return '';
             },
 
             getRoute: function () {
-                return this.getCheckoutConfigParam('route', '');
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
+                    return window.checkoutConfig.payment[this.getCode()]['route'];
+                }
+                return '';
             },
 
             getCountry: function () {
-                return this.getCheckoutConfigParam('country', '');
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
+                    return window.checkoutConfig.payment[this.getCode()]['country'];
+                }
+                return '';
             },
 
             getSuccessUrl: function () {
-                return this.getCheckoutConfigParam('success_url', '');
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
+                    return window.checkoutConfig.payment[this.getCode()]['success_url'];
+                }
+                return '';
             },
 
             getCustomer: function () {
-                return this.getCheckoutConfigParam('customer', '');
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
+                    return window.checkoutConfig.payment[this.getCode()]['customer'];
+                }
+                return '';
             },
 
             getLoadingGifUrl: function () {
-                return this.getCheckoutConfigParam('loading_gif', '');
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
+                    return window.checkoutConfig.payment[this.getCode()]['loading_gif'];
+                }
+                return '';
             },
 
             getMpGatewayMode: function () {
-                return this.getCheckoutConfigParam('mp_gateway_mode', 0);
-            },
-
-            getApiAccessMode: function () {
-                return this.getCheckoutConfigParam('api_access_mode', 'gateway');
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
+                    return window.checkoutConfig.payment[this.getCode()]['mp_gateway_mode'];
+                }
+                return 0;
             },
 
             isCpfRequired: function () {
-                return this.getCheckoutConfigParam('is_cpf_required', false);
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
+                    return parseInt(window.checkoutConfig.payment[this.getCode()]['is_cpf_required']) === 1;
+                }
+
+                return false;
             },
 
             areInstallmentsEnabled: function () {
-                return parseInt(this.getCheckoutConfigParam('are_installments_enabled', 0)) === 1;
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
+                    return parseInt(window.checkoutConfig.payment[this.getCode()]['are_installments_enabled']) === 1;
+                }
+
+                return false;
             },
 
             getCardBrandsLogoURL: function () {
-                return this.getCheckoutConfigParam('card_brands_logo_url', '');
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
+                    return window.checkoutConfig.payment[this.getCode()]['card_brands_logo_url'];
+                }
+
+                return '';
             },
 
             /**
@@ -130,12 +168,12 @@ define(
              * @returns {String}
              */
             getLogoUrl: function () {
-                return this.getCheckoutConfigParam('logoUrl', '');
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
+                    return window.checkoutConfig.payment[this.getCode()]['logoUrl'];
+                }
+                return '';
             },
-            safeGetData: function (selector) {
-                const el = jQuery(selector);
-                return ('object' === typeof el) ? el.val() : null;
-            },
+
             /**
              * @override
              */
@@ -145,19 +183,19 @@ define(
                     'method': this.item.method,
                     'additional_data': {
                         'payment[method]': this.getCode(),
-                        'card_expiration_date': this.safeGetData(CPv1.selectors.cardExpirationDate),
-                        'card_number': this.safeGetData(CPv1.selectors.cardNumber),
-                        'security_code': this.safeGetData(CPv1.selectors.securityCode),
-                        'card_holder_name': this.safeGetData(CPv1.selectors.cardholderName),
-                        'installments': this.safeGetData(CPv1.selectors.installments),
-                        'cpf': this.safeGetData(CPv1.selectors.cpf),
-                        'total_amount': this.safeGetData(CPv1.selectors.amount),
-                        'amount': this.safeGetData(CPv1.selectors.amount),
+                        'card_expiration_date': document.querySelector(CPv1.selectors.cardExpirationDate).value,
+                        'card_number': document.querySelector(CPv1.selectors.cardNumber).value,
+                        'security_code': document.querySelector(CPv1.selectors.securityCode).value,
+                        'card_holder_name': document.querySelector(CPv1.selectors.cardholderName).value,
+                        'installments': document.getElementById('installments') ? document.querySelector(CPv1.selectors.installments).value : null,
+                        'cpf': document.getElementById('cpf') ? document.querySelector(CPv1.selectors.cpf).value : null,
+                        'total_amount': document.querySelector(CPv1.selectors.amount).value,
+                        'amount': document.querySelector(CPv1.selectors.amount).value,
                         'site_id': this.getCountry(),
-                        'token': this.safeGetData(CPv1.selectors.token),
-                        'payment_method_id': this.safeGetData(CPv1.selectors.paymentMethodId),
-                        'one_click_pay': this.safeGetData(CPv1.selectors.CustomerAndCard),
-                        'gateway_mode': this.safeGetData(CPv1.selectors.MpGatewayMode),
+                        'token': document.querySelector(CPv1.selectors.token).value,
+                        'payment_method_id': document.querySelector(CPv1.selectors.paymentMethodId).value,
+                        'one_click_pay': document.querySelector(CPv1.selectors.CustomerAndCard).value,
+                        'gateway_mode': document.querySelector(CPv1.selectors.MpGatewayMode).value,
                     }
                 };
             },
@@ -171,71 +209,32 @@ define(
             },
 
             hasErrors: function () {
-                const allMessageErrors = jQuery('.mp-error');
+                var allMessageErrors = jQuery('.mp-error');
                 if (allMessageErrors.length > 1) {
-                    for (let x = 0; x < allMessageErrors.length; x++) {
-                        if (jQuery(allMessageErrors[x]).is(':visible')) {
-                            return true;
+                    for (var x = 0; x < allMessageErrors.length; x++) {
+                        if ($(allMessageErrors[x]).css('display') !== 'none') {
+                            return true
                         }
                     }
                 } else {
-                    if (jQuery(allMessageErrors).is(':visible')) {
-                        return true;
+                    if (allMessageErrors.css('display') !== 'none') {
+                        return true
                     }
                 }
 
                 return false;
             },
-            initModalSize: function () {
-                const self = this;
-                jQuery(window).resize(function () {
-                    self.setModalSize();
-                });
-                self.setModalSize();
-            },
-            setModalSize: function () {
-                const backWindow = jQuery('#unlimint_modal_page');
-                const w = jQuery(window).width();
-                const h = jQuery(window).height();
-                backWindow.css('margin-top', '40px');
-                backWindow.css('margin-bottom', '40px');
-                let newWidth = (w - this.iframePadding);
-                newWidth = (newWidth > this.maxIframeWidth) ? this.maxIframeWidth : newWidth;
-                const margin = Math.round((w - newWidth) / 2);
-                backWindow.css('margin-left', margin + 'px');
-                backWindow.width(newWidth);
-                backWindow.height(h - 40 - this.iframePadding * 2);
-            },
-            redirectFunc: function () {
-                this.initModalSize();
-                jQuery('#unlimint_modal_bg').removeClass('closed');
-                jQuery('body').css('overflow', 'hidden');
-                jQuery('#unimint_modal_iframe').attr('src', this.getSuccessUrl());
-            },
+
             /**
              * Place order
              */
             placeOrder: function (data, event) {
                 var self = this;
 
-                if (self.getApiAccessMode() !== 'pp') {
-                    this.validateCreditCardNumber();
-                    this.validateCardHolderName();
-                    this.validateCardExpirationDate();
-                    this.validateSecurityCode();
-
-                    if (self.isCpfRequired()) {
-                        this.validateCpf();
-                    }
-                }
-
-                if (self.areInstallmentsEnabled()) {
-                    this.validateInstallments();
-                }
-
                 if (event) {
                     event.preventDefault();
                 }
+
                 if (this.validate() && additionalValidators.validate() && !this.hasErrors()) {
                     this.isPlaceOrderActionAllowed(false);
 
@@ -245,18 +244,16 @@ define(
                                 self.isPlaceOrderActionAllowed(true);
                             }
                         ).done(function () {
-                            if (self.getApiAccessMode() === 'pp') {
-                                self.redirectFunc();
-                            } else {
-                                self.afterPlaceOrder();
+                            self.afterPlaceOrder();
+
+                            if (self.redirectAfterPlaceOrder) {
+                                redirectOnSuccessAction.execute();
                             }
                         }
                     );
 
                     return true;
                 }
-
-                jQuery('div.mage-error').css('display', 'none');
 
                 return false;
             },
@@ -281,29 +278,21 @@ define(
              */
             onlyNumbersInCardNumber: function (t, evt) {
                 var cardNumber = document.querySelector(CPv1.selectors.cardNumber);
-
-                cardNumber.value = cardNumber.value.replace(/\D/g, '')
-                    .replace(/^(\d{4})(\d)/g, "$1 $2")
-                    .replace(/^(\d{4})\s(\d{4})(\d)/g, "$1 $2 $3")
-                    .replace(/^(\d{4})\s(\d{4})\s(\d{4})(\d)/g, "$1 $2 $3 $4");
-
+                if (cardNumber.value.match(/[^\d]/g)) {
+                    cardNumber.value = cardNumber.value.replace(/[^\d]/g, '');
+                }
             },
 
             luhnValidation: function (cardNumber) {
-                if (!cardNumber) {
-                    return false;
-                }
-
-                const cardNumberWithoutSpaces = (cardNumber + '').replace(/\s/g, '');
                 let digit, odd, sum, _i, _len;
                 odd = true;
                 sum = 0;
-                const digits = cardNumberWithoutSpaces.split('').reverse();
+                const digits = (cardNumber + '').split('').reverse();
 
                 for (_i = 0, _len = digits.length; _i < _len; _i++) {
                     digit = digits[_i];
                     digit = parseInt(digit, 10);
-                    odd = !odd;
+                    odd = !odd
                     if (odd) {
                         digit *= 2;
                     }
@@ -316,63 +305,66 @@ define(
                 return (sum % 10 === 0);
             },
 
-            validateCreditCardNumber: function (_a, _b) {
+            validateCreditCardNumber: function (a, b) {
                 const cardBrands = [
                     {
-                        cbType: 'visa',
+                        cbType: "visa",
                         pattern: /^4/,
                         cnLength: [13, 14, 15, 16, 19],
                     },
                     {
-                        cbType: 'mir',
-                        pattern: /^220[0-4]\d+/,
+                        cbType: "mir",
+                        pattern: /^220[0-4][\d]+/,
                         cnLength: [16, 17, 18, 19],
                     },
                     {
-                        cbType: 'discover',
+                        cbType: "discover",
                         pattern: /^(60110\d|6011[2-4]\d|601174|60117[7-9]|6011[8-9][4-9]|644\d\d\d|65\d\d\d\d|64[4-9]\d+|369989)/,
                         cnLength: [16, 17, 18, 19],
                     },
                     {
-                        cbType: 'dinersclub',
+                        cbType: "dinersclub",
                         pattern: /^(30[0-5]\d\d\d|3095\d\d|3[8-9]\d\d\d\d)/,
                         cnLength: [16, 17, 18, 19],
                     }, {
-                        cbType: 'dinersclub',
+                        cbType: "dinersclub",
                         pattern: /^(36\d\d\d\d)/,
                         cnLength: [14, 15, 16, 17, 18, 19],
                     },
                     {
-                        cbType: 'amex',
+                        cbType: "amex",
                         pattern: /^3[47]/,
                         cnLength: [15],
                     },
                     {
-                        cbType: 'jcb',
-                        pattern: /^(((352[8-9][0-9][0-9])|(35[3-8][0-9][0-9][0-9]))|((30[8-9][8-9][0-9][0-9])|309[0-4][0-9][0-9])|((309[6-9][0-9][0-9])|310[0-2][0-9][0-9])|(311[2-9][0-9][0-9])|(3120[0-9][0-9])|(315[8-9][0-9][0-9])|((333[7-9][0-9][0-9])|(334[0-9][0-9][0-9])))/,  // NOSONAR
+                        cbType: "jcb",
+                        pattern: /^(((352[8-9][0-9][0-9])|(35[3-8][0-9][0-9][0-9]))|((30[8-9][8-9][0-9][0-9])|309[0-4][0-9][0-9])|((309[6-9][0-9][0-9])|310[0-2][0-9][0-9])|(311[2-9][0-9][0-9])|(3120[0-9][0-9])|(315[8-9][0-9][0-9])|((333[7-9][0-9][0-9])|(334[0-9][0-9][0-9])))/,
                         cnLength: [16, 17, 18, 19],
                     },
                     {
-                        cbType: 'unionpay',
+                        cbType: "unionpay",
                         pattern: /^(62|9558|81)/,
                         cnLength: [13, 14, 15, 16, 17, 18, 19],
                     },
                     {
-                        cbType: 'elo',
-                        pattern: /^(50(67(0[78]|1[5789]|2[012456789]|3[01234569]|4[0-7]|53|7[4-8])|9(0(0[0123478]|14|2[0-2]|3[359]|4[01235678]|5[1-9]|6[0-9]|7[0134789]|8[04789]|9[12349])|1(0[34568]|4[6-9]|83)|2(20|5[7-9]|6[0-6])|4(0[7-9]|1[0-2]|31)|7(22|6[5-9])))|4(0117[89]|3(1274|8935)|5(1416|7(393|63[12])))|6(27780|36368|5(0(0(3[12356789]|4[0-9]|5[01789]|6[01345678]|7[78])|4(0[6-9]|1[0-3]|2[2-6]|3[4-9]|8[5-9]|9[0-9])|5(0[012346789]|1[0-9]|2[0-9]|3[0-8]|7[7-9]|8[0-9]|9[0-8])|72[0-7]|9(0[1-9]|1[0-9]|2[0128]|3[89]|4[6-9]|5[045]|6[25678]|71))|16(5[2-9]|6[0-9]|7[01456789])|50(0[0-9]|1[0-9]|2[1-9]|3[0-6]|5[1-7]))))/, // NOSONAR
+                        cbType: "elo",
+                        pattern: /^(50(67(0[78]|1[5789]|2[012456789]|3[01234569]|4[0-7]|53|7[4-8])|9(0(0[0123478]|14|2[0-2]|3[359]|4[01235678]|5[1-9]|6[0-9]|7[0134789]|8[04789]|9[12349])|1(0[34568]|4[6-9]|83)|2(20|5[7-9]|6[0-6])|4(0[7-9]|1[0-2]|31)|7(22|6[5-9])))|4(0117[89]|3(1274|8935)|5(1416|7(393|63[12])))|6(27780|36368|5(0(0(3[12356789]|4[0-9]|5[01789]|6[01345678]|7[78])|4(0[6-9]|1[0-3]|2[2-6]|3[4-9]|8[5-9]|9[0-9])|5(0[012346789]|1[0-9]|2[0-9]|3[0-8]|7[7-9]|8[0-9]|9[0-8])|72[0-7]|9(0[1-9]|1[0-9]|2[0128]|3[89]|4[6-9]|5[045]|6[25678]|71))|16(5[2-9]|6[0-9]|7[01456789])|50(0[0-9]|1[0-9]|2[1-9]|3[0-6]|5[1-7]))))/,
                         cnLength: [13, 16, 19],
                     },
                     {
-                        cbType: 'mastercard',
+                        cbType: "mastercard",
                         pattern: /^5[1-5]|^2(?:2(?:2[1-9]|[3-9]\d)|[3-6]\d\d|7(?:[01]\d|20))/,
                         cnLength: [16],
                     },
                     {
-                        cbType: 'maestro',
+                        cbType: "maestro",
                         pattern: /^(0604|50|5[6789]|60|61|63|64|67|6660|6670|6818|6858|6890|6901|6907)/,
                         cnLength: [12, 13, 14, 15, 16, 17, 18, 19],
                     },
                 ];
+
+                var self = this;
+                self.hideError('card-number');
 
                 const cardBrandSpan = document.getElementById('card-brand');
                 cardBrandSpan.removeAttribute('class');
@@ -381,14 +373,18 @@ define(
                 if (cardNumberInputField === null || typeof cardNumberInputField === 'undefined') {
                     return;
                 }
-                cardNumberInputField.removeAttribute("style")
 
-                const cardNumber = cardNumberInputField.value.replace(/[^\d]/gi, '');
+                const cardNumber = cardNumberInputField.value;
+                if (cardNumber === null || typeof cardNumber === 'undefined') {
+                    return;
+                }
 
                 let isCardNumberValid = true;
+                let isCardBrandDetected = false;
                 for (let cardBrandIndex = 0; cardBrandIndex <= cardBrands.length - 1; cardBrandIndex++) {
                     const cardBrand = cardBrands[cardBrandIndex];
-                    if (cardBrand.pattern.test(cardNumber)) {
+                    if (cardNumber.match(cardBrand.pattern)) {
+                        isCardBrandDetected = true;
                         if (!cardBrand.cnLength.includes(cardNumber.length) || !this.luhnValidation(cardNumber)) {
                             isCardNumberValid = false;
                         }
@@ -399,16 +395,11 @@ define(
                 }
 
                 // unknown card brand
-                var self = this;
-
-                self.hideErrorSecond('card-number');
-                self.hideError('card-number');
-                if (!cardNumber.length) {
-                    self.showErrorsecond('card-number');
-                    return;
+                if (!isCardBrandDetected && (cardNumber.length < 13 || cardNumber.length > 19 || !this.luhnValidation(cardNumber))) {
+                    isCardNumberValid = false;
                 }
 
-                if (cardNumber.length < 13 || cardNumber.length > 19 || !this.luhnValidation(cardNumber)) {
+                if (!isCardNumberValid) {
                     self.showError('card-number');
                 }
             },
@@ -423,35 +414,26 @@ define(
                     .replace(/(\d{2})(\d)/, "$1/$2")
                     .replace(/(\d{2})(\d{2})$/, "$1$2");
             },
+
             validateCardExpirationDate: function (a, b) {
                 const self = this;
                 const errorCode = '209';
                 self.hideError(errorCode);
 
-                const valueExpirationDate = document.querySelector(CPv1.selectors.cardExpirationDate).value;
-                const expirationValuesEmpty = valueExpirationDate;
-                const errorCodeSecond = '208';
-                self.hideErrorSecond(errorCodeSecond);
-                if (!expirationValuesEmpty.length) {
-                    self.showErrorsecond(errorCodeSecond);
-                    return;
-                }
-
-                const expirationValues = valueExpirationDate.split('/');
+                const expirationValues = document.querySelector(CPv1.selectors.cardExpirationDate).value.split('/');
                 if (typeof expirationValues[0] === 'undefined' || typeof expirationValues[1] === 'undefined') {
                     self.showError(errorCode);
                     return;
                 }
 
                 const expirationMonth = parseInt(expirationValues[0]);
+                const expirationYear = parseInt(expirationValues[1]);
                 if (expirationMonth < 1 || expirationMonth > 12) {
                     self.showError(errorCode);
                     return;
                 }
 
-                const expirationYear = parseInt(20 + expirationValues[1]);
-
-                const currentTime = new Date();
+                const currentTime = new Date()
                 const currentYear = currentTime.getFullYear();
                 const currentMonth = currentTime.getMonth() + 1;
 
@@ -463,86 +445,47 @@ define(
             },
 
             validateCardHolderName: function (a, b) {
-                const cardHolderName = document.querySelector(CPv1.selectors.cardholderName).value;
-                const self = this;
-
-                self.hideError('316');
-                self.hideErrorSecond('317');
-                if (cardHolderName.length === 0 || cardHolderName === '') {
-                    self.showErrorsecond('317');
-                    self.hideError('316');
-                    return;
-                }
-
-                if (cardHolderName.length < 2 || cardHolderName.length > 50) {
-                    self.showError('316');
-                    self.hideErrorSecond('317');
-                }
-            },
-
-            validateInstallments: function () {
-                var installmentsInput = document.querySelector(CPv1.selectors.installments).value;
                 var self = this;
-                self.hideError('210');
-                if (!installmentsInput.length) {
-                    var installmentsError = document.getElementById('installments-error');
-                    if (installmentsError) {
-                        installmentsError.style.display = 'none';
-                    }
-                    self.showError('210');
-                }
+                self.hideError('316');
             },
 
-            validateSecurityCode: function () {
+            validateSecurityCode: function (a, b) {
                 var self = this;
                 self.hideError('E302');
-                self.hideErrorSecond('224');
 
-                const securityCode = document.querySelector(CPv1.selectors.securityCode).value;
-                if (!securityCode) {
-                    self.hideError('E302');
-                    self.showErrorsecond('224');
-                }
-
-                if (securityCode.length === 1 || securityCode.length === 2) {
-                    self.hideErrorSecond('224');
+                var securityCode = document.querySelector(CPv1.selectors.securityCode).value;
+                if (securityCode !== "" && securityCode.length < 3) {
                     self.showError('E302');
                 }
             },
 
             validateCpf: function (a, b) {
-                const self = this;
-                const cpf = document.querySelector(CPv1.selectors.cpf).value;
+                var self = this;
                 self.hideError('E303');
-                self.hideErrorSecond('E304');
 
-                if (!cpf.length || cpf === 'XXX.XXX.XXX-XX') {
-                    self.hideError('E303');
-                    self.showErrorsecond('E304');
-                    return;
-                }
-
-                if (cpf !== '' && (cpf.includes('X') || !this.isValidCPF(cpf))) {
-                    self.hideErrorSecond('E304');
-                    self.showError('E303');
+                var cpf = document.querySelector(CPv1.selectors.cpf).value;
+                if (cpf !== "") {
+                    if (cpf.includes('X') || !this.isValidCPF(cpf)) {
+                        self.showError('E303');
+                    }
                 }
             },
 
-            onlyNumbersInSecurityCode: function () {
-                const securityCode = document.querySelector(CPv1.selectors.securityCode);
+            onlyNumbersInSecurityCode: function (t, evt) {
+                var securityCode = document.querySelector(CPv1.selectors.securityCode);
                 if (securityCode.value.match(/[^\d]/g)) {
                     securityCode.value = securityCode.value.replace(/[^\d]/g, '');
                 }
             },
 
-            applyInputMask: function () { //NOSONAR
+            applyInputMask: function (a, b) { //NOSONAR
                 function doFormat(x, pattern, mask) {
-                    let strippedValue = x.replace(/[^\d]/g, "");
-                    let chars = strippedValue.split('');
-                    let count = 0;
+                    var strippedValue = x.replace(/[^\d]/g, "");
+                    var chars = strippedValue.split('');
+                    var count = 0;
 
-                    let formatted = '';
-                    for (let i = 0; i < pattern.length; i++) {
+                    var formatted = '';
+                    for (var i = 0; i < pattern.length; i++) {
                         const c = pattern[i];
                         if (chars[count]) {
                             if (/\*/.test(c)) {
@@ -551,8 +494,8 @@ define(
                             } else {
                                 formatted += c;
                             }
-                        } else {
-                            if (mask && (mask.split('')[i])) {
+                        } else if (mask) {
+                            if (mask.split('')[i]) {
                                 formatted += mask.split('')[i];
                             }
                         }
@@ -589,79 +532,67 @@ define(
             },
 
             isValidCPF(cpf) {
-                if (!cpf) {
-                    return false;
+                if (typeof cpf !== "string") {
+                    return false
                 }
 
-                cpf = cpf.replace(/[\s.-]*/igm, '');
+                cpf = cpf.replace(/[\s.-]*/igm, '')
                 if (
                     !cpf ||
                     cpf.length !== 11 ||
-                    cpf === '00000000000' ||
-                    cpf === '11111111111' ||
-                    cpf === '22222222222' ||
-                    cpf === '33333333333' ||
-                    cpf === '44444444444' ||
-                    cpf === '55555555555' ||
-                    cpf === '66666666666' ||
-                    cpf === '77777777777' ||
-                    cpf === '88888888888' ||
-                    cpf === '99999999999'
+                    cpf === "00000000000" ||
+                    cpf === "11111111111" ||
+                    cpf === "22222222222" ||
+                    cpf === "33333333333" ||
+                    cpf === "44444444444" ||
+                    cpf === "55555555555" ||
+                    cpf === "66666666666" ||
+                    cpf === "77777777777" ||
+                    cpf === "88888888888" ||
+                    cpf === "99999999999"
                 ) {
-                    return false;
+                    return false
                 }
 
-                let sum = 0;
-                let remainder;
+                let sum = 0
+                let remainder
                 for (let i = 1; i <= 9; i++) {
-                    sum = sum + parseInt(cpf.substring(i - 1, i)) * (11 - i);
+                    sum = sum + parseInt(cpf.substring(i - 1, i)) * (11 - i)
                 }
 
-                remainder = parseInt(sum * 10) % 11;
+                remainder = parseInt(sum * 10) % 11
                 if ((remainder === 10) || (remainder === 11)) {
-                    remainder = 0;
+                    remainder = 0
                 }
 
                 if (remainder !== parseInt(cpf.substring(9, 10))) {
-                    return false;
+                    return false
                 }
 
-                sum = 0;
+                sum = 0
                 for (let j = 1; j <= 10; j++) {
-                    sum = sum + parseInt(cpf.substring(j - 1, j)) * (12 - j);
+                    sum = sum + parseInt(cpf.substring(j - 1, j)) * (12 - j)
                 }
 
-                remainder = parseInt((sum * 10) % 11);
+                remainder = parseInt((sum * 10) % 11)
                 if ((remainder === 10) || (remainder === 11)) {
-                    remainder = 0;
+                    remainder = 0
                 }
 
                 return remainder === parseInt(cpf.substring(10, 11));
             },
 
             showError: function (code) {
-                const $form = CPv1.getForm();
-                const $span = $form.querySelector('#mp-error-' + code);
+                var $form = CPv1.getForm();
+                var $span = $form.querySelector('#mp-error-' + code);
                 $span.style.display = 'inline-block';
             },
 
             hideError: function (code) {
-                const $form = CPv1.getForm();
-                const $span = $form.querySelector('#mp-error-' + code);
+                var $form = CPv1.getForm();
+                var $span = $form.querySelector('#mp-error-' + code);
                 $span.style.display = 'none';
-            },
-
-            showErrorsecond: function (code) {
-                const $form = CPv1.getForm();
-                const $span = $form.querySelector('#mp-error-' + code + '-second');
-                $span.style.display = 'inline-block';
-            },
-
-            hideErrorSecond: function (code) {
-                const $form = CPv1.getForm();
-                const $span = $form.querySelector('#mp-error-' + code + '-second');
-                $span.style.display = 'none';
-            },
+            }
         });
     }
 );

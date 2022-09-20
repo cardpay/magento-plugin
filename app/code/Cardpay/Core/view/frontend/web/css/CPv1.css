@@ -1,4 +1,4 @@
-#co-cardpay-form, #co-cardpay-form-ticket, #co-cardpay-form-pix {
+#co-cardpay-form, #co-cardpay-form-ticket {
     max-width: 400px;
 }
 
@@ -37,7 +37,6 @@
 
 .mp-col-50 {
     width: 50%;
-    margin-top: 5px;
 }
 
 .mp-col-60 {
@@ -344,6 +343,12 @@
     clear: both;
 }
 
+
+/*
+* Tax
+*
+*/
+
 #mp-box-input-tax-tea {
     color: #666;
     font-weight: 300;
@@ -411,6 +416,23 @@
     float: left;
 }
 
+/*
+.form-control-mine {
+    width: 100% !important;
+    height: 27px;
+    padding: 5px;
+    font-size: 14px;
+    color: #555;
+    background-color: #fff;
+    background-image: none;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    -webkit-box-sizing: border-box; !* Safari/Chrome, other WebKit *!
+    -moz-box-sizing: border-box; !* Firefox, other Gecko *!
+    box-sizing: border-box;
+}
+*/
+
 .form-row select {
     width: 100%;
     background-color: #fff;
@@ -430,6 +452,16 @@
     -ms-appearance: menulist-button;
     appearance: menulist-button;
 }
+
+/*
+.mensagem-febraban {
+    text-transform: uppercase;
+    font-size: 10px;
+    display: block;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    margin-top: 10px;
+}
+*/
 
 [class^=form-col-] label.require:after {
     content: ' *';
@@ -481,38 +513,3 @@
 #co-cardpay-form-ticket .field-error {
     margin-top: -10px;
 }
-
-/* Pix */
-#cardpay-pix-form-general, .cardpay-box-form {
-    float: left;
-    width: 100%;
-}
-
-#form-pix, #cardpay-form-coupon-pix {
-    width: 100%;
-    margin-left: 10px;
-    margin-right: 10px;
-    max-width: 400px;
-    padding-left: 10px;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    float: left;
-}
-
-#cardpay-form-coupon-pix {
-    margin-bottom: 10px;
-}
-
-#cardpay-payment-methods-pix {
-    margin: 0 0 0 -30px;
-}
-
-#cardpay-payment-methods-pix li {
-    list-style: none;
-}
-
-#co-cardpay-form-pix .field-error {
-    margin-top: -10px;
-}
-

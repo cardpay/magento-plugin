@@ -6,8 +6,14 @@
             <!-- Unlimint Logo -->
             <span data-bind="text: getTitle()"></span>
         </label>
-    </div>
 
+        <!-- ko if: (existBanner() == true)-->
+        <div class="class-custom-banner-checkout">
+            <img data-bind="attr: {alt: 'Unlimint Banner', src: getBannerUrl()}"
+                 class="payment-banner-checkout" alt="Unlimint"/>
+        </div>
+        <!--/ko-->
+    </div>
     <div class="payment-method-content">
         <!-- ko foreach: getRegion('messages') -->
         <!-- ko template: getTemplate() --><!-- /ko -->
@@ -17,51 +23,40 @@
             <!-- ko template: getTemplate() --><!-- /ko -->
             <!--/ko-->
         </div>
+
         <form class="form" id="co-cardpay-form-ticket" action="#" method="post"
               data-bind="mageInit: {'transparent':{'context': context()}, 'validation':[]}">
 
-            <div id="cardpay-form-boleto">
-                <div class="mp-box-inputs mp-col-100">
-                    <label for="zip_boleto"> <!-- ko i18n: 'ZIP / Postal Code'--><!-- /ko --> <em>*</em></label>
-                    <input type="text" id="zip_boleto" name="cardpay_custom_ticket[zip_boleto]"
-                           data-checkout="zip_boleto"
-                           data-format="99999999"
-                           data-bind="event: {blur: validateZipBoleto, change: validateZipBoleto}, value: getZipCode()">
-                    <span class="mp-error" id="mp-error-E305" data-main="#zip_boleto"> <!-- ko i18n: 'ZIP / Postal code must be 8 characters'-->
-                        <!-- /ko -->  </span>
-                    <span class="mp-error" id="mp-error-E305-second" data-main="#zip_boleto"> <!-- ko i18n: 'ZIP / Postal code must be 8 characters'-->
-                        <!-- /ko -->  </span>
-                </div>
-                <div class="mp-box-inputs mp-col-100">
-                    <label for="cpf_boleto"> <!-- ko i18n: 'CPF'--><!-- /ko --> <em>*</em></label>
-                    <input type="text" id="cpf_boleto" name="cardpay_custom_ticket[cpf_boleto]"
-                           data-checkout="cpf_boleto"
-                           data-format="***.***.***-**"
-                           data-mask="XXX.XXX.XXX-XX"
-                           placeholder="XXX.XXX.XXX-XX"
-                           autocomplete="off"
-                           data-bind="event: {keyup: applyInputMask, blur: validateCpfBoleto}"/>
-                    <span class="mp-error" id="mp-error-E303" data-main="#cpf"> <!-- ko i18n: 'CPF is invalid'-->
-                        <!-- /ko -->  </span>
-                    <span class="mp-error" id="mp-error-E304-second" data-main="#cpf"> <!-- ko i18n: 'Please fill out a CPF'-->
-                        <!-- /ko -->  </span>
-                </div>
-            </div>
+                <div id="cardpay-form-boleto">
+                    <div class="mp-box-inputs mp-col-100">
+                        <label for="cpf_boleto"> <!-- ko i18n: 'CPF'--><!-- /ko --> <em>*</em></label>
+                        <input type="text" id="cpf_boleto" name="cardpay_custom_ticket[cpf_boleto]"
+                               data-checkout="cpf_boleto"
+                               data-format="***.***.***-**"
+                               data-mask="XXX.XXX.XXX-XX"
+                               placeholder="XXX.XXX.XXX-XX"
+                               autocomplete="off"
+                               data-bind="attr: {'data-validate': JSON.stringify({required:true})}, event: {keyup: applyInputMask, blur: validateCpfBoleto}"/>
 
-            <div class="mp-box-inputs mp-col-100" id="cardpay-utilities">
-                <input type="hidden" id="site_idTicket" value="" name="cardpay_custom_ticket[site_id]"/>
-                <input type="hidden" id="amountTicket" value="" name="cardpay_custom_ticket[amount]"
-                       data-bind="attr: {value: getInitialTotal()}">
-                <input type="hidden" id="campaign_idTicket" name="cardpay_custom_ticket[campaign_id]"/>
-                <input type="hidden" id="campaignTicket" name="cardpay_custom_ticket[campaign]"/>
-                <input type="hidden" id="discountTicket" name="cardpay_custom_ticket[discount]"/>
-            </div>
+                        <span class="mp-error" id="mp-error-E304" data-main="#cpf_boleto"> <!-- ko i18n: 'Invalid CPF'--><!-- /ko -->  </span>
+                    </div>
+                </div>
 
-            <div>
-                <img data-bind="attr: {src: getBoletoLogoURL()}" alt="Boleto" width="53" height="35"
-                     style="margin-top: 15px;"/>
-            </div>
+                <div class="mp-box-inputs mp-col-100" id="cardpay-utilities">
+                    <input type="hidden" id="site_idTicket" value="" name="cardpay_custom_ticket[site_id]"/>
+                    <input type="hidden" id="amountTicket" value="" name="cardpay_custom_ticket[amount]"
+                           data-bind="attr: {value: getInitialTotal()}">
+                    <input type="hidden" id="campaign_idTicket" name="cardpay_custom_ticket[campaign_id]"/>
+                    <input type="hidden" id="campaignTicket" name="cardpay_custom_ticket[campaign]"/>
+                    <input type="hidden" id="discountTicket" name="cardpay_custom_ticket[discount]"/>
+                </div>
+
+                <div>
+                    <img data-bind="attr: {src: getBoletoLogoURL()}" alt="Boleto" width="53" height="35" style="margin-top: 15px;" />
+                </div>
         </form>
+
+        <div data-bind="template: {afterRender: initializeMethod()}"></div>
 
         <div class="checkout-agreements-block">
             <!-- ko foreach: $parent.getRegion('before-place-order') -->
@@ -77,7 +72,7 @@
                                attr: {title: $t('Place Order')},
                                enable: (getCode() == isChecked()),
                                click: placeOrder,
-                               css: {disabled: !isPlaceOrderActionAllowed()},
+                               css: {disabled: !isPlaceOrderActionAllowed()}
                            "
                         class="action primary checkout"
                         disabled>

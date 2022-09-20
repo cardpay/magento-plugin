@@ -21,6 +21,7 @@ class Success extends AbstractRedirectAction
             $this->setResponseHttp('200', $message);
             $this->isExecuted = true;
             return;
+
         } catch (Exception $e) {
             $statusResponse = Response::HTTP_INTERNAL_ERROR;
 
