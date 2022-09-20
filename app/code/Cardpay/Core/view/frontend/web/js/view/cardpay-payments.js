@@ -18,6 +18,12 @@ define(
                 component: 'Cardpay_Core/js/view/method-renderer/custom-method-ticket'
             }
         );
+        rendererList.push(
+            {
+                type: 'cardpay_custompix',
+                component: 'Cardpay_Core/js/view/method-renderer/custom-method-pix'
+            }
+        );
 
         return Component.extend({});
     }

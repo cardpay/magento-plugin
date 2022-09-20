@@ -8,6 +8,7 @@ use Cardpay\Core\Lib\RestClient;
 use Cardpay\Core\Logger\Logger;
 use Cardpay\Core\Model\Payment\BankCardPayment;
 use Cardpay\Core\Model\Payment\BoletoPayment;
+use Cardpay\Core\Model\Payment\PixPayment;
 use Exception;
 use Magento\Backend\Block\Store\Switcher;
 use Magento\Framework\App\Config\Initial;
@@ -26,6 +27,7 @@ use Magento\Sales\Model\OrderFactory;
 use Magento\Sales\Model\ResourceModel\Status\Collection;
 use Magento\Store\Model\App\Emulation;
 use Magento\Store\Model\ScopeInterface;
+use Monolog\Logger as LoggerAlias;
 
 /**
  * Class Data
@@ -86,6 +88,11 @@ class Data extends \Magento\Payment\Helper\Data
     protected $_switcher;
 
     /**
+     * @var TimezoneInterface
+     */
+    protected $_timezone;
+
+    /**
      * @var ComposerInformation
      */
     protected $_composerInformation;
@@ -131,7 +138,8 @@ class Data extends \Magento\Payment\Helper\Data
         ComposerInformation      $composerInformation,
         ResourceInterface        $moduleResource,
         TimezoneInterface        $timezone
-    ) {
+    )
+    {
         parent::__construct($context, $layoutFactory, $paymentMethodFactory, $appEmulation, $paymentConfig, $initialConfig);
 
         $this->_messageInterface = $messageInterface;
@@ -163,7 +171,7 @@ class Data extends \Magento\Payment\Helper\Data
         }
 
         $this->_mpLogger->setName($name);
-        $this->_mpLogger->debug($message);
+        $this->_mpLogger->log(LoggerAlias::DEBUG, $message);
     }
 
     public function maskSensitiveInfo($string)
@@ -195,6 +203,9 @@ class Data extends \Magento\Payment\Helper\Data
             } elseif (BoletoPayment::isBoletoPaymentMethod($order)) {
                 $terminalCode = ConfigData::PATH_BOLETO_TERMINAL_CODE;
                 $terminalPassword = ConfigData::PATH_BOLETO_TERMINAL_PASSWORD;
+            } elseif (PixPayment::isPixPaymentMethod($order)) {
+                $terminalCode = ConfigData::PATH_PIX_TERMINAL_CODE;
+                $terminalPassword = ConfigData::PATH_PIX_TERMINAL_PASSWORD;
             }
         }
 
@@ -465,6 +476,8 @@ class Data extends \Magento\Payment\Helper\Data
             $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_BANKCARD_SANDBOX, ScopeInterface::SCOPE_STORE));
         } elseif (ConfigData::PATH_BOLETO_TERMINAL_CODE === $terminalCode) {
             $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_BOLETO_SANDBOX, ScopeInterface::SCOPE_STORE));
+        }elseif (ConfigData::PATH_PIX_TERMINAL_CODE === $terminalCode) {
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_PIX_SANDBOX, ScopeInterface::SCOPE_STORE));
         } else {
             throw new Exception('Unable to get API host');
         }

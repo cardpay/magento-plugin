@@ -17,8 +17,6 @@ define(
     function (Component, quote, paymentService, paymentMethodList, getTotalsAction, $, fullScreenLoader, setAnalyticsInformation, $t, defaultTotal, cartCache) {
         'use strict';
 
-        const configPayment = window.checkoutConfig.payment.cardpay_customticket;
-
         return Component.extend({
             defaults: {
                 template: 'Cardpay_Core/payment/custom_ticket',
@@ -94,6 +92,21 @@ define(
                 document.querySelector(CPv1Ticket.selectors.zipcode).value = "postcode" in billingAddress ? billingAddress.postcode : '';
             },
 
+            getZipCode: function () {
+                let zipcode = '';
+                try {
+                    const billing = quote.billingAddress();
+                    const shipping = quote.shippingAddress();
+                    const sa = (shipping) ? shipping.postcode : '';
+                    const ba = (billing) ? billing.postcode : '';
+                    zipcode = sa || ba;
+                } catch {
+
+                }
+                zipcode = zipcode.replace(/[\D]/g, "");
+                return (zipcode.length >= 8) ? zipcode : '';
+            },
+
             getInitialTotal: function () {
                 return quote.totals().base_subtotal
                     + quote.totals().base_shipping_incl_tax
@@ -111,7 +124,7 @@ define(
 
             getLogoUrl: function () {
                 if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
-                    return configPayment['logoUrl'];
+                    return window.checkoutConfig.payment[this.getCode()]['logoUrl'];
                 }
                 return '';
             },
@@ -121,7 +134,7 @@ define(
             },
 
             getCountryId: function () {
-                return configPayment['country'];
+                return window.checkoutConfig.payment[this.getCode()]['country'];
             },
 
             existBanner: function () {
@@ -145,7 +158,7 @@ define(
             },
 
             getTicketsData: function () {
-                return configPayment['options'];
+                return window.checkoutConfig.payment[this.getCode()]['options'];
             },
 
             getCountTickets: function () {
@@ -159,15 +172,15 @@ define(
             },
 
             getInitialGrandTotal: function () {
-                if (typeof configPayment !== 'undefined') {
-                    return configPayment['grand_total'];
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
+                    return window.checkoutConfig.payment[this.getCode()]['grand_total'];
                 }
                 return '';
             },
 
             getSuccessUrl: function () {
-                if (typeof configPayment !== 'undefined') {
-                    return configPayment['success_url'];
+                if (typeof window.checkoutConfig.payment[this.getCode()] !== 'undefined') {
+                    return window.checkoutConfig.payment[this.getCode()]['success_url'];
                 }
                 return '';
             },
@@ -204,7 +217,8 @@ define(
                         'method': this.getCode(),
                         'site_id': this.getCountryId(),
                         'payment_method_ticket': this.getPaymentSelected(),
-                        'cpf': document.getElementById('cpf_boleto') ? document.querySelector(CPv1.selectors.cpfBoleto).value : null
+                        'zip': document.getElementById('zip_boleto').value,
+                        'cpf': document.getElementById('cpf_boleto').value
                     }
                 };
 
@@ -232,16 +246,16 @@ define(
             },
 
             hasErrors: function () {
-                var allMessageErrors = jQuery('.mp-error');
+                const allMessageErrors = jQuery('.mp-error');
                 if (allMessageErrors.length > 1) {
-                    for (var x = 0; x < allMessageErrors.length; x++) {
-                        if ($(allMessageErrors[x]).css('display') !== 'none') {
-                            return true
+                    for (let x = 0; x < allMessageErrors.length; x++) {
+                        if (jQuery(allMessageErrors[x]).is(':visible')) {
+                            return true;
                         }
                     }
                 } else {
-                    if (allMessageErrors.css('display') !== 'none') {
-                        return true
+                    if (jQuery(allMessageErrors).is(':visible')) {
+                        return true;
                     }
                 }
 
@@ -250,7 +264,8 @@ define(
 
             placeOrder: function (data, event) {
                 var self = this;
-
+                this.validateCpfBoleto();
+                this.validateZipBoleto();
                 if (event) {
                     event.preventDefault();
                 }
@@ -273,15 +288,47 @@ define(
 
                 return false;
             },
-
+            validateZipBoleto: function (a, b) {
+                const self = this;
+                self.hideErrorBoleto('E305');
+                self.hideErrorBoleto('E305-second');
+                if (!jQuery('#zip_boleto').is(':visible')) {
+                    return;
+                }
+                const postcode = jQuery('#zip_boleto').val();
+                const newZip = postcode.replace(/[\D]+/, '');
+                if (newZip !== postcode) {
+                    window.setTimeout(function () {
+                        jQuery('#zip_boleto').val(newZip);
+                        self.validateZipBoleto();
+                    }, 100);
+                }
+                if (newZip.length !== 8) {
+                    if (newZip.length === 0) {
+                        self.showError('E305-second');
+                    } else {
+                        self.showError('E305');
+                    }
+                }
+            },
             validateCpfBoleto: function (a, b) {
                 var self = this;
-                self.hideError('E304');
-
                 var cpfBoleto = document.querySelector(CPv1.selectors.cpfBoleto).value;
+                self.hideErrorBoleto('E303');
+                self.hideErrorSecond('E304');
+                if (!jQuery(CPv1.selectors.cpfBoleto).is(':visible')) {
+                    return;
+                }
+                if (!cpfBoleto.length || cpfBoleto === 'XXX.XXX.XXX-XX') {
+                    self.hideErrorBoleto('E303');
+                    self.showErrorsecond('E304');
+                    return;
+                }
+
                 if (cpfBoleto !== "") {
-                    if (cpfBoleto.includes('X') || !this.isValidCPF(cpfBoleto)) {
-                        self.showError('E304');
+                    if (cpfBoleto.includes('X') || !this.isValidCPFBoleto(cpfBoleto)) {
+                        self.hideErrorSecond('E304');
+                        self.showError('E303');
                     }
                 }
             },
@@ -339,69 +386,84 @@ define(
                 });
             },
 
-            isValidCPF(cpf) {
-                if (typeof cpf !== "string") {
-                    return false
+            isValidCPFBoleto(cpf) {
+                if (!cpf) {
+                    return;
                 }
 
-                cpf = cpf.replace(/[\s.-]*/igm, '')
+                cpf = cpf.replace(/[\s.-]*/igm, '');
                 if (
                     !cpf ||
                     cpf.length !== 11 ||
-                    cpf === "00000000000" ||
-                    cpf === "11111111111" ||
-                    cpf === "22222222222" ||
-                    cpf === "33333333333" ||
-                    cpf === "44444444444" ||
-                    cpf === "55555555555" ||
-                    cpf === "66666666666" ||
-                    cpf === "77777777777" ||
-                    cpf === "88888888888" ||
-                    cpf === "99999999999"
+                    cpf === '00000000000' ||
+                    cpf === '11111111111' ||
+                    cpf === '22222222222' ||
+                    cpf === '33333333333' ||
+                    cpf === '44444444444' ||
+                    cpf === '55555555555' ||
+                    cpf === '66666666666' ||
+                    cpf === '77777777777' ||
+                    cpf === '88888888888' ||
+                    cpf === '99999999999'
                 ) {
-                    return false
+                    return;
                 }
 
-                let sum = 0
-                let remainder
+                let sum = 0;
+                let remainder;
                 for (let i = 1; i <= 9; i++) {
-                    sum = sum + parseInt(cpf.substring(i - 1, i)) * (11 - i)
+                    sum = sum + parseInt(cpf.substring(i - 1, i)) * (11 - i);
                 }
 
-                remainder = parseInt((sum * 10) % 11)
+                remainder = parseInt(sum * 10) % 11;
                 if ((remainder === 10) || (remainder === 11)) {
-                    remainder = 0
+                    remainder = 0;
                 }
 
                 if (remainder !== parseInt(cpf.substring(9, 10))) {
-                    return false
+                    return;
                 }
 
-                sum = 0
-                for (var k = 1; k <= 10; k++) {
-                    sum = sum + parseInt(cpf.substring(k - 1, k)) * (12 - k)
+                sum = 0;
+                for (let j = 1; j <= 10; j++) {
+                    sum = sum + parseInt(cpf.substring(j - 1, j)) * (12 - j);
                 }
 
-                remainder = parseInt((sum * 10) % 11)
+                remainder = parseInt((sum * 10) % 11);
                 if ((remainder === 10) || (remainder === 11)) {
-                    remainder = 0
+                    remainder = 0;
                 }
 
                 return remainder === parseInt(cpf.substring(10, 11));
             },
 
             showError: function (code) {
-                var $form = document.querySelector(CPv1.selectors.formBoleto);
-                var $span = $form.querySelector('#mp-error-' + code);
+                const $form = document.querySelector(CPv1.selectors.formBoleto);
+                const $span = $form.querySelector('#mp-error-' + code);
+                if ($span) {
+                    $span.style.display = 'inline-block';
+                }
+            },
+
+            hideErrorBoleto: function (code) {
+                const $form = document.querySelector(CPv1.selectors.formBoleto);
+                const $span = $form.querySelector('#mp-error-' + code);
+                if ($span) {
+                    $span.style.display = 'none';
+                }
+            },
+
+            showErrorsecond: function (code) {
+                const $form = document.querySelector(CPv1.selectors.formBoleto);
+                const $span = $form.querySelector('#mp-error-' + code + '-second');
                 $span.style.display = 'inline-block';
             },
 
-            hideError: function (code) {
-                var $form = document.querySelector(CPv1.selectors.formBoleto);
-                var $span = $form.querySelector('#mp-error-' + code);
+            hideErrorSecond: function (code) {
+                const $form = document.querySelector(CPv1.selectors.formBoleto);
+                const $span = $form.querySelector('#mp-error-' + code + '-second');
                 $span.style.display = 'none';
             },
-
             /*
              * Customize CPV1
              */

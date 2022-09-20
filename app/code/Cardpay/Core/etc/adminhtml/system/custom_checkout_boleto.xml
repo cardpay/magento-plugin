@@ -10,7 +10,7 @@
             <comment>It is a requirement that you have a SSL certificate, and the payment form to be provided under an HTTPS page.</comment>
         </field>
 
-        <field id="mode" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="code" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Terminal Code</label>
             <config_path>payment/cardpay_customticket/terminal_code_boleto</config_path>
         </field>
@@ -18,7 +18,9 @@
         <field id="access_token" translate="label comment" type="password" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Terminal Password</label>
             <config_path>payment/cardpay_customticket/terminal_password_boleto</config_path>
-            <comment>Get your credentials, visit the unlimint.com</comment>
+            <comment><![CDATA[
+                Get your credentials, visit the <a href="https://unlimint.com/">unlimint.com</a>.
+                ]]></comment>
         </field>
 
         <field id="callback_secret" translate="label" type="password" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
@@ -29,7 +31,7 @@
         <field id="sandbox" translate="label comment" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
             <label>Test Environment</label>
             <config_path>payment/cardpay_customticket/sandbox_boleto</config_path>
-            <comment>In test mode, the data is sent to the sandbox.</comment>
+            <comment>In test environment, the data is sent to the sandbox only. Test and prod credentials (terminal code, terminal password, secret) are different</comment>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
         </field>
 

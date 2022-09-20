@@ -125,7 +125,7 @@ class Payment extends TopicsAbstract
         // get payment order object
         $paymentOrder = $order->getPayment();
         $paymentMethod = $paymentOrder->getMethodInstance()->getCode();
-        if (!in_array($paymentMethod, ['cardpay_custom', ConfigData::BOLETO_PAYMENT_METHOD, ConfigData::BANKCARD_PAYMENT_METHOD, 'cardpay_basic'])) {
+        if (!in_array($paymentMethod, ['cardpay_custom', ConfigData::BOLETO_PAYMENT_METHOD, ConfigData::PIX_PAYMENT_METHOD, ConfigData::BANKCARD_PAYMENT_METHOD, 'cardpay_basic'])) {
             return;
         }
 

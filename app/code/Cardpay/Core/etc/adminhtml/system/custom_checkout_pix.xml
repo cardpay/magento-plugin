@@ -1,0 +1,50 @@
+<?xml version="1.0"?>
+<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
+    <group id="custom_checkout_pix" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+        <label>Pix</label>
+
+        <field id="active" translate="label" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Enabled</label>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+            <config_path>payment/cardpay_custompix/active</config_path>
+            <comment>It is a requirement that you have a SSL certificate, and the payment form to be provided under an HTTPS page.</comment>
+        </field>
+
+        <field id="code" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Terminal Code</label>
+            <config_path>payment/cardpay_custompix/terminal_code_pix</config_path>
+        </field>
+
+        <field id="access_token" translate="label comment" type="password" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Terminal Password</label>
+            <config_path>payment/cardpay_custompix/terminal_password_pix</config_path>
+            <comment><![CDATA[
+                Get your credentials, visit the <a href="https://unlimint.com/">unlimint.com</a>.
+                ]]></comment>
+        </field>
+
+        <field id="callback_secret" translate="label" type="password" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Callback Secret</label>
+            <config_path>payment/cardpay_custompix/callback_secret_pix</config_path>
+        </field>
+
+        <field id="sandbox" translate="label comment" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Test Environment</label>
+            <config_path>payment/cardpay_custompix/sandbox_pix</config_path>
+            <comment>In test environment, the data is sent to the sandbox only. Test and prod credentials (terminal code, terminal password, secret) are different</comment>
+            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+        </field>
+
+        <field id="title" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Payment Title</label>
+            <config_path>payment/cardpay_custompix/title</config_path>
+        </field>
+
+        <field id="sort_order" translate="label comment" type="text" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+            <label>Checkout Position</label>
+            <frontend_class>validate-number</frontend_class>
+            <config_path>payment/cardpay_custompix/sort_order</config_path>
+            <comment>This setting will be the position in which the payment method will be available to the buyer.</comment>
+        </field>
+    </group>
+</include>

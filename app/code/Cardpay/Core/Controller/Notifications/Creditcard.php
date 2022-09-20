@@ -73,7 +73,6 @@ class Creditcard extends NotificationBase
             if (isset($response['httpStatus'])) {
                 $this->setResponseHttp($response['httpStatus'], self::SUCCESSFUL_RESPONSE);
             }
-
         } catch (Exception $e) {
             $this->coreHelper->log('Creditcard::execute error: ' . $e->getMessage());
 
