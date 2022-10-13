@@ -24,6 +24,7 @@ use Magento\Store\Model\ScopeInterface;
 
 abstract class TopicsAbstract
 {
+    const PAYMENT_CARDPAY_CUSTOM = 'payment/cardpay_custom/';
     public $statusUpdatedFlag;
     protected $scopeConfig;
     protected $dataHelper;
@@ -102,17 +103,29 @@ abstract class TopicsAbstract
      * @param $payment
      * @return mixed
      */
-    public function getConfigStatus($payment)
+    public function getConfigStatus($payment, $paymentMethod)
     {
         $pathStatus = "PATH_ORDER_" . $payment['status'];
         $path = constant('\Cardpay\Core\Helper\ConfigData::' . $pathStatus);
-        $status = $this->scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE);
 
-        if (empty($status)) {
-            $status = $this->scopeConfig->getValue(ConfigData::PATH_ORDER_IN_PROCESS, ScopeInterface::SCOPE_STORE);
+        if ($paymentMethod !== 'BANKCARD') {
+            switch ($paymentMethod) {
+                case 'BOLETO':
+                    $path = str_replace(self::PAYMENT_CARDPAY_CUSTOM, 'payment/cardpay_customticket/', $path);
+                    break;
+
+                case 'PIX':
+                    $path = str_replace(self::PAYMENT_CARDPAY_CUSTOM, 'payment/cardpay_custompix/', $path);
+                    break;
+
+                default:
+                    break;
+            }
         }
+        $this->dataHelper->log($payment['status'], ConfigData::BASIC_LOG_PREFIX);
+        $this->dataHelper->log($path, ConfigData::BASIC_LOG_PREFIX);
 
-        return $status;
+        return $this->scopeConfig->getValue($path, ScopeInterface::SCOPE_STORE);
     }
 
     /**

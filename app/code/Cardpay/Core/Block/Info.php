@@ -54,7 +54,7 @@ class Info extends \Magento\Payment\Block\Info
         }
 
         if (isset($paymentResponse['card']) && isset($paymentResponse['card']['expiration_month']) && isset($paymentResponse['card']['expiration_year'])) {
-            $title = __('Expiration Date');
+            $title = __('Expiration date');
             $data[$title->__toString()] = $paymentResponse['card']['expiration_month'] . "/" . $paymentResponse['card']['expiration_year'];
         }
 

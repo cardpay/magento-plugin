@@ -30,7 +30,6 @@ class Decline extends AbstractRedirectAction
 
             $this->isExecuted = true;
             return;
-
         } catch (Exception $e) {
             $statusResponse = Response::HTTP_INTERNAL_ERROR;
 

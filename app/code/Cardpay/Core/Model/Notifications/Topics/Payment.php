@@ -125,7 +125,7 @@ class Payment extends TopicsAbstract
         // get payment order object
         $paymentOrder = $order->getPayment();
         $paymentMethod = $paymentOrder->getMethodInstance()->getCode();
-        if (!in_array($paymentMethod, ['cardpay_custom', ConfigData::BOLETO_PAYMENT_METHOD, ConfigData::BANKCARD_PAYMENT_METHOD, 'cardpay_basic'])) {
+        if (!in_array($paymentMethod, ['cardpay_custom', ConfigData::BOLETO_PAYMENT_METHOD, ConfigData::PIX_PAYMENT_METHOD, ConfigData::BANKCARD_PAYMENT_METHOD, 'cardpay_basic'])) {
             return;
         }
 
@@ -184,7 +184,7 @@ class Payment extends TopicsAbstract
         }
 
         if (isset($paymentData['status'])) {
-            $newOrderStatus = $this->getConfigStatus($paymentData);
+            $newOrderStatus = $this->getConfigStatus($paymentData, $requestParams['payment_method']);
             $order = $this->setStatusAndComment($order, $newOrderStatus, $message);
             $this->sendEmailCreateOrUpdate($order, $message);
 

@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <type name="Magento\Checkout\Model\CompositeConfigProvider">
+        <arguments>
+            <argument name="configProviders" xsi:type="array">
+                <item name="cardpay_core_custom_provider" xsi:type="object">
+                    Cardpay\Core\Model\BankCardConfigProvider
+                </item>
+                <item name="cardpay_core_customTicket_provider" xsi:type="object">
+                    Cardpay\Core\Model\BoletoConfigProvider
+                </item>
+                <item name="cardpay_core_customPix_provider" xsi:type="object">
+                    Cardpay\Core\Model\PixConfigProvider
+                </item>
+            </argument>
+        </arguments>
+    </type>
+    <type name="Magento\Payment\Model\CcGenericConfigProvider">
+        <arguments>
+            <argument name="methodCodes" xsi:type="array">
+                <item name="cardpay_custom" xsi:type="const">Cardpay\Core\Model\Payment\BankCardPayment::CODE</item>
+                <item name="cardpay_customticket" xsi:type="const">Cardpay\Core\Model\Payment\BoletoPayment::CODE</item>
+                <item name="cardpay_custompix" xsi:type="const">Cardpay\Core\Model\Payment\PixPayment::CODE</item>
+            </argument>
+        </arguments>
+    </type>
+    <preference for="Magento\Framework\UrlInterface" type="Magento\Framework\Url"/>
+</config>

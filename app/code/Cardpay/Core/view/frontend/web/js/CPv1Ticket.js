@@ -51,6 +51,8 @@ const INLINE_BLOCK = 'inline-block';
             number: "#CPv1-number",
             city: "#CPv1-city",
             state: "#CPv1-state",
+            cpfBoleto: '#cpf_boleto',
+            formBoleto: '#cardpay-form-boleto',
             zipcode: "#CPv1-zipcode",
 
             // payment method and checkout

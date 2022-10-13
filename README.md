@@ -5,6 +5,8 @@ Unlimint Magento 2 plugin allows merchants to make payments and refunds (credit 
 
 Also, for preauthorised payments  the plugin supports cancellation (void) transactions and capturing of the payments.
 
+Unlimint Magento 2 plugin works with accessible Gateway and Payment Page modes.
+
 ### Requirements
 
 Unlimint’s Magento 2 plugin is an open-source and supports: 
@@ -16,6 +18,12 @@ Unlimint’s Magento 2 plugin is an open-source and supports:
 
 - Bank сard (Credit Card)
 - Boleto
+- Pix
+
+### Supported localizations
+
+- Portuguese (PT)
+- Spanish (ES)
 
 ## Installation
 
@@ -48,15 +56,15 @@ The installation process will explain how to install the Magento 2 plugin, detai
 
 * Navigate to **Stores > Configuration** and under the **Sales** section, click the **Payment Methods**, and then you’ll see **Unlimint** and the settings of it.
 
-![](readme_images/unlimint_settings.png)
+![](readme_images/unlimint_settings.PNG)
 
 * If you don't see **Unlimint** - please reinstall the plugin again
 
-9. The Unlimint Magento 2 plugin was successfully installed.
+9. The Unlimint Magento 2 plugin was successfully installed
 
 ## Unit tests (optional)
 
-For execution unit tests in Magento plugin, run the command in the console:
+For execution unit tests in **Magento** plugin, run the command in the console:
 
  `php ./vendor/phpunit/phpunit/phpunit ./app/code/Cardpay/Core/Test/Unit`
    
@@ -72,31 +80,40 @@ This process explains how to set up and configure the **Magento plugin** to acce
 
 2. Navigate to **Stores** > **Configuration** and under the **Sales** section, click the **Payment Methods**. From here, you can configure the Unlimint payment methods
 
-3. You need to enable payment methods in Magento plugin (Credit Card and Boleto)
+3. You need to enable payment methods in **Magento** plugin (Credit Card, Pix and Boleto)
 
 First, access the methods you want to enable via Unlimint support (it's a part of merchant onboarding process - see [here](https://www.unlimint.com/integration/))
 
 3.1. To enable payments via **Credit Card** complete the following steps:
 
-![](readme_images/credit_card.png)
+![](readme_images/credit_card.PNG)
 
-![](readme_images/credit_card_2.png)
+![](readme_images/credit_card_2.PNG)
+
+![](readme_images/credit_card_3.PNG)
 
  * Set **Enabled** to **Yes**
+ * **API access mode:**
+    * Set to **Payment page** for cases when payment page by Unlimint in iFrame is used for customer data collecting
+    * Set to **Gateway** for cases when embedded payment form in plugin is used for customer data collecting
  * Set **Terminal code**, **Terminal password**, **Callback secret** values - it should be merchant credentials in Unlimint APIv3 for this payment method (how to obtain credentials see [here](https://www.unlimint.com/integration/))
- * Test environment:
+ * **Test environment:**
     * Set to **Yes** for Sandbox environment (for test purposes)
     * Set to **No** for Production environment
- * **Payment title** - fill in the name of the payment method, which will be presented for the customer in checkout
  * **Capture payment:**
-   * Set to **Yes** - for completing payment automatically (one-phase payment),
-   * Set to **No** for two-phases of payment: the amount will not be captured but only blocked.  
- With **No** option selected payments will be captured automatically in 7 days from the time of creating the preauthorised transaction.
- 
- In installment case with **No** option selected installments will be declined automatically in 7 days from the time of creating the preauthorised transaction.
+   * Set to **Yes** - for completing payment automatically (one-phase payment)
+   * Set to **No** - for two-phases of payment: the amount will not be captured but only blocked  
  * **Installment enabled:** - this setting enables installment payments
-   * Set to **Yes** - installment payments are enabled. The number of installments are available for selection in payment form, and it's possible to split payment to 2-12 installments, each installment in a 30 days period.
+   * Set to **Yes** - installment payments are enabled
    * Set to **No** - installment payments aren't enabled
+* **Installment type:** - installment type used in plugin
+   * Set to **Issuer financed** - for using Issuer financed installments  - for more details about it, see [API documentation](https://integration.unlimint.com/#Issuer-financed-(IF))
+   * Set to **Merchant financed** - for using Merchant financed installments  - for more details about it, see [API documentation](https://integration.unlimint.com/#Merchant-financed-(MF_HOLD))
+* **Minimum installment amount:** - minimum amount of 1 installment
+* **Allowed installments range:** - allowed installments range:
+   * 1-12 for Merchant financed
+   * 3, 6, 9, 12, 18 for Issuer financed
+ * **Payment title** - fill in the name of the payment method, which will be presented for the customer in checkout
  * **Checkout position** - this setting value is the position of the payment method for the customer in checkout
  * **Ask CPF** - set to **Yes** if you require **CPF (Brazilian Tax Id)** of your customers during checkout
  * **Dynamic Descriptor** - in this setting is described dynamic_descriptor parameter in payment request - for more details about it, see [API documentation](https://integration.unlimint.com/#PaymentRequestPaymentData)
@@ -106,8 +123,20 @@ First, access the methods you want to enable via Unlimint support (it's a part o
 ![](readme_images/boleto.png)
 
  * Set **Enabled** to **Yes** (by default it's disabled)
- * Set **Terminal code**, **terminal password**, **callback secret** values - it should be merchant credentials in Unlimint APIv3 for this payment method (how to obtain credentials see [here](https://www.unlimint.com/integration/))
- * Test environment:
+ * Set **Terminal code**, **Terminal password**, **Callback secret** values - it should be merchant credentials in Unlimint APIv3 for this payment method (how to obtain credentials see [here](https://www.unlimint.com/integration/))
+ * **Test environment:**
+    * Set to **Yes** for Sandbox environment (for test purposes)
+    * Set to **No** for Production environment
+ * **Payment title** - fill in the name of the payment method, which will be presented for the customer in checkout
+ * **Checkout position** - this setting value is the position of the payment method for the customer in checkout
+
+3.3. To enable payments via **Pix**
+
+![](readme_images/pix.PNG)
+
+ * Set **Enabled** to **Yes** (by default it's disabled)
+ * Set **Terminal code**, **Terminal password**, **Callback secret** values - it should be merchant credentials in Unlimint APIv3 for this payment method (how to obtain credentials see [here](https://www.unlimint.com/integration/))
+ * **Test environment:**
     * Set to **Yes** for Sandbox environment (for test purposes)
     * Set to **No** for Production environment
  * **Payment title** - fill in the name of the payment method, which will be presented for the customer in checkout
@@ -115,15 +144,22 @@ First, access the methods you want to enable via Unlimint support (it's a part o
 
 That's it! The selected payment methods are successfully enabled in the checkout.
 
-3.3. Order statuses and refunds settings
+3.4. Order statuses and refunds settings
 
 Mapping of the order statuses is set by default and you need to change it ONLY if you have yours custom order statuses flow (not recommended to change).
 
 **Refund payment**: by default is set to **Yes**. If it's set to **No** - Refunds (Credit Memos) will be unavailable.
 
-![](readme_images/order_status.png)
+**Order statuses for Credit card**
+![](readme_images/order_status_card.PNG)
 
-3.4. Advanced settings - Developer Options
+**Order statuses for Pix**
+![](readme_images/order_status_pix.PNG)
+
+**Order statuses for Boleto**
+![](readme_images/order_status_boleto.PNG)
+
+3.5. Advanced settings - Developer Options
 
 **Log to file** - it's a setting about the Magento plugin system log (cardpay.log), this log file contains the plugin debug information, communication errors between plugin front-end and back-end.
 

@@ -660,3 +660,49 @@ textarea.has-error {
     width: 40px;
     height: 20px;
 }
+
+.closed {
+    display: none;
+}
+
+#unlimint_modal_bg {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    background: #00000099;
+    width: 100vw;
+    height: 100vh;
+    margin: 0;
+    padding: 0
+}
+
+#unlimint_modal_bg .closed {
+    display: none;
+}
+
+#unlimint_modal_close {
+    position: fixed;
+    top: 4px;
+    right: 4px;
+}
+
+#unlimint_modal_page {
+    background: #FFF;
+}
+
+#unimint_modal_iframe {
+    border: 0;
+    height: 100%;
+    width: 100%;
+    overflow: hidden;
+}
+
+body.modal-open {
+    height: 100vh;
+    overflow-y: hidden;
+}
+
+.securityCodeMarginTop {
+    margin-left: 50px;
+}

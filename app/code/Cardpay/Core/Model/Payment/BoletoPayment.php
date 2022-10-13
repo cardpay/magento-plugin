@@ -24,7 +24,8 @@ class BoletoPayment extends UnlimintPayment
     protected $_code = self::CODE;
 
     protected $fields_febraban = [
-        'firstName', 'lastName', 'docType', 'docNumber', 'address', 'addressNumber', 'addressCity', 'addressState', 'addressZipcode'
+        'firstName', 'lastName', 'docType', 'docNumber', 'address', 'addressNumber',
+        'addressCity', 'addressState', 'addressZipcode'
     ];
 
     /**
@@ -35,32 +36,33 @@ class BoletoPayment extends UnlimintPayment
     public function assignData(DataObject $data)
     {
         $infoForm = $data->getData();
+        if (empty($infoForm['additional_data'])) {
+            return $this;
+        }
 
-        if (isset($infoForm['additional_data'])) {
-            if (empty($infoForm['additional_data'])) {
-                return $this;
-            }
-            $additionalData = $infoForm['additional_data'];
+        $additionalData = $infoForm['additional_data'];
 
-            $info = $this->getInfoInstance();
+        $info = $this->getInfoInstance();
 
-            if (!empty($infoForm['method'])) {
-                $info->setAdditionalInformation('method', $infoForm['method']);
-            }
+        if (!empty($infoForm['method'])) {
+            $info->setAdditionalInformation('method', $infoForm['method']);
+        }
 
-            if (!empty($additionalData['payment_method_ticket'])) {
-                $info->setAdditionalInformation('payment_method', $additionalData['payment_method_ticket']);
-                $info->setAdditionalInformation('payment_method_id', $additionalData['payment_method_ticket']);
-            }
+        if (!empty($additionalData['payment_method_ticket'])) {
+            $info->setAdditionalInformation('payment_method', $additionalData['payment_method_ticket']);
+            $info->setAdditionalInformation('payment_method_id', $additionalData['payment_method_ticket']);
+        }
 
-            if (!empty($additionalData['cpf'])) {
-                $info->setAdditionalInformation('cpf', preg_replace('/[^0-9]+/', '', $additionalData['cpf']));   // leave only digits
-            }
+        if (!empty($additionalData['cpf'])) {
+            $info->setAdditionalInformation('cpf', preg_replace('/[^\d]+/', '', $additionalData['cpf']));   // leave only digits
+        }
+        if (!empty($additionalData['zip'])) {
+            $info->setAdditionalInformation('zip', preg_replace('/[^\d]+/', '', $additionalData['zip']));   // leave only digits
+        }
 
-            foreach ($this->fields_febraban as $key) {
-                if (isset($additionalData[$key])) {
-                    $info->setAdditionalInformation($key, $additionalData[$key]);
-                }
+        foreach ($this->fields_febraban as $key) {
+            if (isset($additionalData[$key])) {
+                $info->setAdditionalInformation($key, $additionalData[$key]);
             }
         }
 
@@ -93,9 +95,12 @@ class BoletoPayment extends UnlimintPayment
             if (!empty($payment->getAdditionalInformation('cpf'))) {
                 $paymentInfo['cpf'] = $payment->getAdditionalInformation('cpf');
             }
+            if (!empty($payment->getAdditionalInformation('zip'))) {
+                $paymentInfo['zip'] = $payment->getAdditionalInformation('zip');
+            }
 
-            $requestParams = $this->_coreModel->getDefaultRequestParams($paymentInfo, $quote, $order);
-            $requestParams['payment_method'] = ConfigData::BOLETO_API_PAYMENT_METHOD;
+            $paymentInfo['payment_method'] = ConfigData::BOLETO_API_PAYMENT_METHOD;
+            $requestParams = $this->_coreModel->getDefaultRequestParams($paymentInfo, $quote, $order, []);
             $requestParams['customer']['full_name'] = trim($order->getCustomerName());
 
             $this->_helperData->log("BoletoPayment::initialize - Preference to POST", 'cardpay.log', $requestParams);
@@ -169,7 +174,7 @@ class BoletoPayment extends UnlimintPayment
      */
     public function isAvailable(CartInterface $quote = null)
     {
-        $isActive = (int)$this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_TICKET_ACTIVE, ScopeInterface::SCOPE_STORE);
+        $isActive = (int)$this->_scopeConfig->getValue(ConfigData::PATH_TICKET_ACTIVE, ScopeInterface::SCOPE_STORE);
         if (0 === $isActive) {
             return false;
         }

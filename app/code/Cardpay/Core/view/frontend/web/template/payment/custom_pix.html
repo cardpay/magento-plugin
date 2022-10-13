@@ -1,0 +1,79 @@
+<div class="payment-method" data-bind="css: {'_active': (getCode() == isChecked())}">
+    <div class="payment-method-title field choice">
+        <input type="radio" name="payment[method]" class="radio"
+               data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()"/>
+        <label class="label" data-bind="attr: {'for': getCode()}">
+            <!-- Unlimint Logo -->
+            <span data-bind="text: getTitle()"></span>
+        </label>
+    </div>
+    <div class="payment-method-content">
+        <!-- ko foreach: getRegion('messages') -->
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!--/ko-->
+        <div class="payment-method-billing-address">
+            <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
+
+        <form class="form" id="co-cardpay-form-pix" action="#" method="post"
+              data-bind="mageInit: {'transparent':{'context': context()}, 'validation':[]}">
+
+            <div id="cardpay-form-pix">
+                <div class="mp-box-inputs mp-col-100">
+                    <label for="cpf_pix"> <!-- ko i18n: 'CPF'--><!-- /ko --> <em>*</em></label>
+                    <input type="text" id="cpf_pix" name="cardpay_custom_pix[cpf_pix]"
+                           data-checkout="cpf_pix"
+                           data-format="***.***.***-**"
+                           data-mask="XXX.XXX.XXX-XX"
+                           placeholder="XXX.XXX.XXX-XX"
+                           autocomplete="off"
+                           data-bind="event: {keyup: applyInputMask, blur: validateCpfPix}"/>
+
+                    <span class="mp-error" id="mp-error-E303" data-main="#cpf"> <!-- ko i18n: 'CPF is invalid'-->
+                        <!-- /ko -->  </span>
+                    <span class="mp-error" id="mp-error-E304-second" data-main="#cpf"> <!-- ko i18n: 'Please fill out a CPF'-->
+                        <!-- /ko -->  </span>
+                </div>
+            </div>
+
+            <div class="mp-box-inputs mp-col-100" id="cardpay-utilities">
+                <input type="hidden" id="site_idPix" value="" name="cardpay_custom_pix[site_id]"/>
+                <input type="hidden" id="amountPix" value="" name="cardpay_custom_pix[amount]"
+                       data-bind="attr: {value: getInitialTotal()}">
+                <input type="hidden" id="campaign_idPix" name="cardpay_custom_pix[campaign_id]"/>
+                <input type="hidden" id="campaignPix" name="cardpay_custom_pix[campaign]"/>
+                <input type="hidden" id="discountPix" name="cardpay_custom_pix[discount]"/>
+            </div>
+
+            <div>
+                <img data-bind="attr: {src: getPixLogoURL()}" alt="Pix" width="53" height="35"
+                     style="margin-top: 15px;"/>
+            </div>
+        </form>
+
+        <div class="checkout-agreements-block">
+            <!-- ko foreach: $parent.getRegion('before-place-order') -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
+
+        <div class="actions-toolbar">
+            <div class="primary" style="margin-top: 30px;">
+                <button data-role="review-save"
+                        type="submit"
+                        data-bind="
+                               attr: {title: $t('Place Order')},
+                               enable: (getCode() == isChecked()),
+                               click: placeOrder,
+                               css: {disabled: !isPlaceOrderActionAllowed()},
+                           "
+                        class="action primary checkout"
+                        disabled>
+                    <span data-bind="i18n: 'Place Order'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -2,10 +2,12 @@
 
 namespace Cardpay\Core\Controller\Notifications;
 
+use Cardpay\Core\Exceptions\UnlimintBaseException;
 use Cardpay\Core\Helper\Data;
 use Cardpay\Core\Model\Basic\Payment;
 use Cardpay\Core\Model\Core;
 use Cardpay\Core\Model\Notifications\Notifications;
+use Cardpay\Core\Model\Notifications\Topics\MerchantOrder;
 use Exception;
 use Magento\Framework\App\Action\Context;
 use Magento\Framework\Webapi\Rest\Request;
@@ -28,6 +30,11 @@ class Basic extends NotificationBase
      * @var Data
      */
     protected $coreHelper;
+
+    /**
+     * @var MerchantOrder
+     */
+    protected $finalStatus;
 
     /**
      * @var Core
@@ -65,8 +72,7 @@ class Basic extends NotificationBase
         OrderFactory  $orderFactory,
         Notifications $notifications,
         Request       $request
-    )
-    {
+    ) {
         $this->paymentFactory = $paymentFactory;
         $this->coreHelper = $coreHelper;
         $this->coreModel = $coreModel;
@@ -88,32 +94,31 @@ class Basic extends NotificationBase
             $topicClass = $this->notifications->getPayment();
             $data = $this->notifications->getPaymentInformation($topicClass, $requestParams);
             if (empty($data)) {
-                throw new Exception(__('Error Merchant Order notification is expected'), 400);
+                throw new UnlimintBaseException(__('Error Merchant Order notification is expected'), 400);
             }
             $merchantOrder = $data['merchantOrder'];
 
             if (is_null($merchantOrder)) {
-                throw new Exception(__('Merchant Order not found or is an notification invalid type.'), 400);
+                throw new UnlimintBaseException(__('Merchant Order not found or is an notification invalid type.'), 400);
             }
 
             $order = $this->orderFactory->create()->loadByIncrementId($merchantOrder["external_reference"]);
             if (is_null($order) || empty($order->getId())) {
-                throw new Exception(__('Error Order Not Found in Magento: ') . $merchantOrder["external_reference"], 400);
+                throw new UnlimintBaseException(__('Error Order Not Found in Magento: ') . $merchantOrder["external_reference"], 400);
             }
             if ($order->getStatus() === 'canceled') {
-                throw new Exception(__('Order already cancelled: ') . $merchantOrder["external_reference"], 400);
+                throw new UnlimintBaseException(__('Order already cancelled: ') . $merchantOrder["external_reference"], 400);
             }
 
-            $data['statusFinal'] = $topicClass->getStatusFinal($merchantOrder);
+            $data['statusFinal'] = $this->finalStatus->getStatusFinal($merchantOrder);
 
             if (!$topicClass->validateRefunded($order, $data)) {
-                throw new Exception(__('Error Order Refund'), 400);
+                throw new UnlimintBaseException(__('Error Order Refund'), 400);
             }
 
             $statusResponse = $topicClass->updateOrder($order, $data);
 
             $this->setResponseHttp($statusResponse['code'], $statusResponse['text'], $this->request->getBodyParams());
-
         } catch (Exception $e) {
             $this->setResponseHttp($e->getCode(), $e->getMessage(), $this->request->getBodyParams());
         }
