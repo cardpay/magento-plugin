@@ -1,6 +1,6 @@
 <?php
 
-namespace Cardpay\Core\Controller\Customtpix;
+namespace Cardpay\Core\Controller\Custompix;
 
 use Magento\Checkout\Model\Session;
 use Magento\Framework\App\Action\Action;
@@ -10,7 +10,7 @@ use Magento\Sales\Model\OrderFactory;
 /**
  * Class Success
  *
- * @package Cardpay\Core\Controller\Customticket
+ * @package Cardpay\Core\Controller\Customtpix
  */
 class Success extends Action
 {

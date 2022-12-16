@@ -104,35 +104,19 @@ class RefundObserverBeforeSave implements ObserverInterface
 
         $payment = $order->getPayment();
         if ($payment !== null) {
-            if (!empty($payment->getAdditionalInformation())) {
-                $additionalInformation = $payment->getAdditionalInformation();
-                if (isset($additionalInformation['raw_details_info']['filing'])
-                    && !empty($additionalInformation['raw_details_info']['filing']['id'])
-                ) {
+            $additionalInformation = $payment->getAdditionalInformation();
+            if (!empty($payment->getAdditionalInformation()) && (isset($additionalInformation['raw_details_info']['filing']) && !empty($additionalInformation['raw_details_info']['filing']['id']))) {
+                {
                     $this->throwRefundException(__("Refund is not available for installment payment"));
                 }
             }
-
-            if (!empty($payment->getMethod() && ((ConfigData::BOLETO_PAYMENT_METHOD) == $payment->getMethod()))) {
-                $this->throwRefundException(__('Refund is not available for Boleto'));
-            }
-
-            if (!empty($payment->getMethod() && ((ConfigData::PIX_PAYMENT_METHOD) == $payment->getMethod()))) {
-                $this->throwRefundException(__('Refund is not available for Pix'));
-            }
         }
+
         // check is refund enabled
         $refundAvailable = (int)$this->scopeConfig->getValue(ConfigData::PATH_ORDER_REFUND_AVAILABLE, ScopeInterface::SCOPE_STORE);
         if ($refundAvailable === 0) {
             $this->dataHelper->log('Core, RefundObserverBeforeSave::creditMemoRefundBeforeSave - Refund is disabled', ConfigData::CUSTOM_LOG_PREFIX);
             $this->throwRefundException(__('Refund is disabled'));
-        }
-
-        $refundForMfHold = $this->scopeConfig->getValue(ConfigData::PATH_BANKCARD_INSTALLMENT_TYPE, ScopeInterface::SCOPE_STORE);
-        $checkInstallments = !empty($additionalInformation['raw_details_info']['installments']) && (int)$additionalInformation['raw_details_info']['installments'] > 1;
-        if ($refundAvailable === 1 && $refundForMfHold === 'MF_HOLD' && $checkInstallments) {
-            $this->dataHelper->log('Core, RefundObserverBeforeSave::creditMemoRefundBeforeSave - Refund for MF HOLD not work', ConfigData::CUSTOM_LOG_PREFIX);
-            $this->throwRefundException(__('Refund is not available'));
         }
 
         // get amount refund
@@ -181,6 +165,11 @@ class RefundObserverBeforeSave implements ObserverInterface
         $this->dataHelper->log('Core, RefundObserverBeforeSave::creditMemoRefundBeforeSave responseRefund', ConfigData::CUSTOM_LOG_PREFIX, $refundResponse);
 
         if (!is_null($refundResponse) || (int)$refundResponse['status'] === 200 || (int)$refundResponse['status'] === 201) {
+
+            if ($refundResponse['response']['payment_data']['remaining_amount'] === 0) {
+                $order->setCustomOrderAttribute('REFUNDED');
+            }
+
             $successMessageRefund = 'Unlimint - ' . __('Refund of %1 was processed successfully.', $amountToRefund);
             $this->messageManager->addSuccessMessage($successMessageRefund);
             $this->dataHelper->log('Core, RefundObserverBeforeSave::creditMemoRefundBeforeSave - ' . $successMessageRefund, ConfigData::CUSTOM_LOG_PREFIX, $refundResponse);

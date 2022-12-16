@@ -3,18 +3,9 @@
 namespace Cardpay\Core\Model;
 
 use Cardpay\Core\Helper\ConfigData;
-use Cardpay\Core\Helper\Data;
 use Cardpay\Core\Model\Payment\PixPayment;
-use Magento\Checkout\Model\Session;
-use Magento\Framework\App\Action\Context;
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\App\ProductMetadataInterface;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\UrlInterface;
-use Magento\Framework\View\Asset\Repository;
-use Magento\Payment\Helper\Data as PaymentHelper;
 use Magento\Store\Model\ScopeInterface;
-use Magento\Store\Model\StoreManagerInterface;
 
 class PixConfigProvider extends BasicConfigProvider
 {
@@ -39,7 +30,6 @@ class PixConfigProvider extends BasicConfigProvider
                 $this->methodCode => [
                     'country' => strtoupper($this->getConfigWithDefault(ConfigData::PATH_SITE_ID, ScopeInterface::SCOPE_STORE)),
                     'bannerUrl' => $this->getConfigWithDefault(ConfigData::PATH_PIX_BANNER, ScopeInterface::SCOPE_STORE),
-                    'discount_coupon' => $this->scopeConfig->isSetFlag(ConfigData::PATH_PIX_COUPON, ScopeInterface::SCOPE_STORE),
                     'logEnabled' => $this->getConfigWithDefault(ConfigData::PATH_ADVANCED_LOG, ScopeInterface::SCOPE_STORE),
                     'options' => $paymentMethods,
                     'grand_total' => $this->checkoutSession->getQuote()->getGrandTotal(),

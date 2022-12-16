@@ -13,12 +13,6 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
         add_truncated_card: true,
         site_id: '',
         terminal_code: '',
-        coupon_of_discounts: {
-            discount_action_url: '',
-            payer_email: '',
-            default: true,
-            status: true
-        },
         customer_and_card: {
             default: false,
             status: false
@@ -28,11 +22,6 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
             keyup: false,
             paste: true,
         },
-
-        inputs_to_create_discount: [
-            'couponCode',
-            'applyCoupon'
-        ],
 
         inputs_to_create_token: [
             'cardNumber',
@@ -49,11 +38,6 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
         ],
 
         selectors: {
-            couponCode: '#couponCode',
-            applyCoupon: '#applyCouponCard',
-            mpCouponApplyed: '#mpCouponApplyed',
-            mpCouponError: '#mpCouponError',
-
             paymentMethodSelector: '#paymentMethodSelector',
             pmCustomerAndCards: '#payment-methods-for-customer-and-cards',
             pmListOtherCards: '#payment-methods-list-other-cards',
@@ -101,7 +85,6 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
             formBoleto: '#cardpay-form-boleto',
             formPix: '#cardpay-form-pix',
             formDiv: '#cardpay-form',
-            formCoupon: '#cardpay-form-coupon',
             formCustomerAndCard: '#cardpay-form-customer-and-card',
             utilities_fields: '#cardpay-utilities'
         },
@@ -114,7 +97,6 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
             discount_info4: 'Total of your purchase with discount:',
             discount_info5: 'Upon payment approval',
             discount_info6: 'Terms and Conditions of Use',
-            coupon_empty: 'Please, inform your coupon code',
             apply: 'Apply',
             remove: 'Remove'
         },
@@ -613,13 +595,10 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
     * Initialization function
     */
 
-    CPv1.Initialize = function (siteId, terminalCode, couponMode, discountActionUrl, payerEmail) {
+    CPv1.Initialize = function (siteId, terminalCode) {
         // sets
         CPv1.site_id = siteId
         CPv1.terminal_code = terminalCode
-        CPv1.coupon_of_discounts.default = couponMode
-        CPv1.coupon_of_discounts.discount_action_url = discountActionUrl
-        CPv1.coupon_of_discounts.payer_email = payerEmail
 
         // initialize events
         CPv1.InitializeEvents();

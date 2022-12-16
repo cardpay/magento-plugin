@@ -64,7 +64,6 @@ class BankCardPayment extends UnlimintPayment
                 [
                     'expiration_date' => 'card_expiration_date',
                     'gateway_mode' => 'gateway_mode',
-                    'coupon_code' => 'coupon_code',
                     'payment_method' => 'payment_method_id',
                     'cardholder_name' => 'card_holder_name',
                     'card_number' => 'card_number',
@@ -76,7 +75,7 @@ class BankCardPayment extends UnlimintPayment
 
             $info->setAdditionalInformation('method', $infoForm['method']);
             $info->setAdditionalInformation('payment_type_id', "credit_card");
-            $info->setAdditionalInformation('cpf', preg_replace('/[^0-9]+/', '', $additionalData['cpf'] ?? ''));   // leave only digits
+            $info->setAdditionalInformation('cpf', preg_replace('/[\d]+/', '', $additionalData['cpf'] ?? ''));   // leave only digits
         }
 
         return $this;
@@ -244,14 +243,11 @@ class BankCardPayment extends UnlimintPayment
     public function setOrderSubtotals($data)
     {
         $total = $data['transaction_details']['total_paid_amount'];
+
         $order = $this->getInfoInstance()->getOrder();
         $order->setGrandTotal($total);
         $order->setBaseGrandTotal($total);
-        $couponAmount = $data['coupon_amount'];
-        if ($couponAmount) {
-            $order->setDiscountCouponAmount($couponAmount * -1);
-            $order->setBaseDiscountCouponAmount($couponAmount * -1);
-        }
+
         $this->getInfoInstance()->setOrder($order);
     }
 

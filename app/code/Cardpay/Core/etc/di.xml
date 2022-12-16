@@ -1,7 +1,9 @@
 <?xml version="1.0"?>
 
-<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
-    <preference for="Cardpay\Core\Helper\Message\MessageInterface" type="Cardpay\Core\Helper\Message\StatusOrderMessage"/>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <preference for="Cardpay\Core\Helper\Message\MessageInterface"
+                type="Cardpay\Core\Helper\Message\StatusOrderMessage"/>
     <preference for="Magento\Framework\Setup\ModuleContextInterface" type="Magento\Setup\Model\ModuleContext"/>
     <preference for="Magento\Quote\Api\CartRepositoryInterface" type="Magento\Quote\Model\QuoteRepository"/>
     <type name="Cardpay\Core\Logger\Handler\System">
@@ -25,11 +27,20 @@
     <type name="Cardpay\Core\Model\Core">
         <arguments>
             <argument name="statusMessage" xsi:type="object">Cardpay\Core\Helper\Message\StatusMessage</argument>
-            <argument name="statusDetailMessage" xsi:type="object">Cardpay\Core\Helper\Message\StatusDetailMessage</argument>
-            <argument name="statusOrderMessage" xsi:type="object">Cardpay\Core\Helper\Message\StatusOrderMessage</argument>
+            <argument name="statusDetailMessage" xsi:type="object">Cardpay\Core\Helper\Message\StatusDetailMessage
+            </argument>
+            <argument name="statusOrderMessage" xsi:type="object">Cardpay\Core\Helper\Message\StatusOrderMessage
+            </argument>
         </arguments>
     </type>
     <type name="Magento\Framework\App\Request\CsrfValidator">
         <plugin name="csrf_validator_skip" type="Cardpay\Core\Plugin\CsrfValidatorSkip"/>
     </type>
+    <virtualType name="Magento\Sales\Model\ResourceModel\Order\Grid" type="Magento\Sales\Model\ResourceModel\Grid">
+        <arguments>
+            <argument name="columns" xsi:type="array">
+                <item name="custom_order_attribute" xsi:type="string">sales_order.custom_order_attribute</item>
+            </argument>
+        </arguments>
+    </virtualType>
 </config>

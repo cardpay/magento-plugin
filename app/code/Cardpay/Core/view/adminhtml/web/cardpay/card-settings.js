@@ -101,6 +101,7 @@ const unlimintCardSettings = {
         });
     },
     checkMinimumInstallmentAmount: function () {
+        document.querySelector("#row_payment_other_cardpay_configurations_custom_checkout_minimum_installment_amount > td.label > label > span").innerText = 'Minimum installment amount ' + GET_CURRENCY_SYMBOL['currency'];
         let val = parseFloat(this.minimumInstallmentAmount.val()).toFixed(4);
         if (val < 0) {
             highlightUlAdminError(jQuery(this.minimumInstallmentAmount).attr('id'));

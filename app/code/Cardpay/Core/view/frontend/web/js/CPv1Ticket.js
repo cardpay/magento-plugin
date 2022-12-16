@@ -6,21 +6,11 @@ const INLINE_BLOCK = 'inline-block';
 (function () {
     var CPv1Ticket = {
         site_id: "",
-        coupon_of_discounts: {
-            discount_action_url: "",
-            payer_email: "",
-            default: true,
-            status: true
-        },
         validate_on: {
             event: false,
             keyup: false,
             paste: true,
         },
-        inputs_to_create_discount: [
-            "couponCodeTicket",
-            "applyCouponTicket"
-        ],
         inputs_to_validate_ticket: [
             "firstname",
             "lastname",
@@ -32,16 +22,6 @@ const INLINE_BLOCK = 'inline-block';
             "zipcode"
         ],
         selectors: {
-            // coupom
-            couponCode: "#couponCodeTicket",
-            applyCoupon: "#applyCouponTicket",
-            mpCouponApplyed: "#mpCouponApplyedTicket",
-            mpCouponError: "#mpCouponErrorTicket",
-            campaign_id: "#campaign_idTicket",
-            campaign: "#campaignTicket",
-            discount: "#discountTicket",
-
-            //
             firstName: "#CPv1-firstname",
             lastName: "#CPv1-lastname",
             docTypeFisica: "#CPv1-docType-fisica",
@@ -71,7 +51,6 @@ const INLINE_BLOCK = 'inline-block';
             // form
             radioTypeFisica: '#CPv1-docType-fisica',
             radioTypeJuridica: '#CPv1-docType-juridica',
-            formCoupon: '#cardpay-form-coupon-ticket',
             formTicket: '#form-ticket',
             box_loading: "#mp-box-loading",
             submit: "#btnSubmit",
@@ -95,7 +74,6 @@ const INLINE_BLOCK = 'inline-block';
             discount_info4: "Total of your purchase with discount:",
             discount_info5: "*Uppon payment approval",
             discount_info6: "Terms and Conditions of Use",
-            coupon_empty: "Please, inform your coupon code",
             apply: "Apply",
             remove: "Remove"
         },
@@ -458,12 +436,9 @@ const INLINE_BLOCK = 'inline-block';
         return v
     }
 
-    CPv1Ticket.Initialize = function (site_id, coupon_mode, discount_action_url, payer_email) {
+    CPv1Ticket.Initialize = function (site_id, discount_action_url, payer_email) {
         // Sets.
         CPv1Ticket.site_id = site_id;
-        CPv1Ticket.coupon_of_discounts.default = coupon_mode;
-        CPv1Ticket.coupon_of_discounts.discount_action_url = discount_action_url;
-        CPv1Ticket.coupon_of_discounts.payer_email = payer_email;
 
         // flow: CPB
         if (String(CPv1Ticket.site_id) === "CPB") {

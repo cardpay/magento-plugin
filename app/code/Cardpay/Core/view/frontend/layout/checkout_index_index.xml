@@ -56,48 +56,6 @@
                                         </item>
                                     </item>
                                 </item>
-
-                                <item name="sidebar" xsi:type="array">
-                                    <item name="children" xsi:type="array">
-                                        <item name="summary" xsi:type="array">
-                                            <item name="children" xsi:type="array">
-                                                <item name="totals" xsi:type="array">
-                                                    <item name="children" xsi:type="array">
-                                                        <item name="discount_coupon" xsi:type="array">
-                                                            <item name="component" xsi:type="string">
-                                                                Cardpay_Core/js/view/checkout/cart/totals/discount_coupon
-                                                            </item>
-                                                            <item name="sortOrder" xsi:type="string">50</item>
-                                                            <item name="config" xsi:type="array">
-                                                                <item name="template" xsi:type="string">
-                                                                    Cardpay_Core/checkout/cart/totals/discount_coupon
-                                                                </item>
-                                                                <item name="title" xsi:type="string" translate="true">
-                                                                    Coupon discount of the Cardpay
-                                                                </item>
-                                                            </item>
-                                                        </item>
-
-                                                        <item name="finance_cost" xsi:type="array">
-                                                            <item name="component" xsi:type="string">
-                                                                Cardpay_Core/js/view/checkout/cart/totals/finance_cost
-                                                            </item>
-                                                            <item name="sortOrder" xsi:type="string">50</item>
-                                                            <item name="config" xsi:type="array">
-                                                                <item name="template" xsi:type="string">
-                                                                    Cardpay_Core/checkout/cart/totals/finance_cost
-                                                                </item>
-                                                                <item name="title" xsi:type="string" translate="true">
-                                                                    Financing Cost
-                                                                </item>
-                                                            </item>
-                                                        </item>
-                                                    </item>
-                                                </item>
-                                            </item>
-                                        </item>
-                                    </item>
-                                </item>
                             </item>
                         </item>
                     </item>

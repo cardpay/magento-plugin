@@ -1,0 +1,22 @@
+<?php
+/**
+ * @var $block \Cardpay\Core\Block\Adminhtml\Order\View\View
+ */
+$order = $block->getOrder();
+?>
+
+<section class="admin__page-section order-view-account-information">
+    <div class="admin__page-section-content">
+        <div class="admin__page-section-item order-information">
+            <table class="admin__table-secondary order-information-table">
+                <tbody>
+                <tr>
+                    <th><?= $block->translatePaymentStatus() ?></th>
+                    <td><span id="order_status"><?= $order->getData('custom_order_attribute') ?></span></td>
+                </tr>
+                <tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>

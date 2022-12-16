@@ -25,6 +25,17 @@ class ConfigData
     public const PATH_BANKCARD_INSTALLMENT_TYPE = 'payment/cardpay_custom/installment_type';
     public const PATH_BANKCARD_MINIMUM_INSTALLMENT_AMOUNT = 'payment/cardpay_custom/minimum_installment_amount';
 
+    // basic method
+    public const PATH_BASIC_ACTIVE = 'payment/cardpay_basic/active';
+    public const PATH_BASIC_TITLE = 'payment/cardpay_basic/title';
+    public const PATH_BASIC_URL_FAILURE = 'payment/cardpay_basic/url_failure';
+    public const PATH_BASIC_AUTO_RETURN = 'payment/cardpay_basic/auto_return';
+    public const PATH_BASIC_EXCLUDE_PAYMENT_METHODS = 'payment/cardpay_basic/excluded_payment_methods';
+    public const PATH_BASIC_STATEMENT_DESCRIPTION = 'payment/cardpay_basic/statement_desc';
+    public const PATH_BASIC_EXPIRATION_TIME_PREFERENCE = 'payment/cardpay_basic/exp_time_pref';
+    public const PATH_BASIC_ORDER_STATUS = 'payment/cardpay_basic/order_status';
+    public const PATH_BASIC_BINARY_MODE = 'payment/cardpay_basic/binary_mode';
+    public const PATH_BASIC_GATEWAY_MODE = 'payment/cardpay_basic/gateway_mode';
 
     // credentials path (Boleto)
     public const PATH_BOLETO_TERMINAL_CODE = 'payment/cardpay_customticket/terminal_code_boleto';
@@ -47,7 +58,6 @@ class ConfigData
     public const PATH_CUSTOM_BINARY_MODE = 'payment/cardpay_custom/binary_mode';
     public const PATH_CUSTOM_STATEMENT_DESCRIPTOR = 'payment/cardpay_custom/statement_descriptor';
     public const PATH_CUSTOM_BANNER = 'payment/cardpay_custom/banner_checkout';
-    public const PATH_CUSTOM_COUPON = 'payment/cardpay_custom/coupon_cardpay';
     public const PATH_CUSTOM_GATEWAY_MODE = 'payment/cardpay_custom/gateway_mode';
     public const PATH_CUSTOM_ASK_CPF = 'payment/cardpay_custom/ask_cpf';
     public const PATH_CUSTOM_INSTALLMENT = 'payment/cardpay_custom/installment';
@@ -62,31 +72,17 @@ class ConfigData
 
     // Boleto payment method
     public const PATH_TICKET_ACTIVE = 'payment/cardpay_customticket/active';
-    public const PATH_TICKET_COUPON = 'payment/cardpay_customticket/coupon_cardpay';
     public const PATH_TICKET_BANNER = 'payment/cardpay_customticket/banner_checkout';
     public const PATH_TICKET_EXCLUDE_PAYMENT_METHODS = 'payment/cardpay_customticket/excluded_payment_methods';
 
     // Pix payment method
     public const PATH_PIX_ACTIVE = 'payment/cardpay_custompix/active';
-    public const PATH_PIX_COUPON = 'payment/cardpay_custompix/coupon_cardpay';
     public const PATH_PIX_BANNER = 'payment/cardpay_custompix/banner_checkout';
     public const PATH_PIX_EXCLUDE_PAYMENT_METHODS = 'payment/cardpay_custompix/excluded_payment_methods';
 
     // custom method bank transfer
     public const PATH_CUSTOM_BANK_TRANSFER_ACTIVE = 'payment/cardpay_custom/active';
     public const PATH_CUSTOM_BANK_TRANSFER_REDIRECT_PAYER = 'payment/cardpay_custom/redirect_payer';
-
-    // basic method
-    public const PATH_BASIC_ACTIVE = 'payment/cardpay_basic/active';
-    public const PATH_BASIC_TITLE = 'payment/cardpay_basic/title';
-    public const PATH_BASIC_URL_FAILURE = 'payment/cardpay_basic/url_failure';
-    public const PATH_BASIC_AUTO_RETURN = 'payment/cardpay_basic/auto_return';
-    public const PATH_BASIC_EXCLUDE_PAYMENT_METHODS = 'payment/cardpay_basic/excluded_payment_methods';
-    public const PATH_BASIC_STATEMENT_DESCRIPTION = 'payment/cardpay_basic/statement_desc';
-    public const PATH_BASIC_EXPIRATION_TIME_PREFERENCE = 'payment/cardpay_basic/exp_time_pref';
-    public const PATH_BASIC_ORDER_STATUS = 'payment/cardpay_basic/order_status';
-    public const PATH_BASIC_BINARY_MODE = 'payment/cardpay_basic/binary_mode';
-    public const PATH_BASIC_GATEWAY_MODE = 'payment/cardpay_basic/gateway_mode';
 
     // order configuration
     public const PATH_ORDER_AUTHORIZED = 'payment/cardpay_custom/order_status_authorized';

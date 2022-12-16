@@ -317,37 +317,6 @@ textarea.has-error {
     display: none;
 }
 
-.cardpay-message-coupon {
-    margin: 5px 0 -5px 0;
-    float: left;
-    width: 92%;
-    padding: 0;
-}
-
-.cardpay-message-coupon li {
-    display: none;
-}
-
-.cardpay-coupon-action-apply, .cardpay-coupon-action-remove {
-    cursor: pointer;
-    float: left;
-    font-size: 10px;
-    border: 1px solid #cecece;
-    text-transform: uppercase;
-    padding: 2px 7px;
-    border-radius: 5px;
-    background-color: #F0F0F0;
-    margin: 5px 0 0 0;
-}
-
-.cardpay-coupon-action-remove {
-    display: none;
-}
-
-.cardpay-message-coupon p {
-    margin: 0 0 0 0;
-}
-
 .cardpay-focus {
     color: #004098;
     font-family: Arial, serif;

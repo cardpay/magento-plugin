@@ -173,45 +173,10 @@
     font-weight: 400;
 }
 
-#applyCouponCard, #applyCouponTicket {
-    color: #fff;
-    background-color: #337ab7;
-    border-color: #2e6da4;
-    padding: 6px 12px;
-    border: 1px solid transparent;
-    border-radius: 4px;
-    text-align: center;
-    font-size: 14px;
-    font-weight: 400;
-}
-
-#applyCouponCard:hover, #applyCouponTicket:hover {
-    color: #fff;
-    background-color: #286090;
-    border-color: #204d74;
-}
-
-#applyCouponTicket {
-    margin: 20px 0 0 0;
-}
-
 #btnSubmit:hover {
     color: #fff;
     background-color: #286090;
     border-color: #204d74;
-}
-
-#mpCouponApplyed, #mpCouponError {
-    margin: 5px 0 5px;
-    display: none;
-}
-
-#mpCouponApplyed, #mpCouponApplyedTicket {
-    display: none;
-    border-style: solid;
-    border-width: thin;
-    border-color: #009EE3;
-    padding: 8px 8px 8px 8px;
 }
 
 #form-ticket {
@@ -390,22 +355,6 @@
     width: 100%;
 }
 
-#form-ticket, #cardpay-form-coupon-ticket {
-    width: 100%;
-    margin-left: 10px;
-    margin-right: 10px;
-    max-width: 400px;
-    padding-left: 10px;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    float: left;
-}
-
-#cardpay-form-coupon-ticket {
-    margin-bottom: 10px;
-}
-
 .form-row label {
     width: 100%;
     float: left;
@@ -486,22 +435,6 @@
 #cardpay-pix-form-general, .cardpay-box-form {
     float: left;
     width: 100%;
-}
-
-#form-pix, #cardpay-form-coupon-pix {
-    width: 100%;
-    margin-left: 10px;
-    margin-right: 10px;
-    max-width: 400px;
-    padding-left: 10px;
-    -webkit-box-sizing: border-box;
-    -moz-box-sizing: border-box;
-    box-sizing: border-box;
-    float: left;
-}
-
-#cardpay-form-coupon-pix {
-    margin-bottom: 10px;
 }
 
 #cardpay-payment-methods-pix {

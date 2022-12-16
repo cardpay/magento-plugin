@@ -1,101 +1,143 @@
 <?xml version="1.0"?>
-<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
-    <group id="custom_checkout" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+<include xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_include.xsd">
+    <group id="custom_checkout" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1"
+           showInStore="1">
         <label>Credit Card</label>
 
-        <field id="active" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="active" translate="label comment" type="select" sortOrder="10" showInDefault="1" showInWebsite="1"
+               showInStore="1">
             <label>Enabled</label>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
             <config_path>payment/cardpay_custom/active</config_path>
-            <comment>It is a requirement that you have a SSL certificate, and the payment form to be provided under an HTTPS page.</comment>
+            <comment>It is a requirement that you have a SSL certificate, and the payment form to be provided under an
+                HTTPS page.
+            </comment>
         </field>
 
-        <field id="api_access_mode" translate="label comment" type="select" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="api_access_mode" translate="label comment" type="select" sortOrder="20" showInDefault="1"
+               showInWebsite="1" showInStore="1">
             <label>API access mode</label>
             <config_path>payment/cardpay_custom/api_access_mode</config_path>
-            <comment>If "Payment page" mode is selected - payment page by Unlimint in iFrame is used for customer data collecting. If "Gateway" mode is selected - embedded payment form in plugin is used for customer data collecting.</comment>
+            <comment>If "Payment page" mode is selected - payment page by Unlimint in iFrame is used for customer data
+                collecting. If "Gateway" mode is selected - embedded payment form in plugin is used for customer data
+                collecting.
+            </comment>
             <source_model>Cardpay\Core\Config\ApiAccessMode</source_model>
         </field>
 
 
-        <field id="terminal_code" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="terminal_code" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1"
+               showInStore="1">
             <label>Terminal Code</label>
             <config_path>payment/cardpay_custom/terminal_code</config_path>
-            <comment>If "Api access mode" setting is changed - then "Terminal Code" value need to be checked and changed (if needed).</comment>
+            <comment>If "Api access mode" setting is changed - then "Terminal Code" value need to be checked and changed
+                (if needed).
+            </comment>
         </field>
 
-        <field id="access_token" translate="label comment" type="password" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="access_token" translate="label comment" type="password" sortOrder="30" showInDefault="1"
+               showInWebsite="1" showInStore="1">
             <label>Terminal Password</label>
             <config_path>payment/cardpay_custom/terminal_password</config_path>
-            <comment><![CDATA[Get your credentials, visit the <a href="https://unlimint.com/">unlimint.com</a>. If "Api access mode" setting is changed - then "Terminal Password" value need to be checked and changed (if needed).]]></comment>
+            <comment>
+                <![CDATA[Get your credentials, visit the <a href="https://unlimint.com/">unlimint.com</a>. If "Api access mode" setting is changed - then "Terminal Password" value need to be checked and changed (if needed).]]></comment>
         </field>
 
-        <field id="callback_secret" translate="label" type="password" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="callback_secret" translate="label" type="password" sortOrder="40" showInDefault="1" showInWebsite="1"
+               showInStore="1">
             <label>Callback Secret</label>
             <config_path>payment/cardpay_custom/callback_secret</config_path>
-            <comment>If "Api access mode" setting is changed - then "Callback Secret" value need to be checked and changed (if needed).</comment>
+            <comment>If "Api access mode" setting is changed - then "Callback Secret" value need to be checked and
+                changed (if needed).
+            </comment>
         </field>
 
-        <field id="sandbox" translate="label comment" type="select" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="sandbox" translate="label comment" type="select" sortOrder="50" showInDefault="1" showInWebsite="1"
+               showInStore="1">
             <label>Test Environment</label>
             <config_path>payment/cardpay_custom/sandbox</config_path>
-            <comment>In test environment, the data is sent to the sandbox only. Test and prod credentials (terminal code, terminal password, callback secret) are different.</comment>
+            <comment>In test environment, the data is sent to the sandbox only. Test and prod credentials (terminal
+                code, terminal password, callback secret) are different.
+            </comment>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
         </field>
 
-        <field id="capture" translate="label comment" type="select" sortOrder="60" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="capture" translate="label comment" type="select" sortOrder="60" showInDefault="1" showInWebsite="1"
+               showInStore="1">
             <label>Capture Payment</label>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
             <config_path>payment/cardpay_custom/capture</config_path>
-            <comment>Setting is for regular payments and Merchant Financed installments. If set to "No", the amount will not be captured but only blocked. By default with "No" option selected payments will be voided automatically in 7 days from the time of creating the preauthorized transaction. If you want payments to be captured automatically in 7 days (instead of being voided), please contact your account manager.</comment>
+            <comment>Setting is for regular payments and Merchant Financed installments. If set to "No", the amount will
+                not be captured but only blocked. By default with "No" option selected payments will be voided
+                automatically in 7 days from the time of creating the preauthorized transaction. If you want payments to
+                be captured automatically in 7 days (instead of being voided), please contact your account manager.
+            </comment>
         </field>
 
-        <field id="installment" translate="label comment" type="select" sortOrder="70" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="installment" translate="label comment" type="select" sortOrder="70" showInDefault="1"
+               showInWebsite="1" showInStore="1">
             <label>Installment Enabled</label>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
             <config_path>payment/cardpay_custom/installment</config_path>
-            <comment>If set to Yes then installment payment field will be presented on payment form and installment payments can be possible for processing</comment>
+            <comment>If set to Yes then installment payment field will be presented on payment form and installment
+                payments can be possible for processing
+            </comment>
         </field>
 
-        <field id="installment_type" translate="label comment" type="select" sortOrder="80" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="installment_type" translate="label comment" type="select" sortOrder="80" showInDefault="1"
+               showInWebsite="1" showInStore="1">
             <label>Installment Type</label>
             <config_path>payment/cardpay_custom/installment_type</config_path>
-            <comment><![CDATA[Should be selected only if "Installment enabled" setting is switched on. Here can be choosed Installment type used in trade plugin. More details about installment types you can read <a href="https://integration.unlimint.com/#Issuer-financed-(IF)">Issuer financed installments</a>, <a href="https://integration.unlimint.com/#Merchant-financed-(MF_HOLD)">MF HOLD Installments</a>]]></comment>
+            <comment>
+                <![CDATA[Should be selected only if "Installment enabled" setting is switched on. Here can be choosed Installment type used in trade plugin. More details about installment types you can read <a href="https://integration.unlimint.com/#Issuer-financed-(IF)">Issuer financed installments</a>, <a href="https://integration.unlimint.com/#Merchant-financed-(MF_HOLD)">MF HOLD Installments</a>]]></comment>
             <source_model>Cardpay\Core\Config\InstallmentType</source_model>
         </field>
 
-        <field id="minimum_installment_amount" translate="label" type="text" sortOrder="90" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="minimum_installment_amount" translate="label" type="text" sortOrder="90" showInDefault="1"
+               showInWebsite="1" showInStore="1">
             <label>Minimum installment amount</label>
             <config_path>payment/cardpay_custom/minimum_installment_amount</config_path>
-            <comment>Minimum installment amount for order with installments. Here can be filled minimum amount of 1 installment, f.e if we have 5 installments with 20 usd amount of 1 installment, total amount of order in this case is 100 usd</comment>
+            <comment>Minimum installment amount for order with installments. Here can be filled minimum amount of 1
+                installment, f.e if we have 5 installments with 20 usd amount of 1 installment, total amount of order in
+                this case is 100 usd
+            </comment>
+            <source_model>Cardpay\Core\Config\GetS</source_model>
         </field>
 
-        <field id="maximum_accepted_installments" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="maximum_accepted_installments" translate="label" type="text" sortOrder="100" showInDefault="1"
+               showInWebsite="1" showInStore="1">
             <label>Allowed installments range</label>
             <config_path>payment/cardpay_custom/maximum_accepted_installments</config_path>
-            <comment><![CDATA[Allowed installments range<br>For "Merchant Financed" installments can be filled in range of allowed values or several allowed values not in a row. All values can be from interval 1 - 12. For example: Range of values 3 - 7 (using "-" as separator). Allowed values not in a row 2, 3, 6, 8, 12 (using "," as separator).<br>For "Issuer financed" Installment type can be only allowed values not in a row from the following: 3, 6, 9, 12, 18.<br>If empty, then the default values will be used (2 - 12 for "Merchant Financed" and 3, 6, 9, 12, 18 for "Issuer Financed")]]></comment>
+            <comment>
+                <![CDATA[Allowed installments range<br>For "Merchant Financed" installments can be filled in range of allowed values or several allowed values not in a row. All values can be from interval 1 - 12. For example: Range of values 3 - 7 (using "-" as separator). Allowed values not in a row 2, 3, 6, 8, 12 (using "," as separator).<br>For "Issuer financed" Installment type can be only allowed values not in a row from the following: 3, 6, 9, 12, 18.<br>If empty, then the default values will be used (2 - 12 for "Merchant Financed" and 3, 6, 9, 12, 18 for "Issuer Financed")]]></comment>
         </field>
 
-        <field id="title" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="title" translate="label" type="text" sortOrder="110" showInDefault="1" showInWebsite="1"
+               showInStore="1">
             <label>Payment Title</label>
             <config_path>payment/cardpay_custom/title</config_path>
         </field>
 
 
-        <field id="sort_order" translate="label comment" type="text" sortOrder="120" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="sort_order" translate="label comment" type="text" sortOrder="120" showInDefault="1" showInWebsite="1"
+               showInStore="1">
             <label>Checkout Position</label>
             <frontend_class>validate-number</frontend_class>
             <config_path>payment/cardpay_custom/sort_order</config_path>
-            <comment>This setting will be the position in which the payment method will be available to the buyer.</comment>
+            <comment>This setting will be the position in which the payment method will be available to the buyer.
+            </comment>
         </field>
 
-        <field id="ask_cpf" translate="label comment" type="select" sortOrder="130" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="ask_cpf" translate="label comment" type="select" sortOrder="130" showInDefault="1" showInWebsite="1"
+               showInStore="1">
             <label>Ask CPF</label>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
             <config_path>payment/cardpay_custom/ask_cpf</config_path>
         </field>
 
-        <field id="descriptor" translate="label" type="text" sortOrder="140" showInDefault="1" showInWebsite="1" showInStore="1">
+        <field id="descriptor" translate="label" type="text" sortOrder="140" showInDefault="1" showInWebsite="1"
+               showInStore="1">
             <label>Dynamic Descriptor</label>
             <config_path>payment/cardpay_custom/descriptor</config_path>
             <validate>validate-length maximum-length-22</validate>
