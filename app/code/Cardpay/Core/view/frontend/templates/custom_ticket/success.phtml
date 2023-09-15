@@ -1,0 +1,64 @@
+<?php
+/**
+ * @var Cardpay\Core\Block\CustomTicket\Success $block
+ */
+
+use Cardpay\Core\Helper\ConfigData;
+
+$order = $this->getOrder();
+$total = $this->getTotal();
+$payment = $this->getPayment();
+$paymentResponse = $payment->getAdditionalInformation("paymentResponse");
+$payment_method = $this->getPaymentMethod();
+?>
+
+<div id="box-cardpay">
+    <?php if ($payment_method === ConfigData::BOLETO_PAYMENT_METHOD) { ?>
+        <h2 class="cardpay-title"><?php /* @escapeNotVerified */
+            echo __('Thank you for your purchase!'); ?></h2>
+
+        <p>
+            <?php /* @escapeNotVerified */
+            echo __(
+                'Your order %1 has been successfully generated.',
+                '<a href="' .
+                $block->escapeUrl($this->getOrderUrl()) .
+                '">' . $block->escapeHtml($order->getIncrementId()) .
+                '</a>'
+            );
+            ?>
+        </p>
+
+        <p>
+            <?php echo __('Generate the ticket and pay it wherever you want.'); ?>
+        </p>
+
+        <p>
+            <?php /* @escapeNotVerified */
+            echo __('Will be approved within 2 business days.'); ?>
+        </p>
+
+        <?php if ($paymentResponse['redirect_url']) { ?>
+            <a href="<?php echo $block->escapeUrl(
+                urldecode($paymentResponse['redirect_url'])
+            ); ?>"
+               target="_blank" rel="noopener" id="btn-boleto-cardpay">
+                <?php /* @escapeNotVerified */
+                echo __('Generate ticket'); ?>
+            </a>
+        <?php } else {
+            echo __('Error getting the link to the ticket. Please contact the seller.');
+        } ?>
+
+    <?php } ?>
+</div>
+
+<div id="logo-cardpay">
+    <img src="<?php echo $block->getUrl("Cardpay_Core::images/cp_logo.jpg"); ?>" alt="Unlimit"/>
+</div>
+
+<div class="primary button-success">
+    <a class="action primary continue"
+       href="<?php echo $block->escapeUrl($block->getUrl()) ?>"><span><?php /* @escapeNotVerified */
+            echo __('Continue Shopping') ?></span></a>
+</div>

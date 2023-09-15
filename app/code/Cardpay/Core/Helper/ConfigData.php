@@ -8,11 +8,23 @@ class ConfigData
     public const BANKCARD_PAYMENT_METHOD = 'cardpay_custom';
     public const BOLETO_PAYMENT_METHOD = 'cardpay_customticket';
     public const PIX_PAYMENT_METHOD = 'cardpay_custompix';
+    public const PAYPAL_PAYMENT_METHOD = 'cardpay_paypal';
+    public const GPAY_PAYMENT_METHOD = 'cardpay_gpay';
+    public const SEPA_PAYMENT_METHOD = 'cardpay_sepa';
+    public const SPEI_PAYMENT_METHOD = 'cardpay_spei';
+    public const MULTIBANCO_PAYMENT_METHOD = 'cardpay_multibanco';
+    public const MBWAY_PAYMENT_METHOD = 'cardpay_mbway';
 
-    // Unlimint API payment methods
+    // Unlimit API payment methods
     public const BANK_CARD_API_PAYMENT_METHOD = 'BANKCARD';
     public const BOLETO_API_PAYMENT_METHOD = 'BOLETO';
     public const PIX_API_PAYMENT_METHOD = 'PIX';
+    public const PAYPAL_API_PAYMENT_METHOD = 'PAYPAL';
+    public const GPAY_API_PAYMENT_METHOD = 'GOOGLEPAY';
+    public const SEPA_API_PAYMENT_METHOD = 'SEPATRANSFER';
+    public const SPEI_API_PAYMENT_METHOD = 'SPEI';
+    public const MULTIBANCO_API_PAYMENT_METHOD = 'MULTIBANCO';
+    public const MBWAY_API_PAYMENT_METHOD = 'MBWAY';
 
     // credentials path (cards)
     public const PATH_BANKCARD_TERMINAL_CODE = 'payment/cardpay_custom/terminal_code';
@@ -49,6 +61,53 @@ class ConfigData
     public const PATH_PIX_CALLBACK_SECRET = 'payment/cardpay_custompix/callback_secret_pix';
     public const PATH_PIX_SANDBOX = 'payment/cardpay_custompix/sandbox_pix';
 
+    // credentials path (Paypal)
+    public const PATH_PAYPAL_TERMINAL_CODE = 'payment/cardpay_paypal/terminal_code_paypal';
+    public const PATH_PAYPAL_TERMINAL_PASSWORD = 'payment/cardpay_paypal/terminal_password_paypal';
+    public const PATH_PAYPAL_CALLBACK_SECRET = 'payment/cardpay_paypal/callback_secret_paypal';
+    public const PATH_PAYPAL_SANDBOX = 'payment/cardpay_paypal/sandbox_paypal';
+    public const PATH_PAYPAL_API_ACCESS_MODE = 'payment/cardpay_paypal/api_access_mode';
+
+    // credentials path (Gpay)
+    public const PATH_GPAY_TERMINAL_CODE = 'payment/cardpay_gpay/terminal_code_gpay';
+    public const PATH_GPAY_TERMINAL_PASSWORD = 'payment/cardpay_gpay/terminal_password_gpay';
+    public const PATH_GPAY_CALLBACK_SECRET = 'payment/cardpay_gpay/callback_secret_gpay';
+    public const PATH_GPAY_SANDBOX = 'payment/cardpay_gpay/sandbox_gpay';
+    public const PATH_GPAY_ACTIVE = 'payment/cardpay_gpay/active';
+    public const PATH_GPAY_MERCHANT_ID = 'payment/cardpay_gpay/merchant_id';
+
+    // credentials path (Sepa)
+    public const PATH_SEPA_TERMINAL_CODE = 'payment/cardpay_sepa/terminal_code_sepa';
+    public const PATH_SEPA_TERMINAL_PASSWORD = 'payment/cardpay_sepa/terminal_password_sepa';
+    public const PATH_SEPA_CALLBACK_SECRET = 'payment/cardpay_sepa/callback_secret_sepa';
+    public const PATH_SEPA_SANDBOX = 'payment/cardpay_sepa/sandbox_sepa';
+    public const PATH_SEPA_API_ACCESS_MODE = 'payment/cardpay_sepa/api_access_mode';
+    public const PATH_SEPA_ACTIVE = 'payment/cardpay_sepa/active';
+
+    // credentials path (Spei)
+    public const PATH_SPEI_TERMINAL_CODE = 'payment/cardpay_spei/terminal_code_spei';
+    public const PATH_SPEI_TERMINAL_PASSWORD = 'payment/cardpay_spei/terminal_password_spei';
+    public const PATH_SPEI_CALLBACK_SECRET = 'payment/cardpay_spei/callback_secret_spei';
+    public const PATH_SPEI_SANDBOX = 'payment/cardpay_spei/sandbox_spei';
+    public const PATH_SPEI_API_ACCESS_MODE = 'payment/cardpay_spei/api_access_mode';
+    public const PATH_SPEI_ACTIVE = 'payment/cardpay_spei/active';
+
+    // credentials path (Multibanco)
+    public const PATH_MULTIBANCO_TERMINAL_CODE = 'payment/cardpay_multibanco/terminal_code_multibanco';
+    public const PATH_MULTIBANCO_TERMINAL_PASSWORD = 'payment/cardpay_multibanco/terminal_password_multibanco';
+    public const PATH_MULTIBANCO_CALLBACK_SECRET = 'payment/cardpay_multibanco/callback_secret_multibanco';
+    public const PATH_MULTIBANCO_SANDBOX = 'payment/cardpay_multibanco/sandbox_multibanco';
+    public const PATH_MULTIBANCO_API_ACCESS_MODE = 'payment/cardpay_multibanco/api_access_mode';
+    public const PATH_MULTIBANCO_ACTIVE = 'payment/cardpay_multibanco/active';
+
+    // credentials path (Mb Way)
+    public const PATH_MBWAY_TERMINAL_CODE = 'payment/cardpay_mbway/terminal_code_mbway';
+    public const PATH_MBWAY_TERMINAL_PASSWORD = 'payment/cardpay_mbway/terminal_password_mbway';
+    public const PATH_MBWAY_CALLBACK_SECRET = 'payment/cardpay_mbway/callback_secret_mbway';
+    public const PATH_MBWAY_SANDBOX = 'payment/cardpay_mbway/sandbox_mbway';
+    public const PATH_MBWAY_API_ACCESS_MODE = 'payment/cardpay_mbway/api_access_mode';
+    public const PATH_MBWAY_ACTIVE = 'payment/cardpay_mbway/active';
+
     // configuration hidden path
     public const PATH_SITE_ID = 'payment/cardpay/site_id';
     public const PATH_SPONSOR_ID = 'payment/cardpay/sponsor_id';
@@ -68,6 +127,12 @@ class ConfigData
         'BANKCARD' => 'payment/cardpay_custom/',
         'BOLETO' => 'payment/cardpay_customticket/',
         'PIX' => 'payment/cardpay_custompix/',
+        'PAYPAL' => 'payment/cardpay_paypal/',
+        'GOOGLEPAY' => 'payment/cardpay_gpay/',
+        'SEPA' => 'payment/cardpay_sepa/',
+        'SPEI' => 'payment/cardpay_spei/',
+        'MULTIBANCO' => 'payment/cardpay_multibanco/',
+        'MBWAY' => 'payment/cardpay_mbway/',
     ];
 
     // Boleto payment method
@@ -79,6 +144,11 @@ class ConfigData
     public const PATH_PIX_ACTIVE = 'payment/cardpay_custompix/active';
     public const PATH_PIX_BANNER = 'payment/cardpay_custompix/banner_checkout';
     public const PATH_PIX_EXCLUDE_PAYMENT_METHODS = 'payment/cardpay_custompix/excluded_payment_methods';
+
+    // Paypal payment method
+    public const PATH_PAYPAL_ACTIVE = 'payment/cardpay_paypal/active';
+    public const PATH_PAYPAL_BANNER = 'payment/cardpay_paypal/banner_checkout';
+    public const PATH_PAYPAL_EXCLUDE_PAYMENT_METHODS = 'payment/cardpay_paypal/excluded_payment_methods';
 
     // custom method bank transfer
     public const PATH_CUSTOM_BANK_TRANSFER_ACTIVE = 'payment/cardpay_custom/active';
@@ -109,7 +179,7 @@ class ConfigData
 
     public static function getStatusByPaymentType($status, $paymentType): string
     {
-        $path = constant(self::class . '::' . $status);
+        $path = constant(self::class.'::'.$status);
         $replace = self::PREFIX_PAYMENT[$paymentType];
 
         return str_replace('payment/cardpay_custom/', $replace, $path);

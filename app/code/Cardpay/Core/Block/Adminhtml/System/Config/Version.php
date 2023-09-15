@@ -2,65 +2,71 @@
 
 namespace Cardpay\Core\Block\Adminhtml\System\Config;
 
-use Magento\Framework\App\Cache\TypeListInterface;
-use Magento\Framework\App\Config\ScopeConfigInterface;
-use Magento\Framework\App\Config\Value;
-use Magento\Framework\Data\Collection\AbstractDb;
-use Magento\Framework\Model\Context;
-use Magento\Framework\Model\ResourceModel\AbstractResource;
-use Magento\Framework\Module\ResourceInterface;
-use Magento\Framework\Registry;
+use Magento\Backend\Block\Template\Context;
+use Magento\Config\Block\System\Config\Form\Field;
+use Magento\Framework\Data\Form\Element\AbstractElement;
+use Magento\Framework\Module\ModuleListInterface;
 
-class Version extends Value
+class Version extends Field
 {
-    /**
-     * @var ResourceInterface
-     */
-    protected $moduleResource;
+    const MODULE_NAME = 'Cardpay_Core';
 
     /**
-     * @param Context $context
-     * @param Registry $registry
-     * @param ScopeConfigInterface $config
-     * @param TypeListInterface $cacheTypeList
-     * @param ResourceInterface $moduleResource
-     * @param AbstractResource|null $resource
-     * @param AbstractDb|null $resourceCollection
-     * @param array $data
+     * Template path
+     *
+     * @var string
+     */
+    protected $_template = 'Cardpay_Core::system/config/module_version.phtml';
+
+    /**
+     * @var ModuleListInterface
+     */
+    private $moduleList;
+
+    /**
+     * @param  Context     $context
+     * @param  YotpoConfig $yotpoConfig
+     * @param  array       $data
      */
     public function __construct(
-        Context              $context,
-        Registry             $registry,
-        ScopeConfigInterface $config,
-        TypeListInterface    $cacheTypeList,
-        ResourceInterface    $moduleResource,
-        AbstractResource     $resource = null,
-        AbstractDb           $resourceCollection = null,
-        array                $data = []
-    )
-    {
-        $this->moduleResource = $moduleResource;
-
-        parent::__construct(
-            $context,
-            $registry,
-            $config,
-            $cacheTypeList,
-            $resource,
-            $resourceCollection,
-            $data
-        );
+        Context $context,
+        ModuleListInterface $moduleList,
+        array $data = []
+    ) {
+        $this->moduleList = $moduleList;
+        parent::__construct($context, $data);
     }
 
     /**
-     * Inject current installed module version as the config value.
+     * Remove scope label
      *
-     * @return void
+     * @param  AbstractElement $element
+     * @return string
      */
-    public function afterLoad()
+    public function render(AbstractElement $element)
     {
-        $version = $this->moduleResource->getDbVersion('Cardpay_Core');
+        $element->unsScope()->unsCanUseWebsiteValue()->unsCanUseDefaultValue();
+        return parent::render($element);
+    }
 
-        $this->setValue($version);
+    /**
+     * Return element html
+     *
+     * @param  AbstractElement $element
+     * @return string
+     */
+    protected function _getElementHtml(AbstractElement $element)
+    {
+        return $this->_toHtml();
+    }
+
+    /**
+     * Generate collect button html
+     *
+     * @return string
+     */
+    public function getModuleVersion()
+    {
+        return $this->moduleList->getOne(self::MODULE_NAME)['setup_version'];
     }
 }

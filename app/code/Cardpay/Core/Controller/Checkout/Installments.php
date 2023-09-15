@@ -80,7 +80,9 @@ class Installments extends Action
     {
         $cartId = $this->request->getParam('cartId');
         if (empty($cartId)) {
-            $this->dataHelper->log('Cart id is not provided, unable to get installment options');
+            $this->dataHelper->log(
+                'Cart id is not provided, unable to get installment options'
+            );
             return [];
         }
 
@@ -89,7 +91,9 @@ class Installments extends Action
          */
         $quote = $this->quoteRepository->getActive($cartId);
         if (is_null($quote)) {
-            $this->dataHelper->log('Empty quote, unable to get installment options');
+            $this->dataHelper->log(
+                'Empty quote, unable to get installment options'
+            );
             return [];
         }
 
@@ -149,8 +153,15 @@ class Installments extends Action
     private function getInstallmentOptions($grandTotal)
     {
         $options = [];
-        $range = $this->getInstallmentRange($this->scopeConfig->getValue(ConfigData::PATH_BANKCARD_MAXIMUM_ACCEPTED_INSTALLMENTS, ScopeInterface::SCOPE_STORE));
-        $minAmount = $this->scopeConfig->getValue(ConfigData::PATH_BANKCARD_MINIMUM_INSTALLMENT_AMOUNT, ScopeInterface::SCOPE_STORE);
+        $range = $this->getInstallmentRange(
+            $this->scopeConfig->getValue(
+                ConfigData::PATH_BANKCARD_MAXIMUM_ACCEPTED_INSTALLMENTS,
+                ScopeInterface::SCOPE_STORE)
+        );
+        $minAmount = $this->scopeConfig->getValue(
+            ConfigData::PATH_BANKCARD_MINIMUM_INSTALLMENT_AMOUNT,
+            ScopeInterface::SCOPE_STORE
+        );
 
         foreach ($range as $installments) {
             $amount = $grandTotal / $installments;

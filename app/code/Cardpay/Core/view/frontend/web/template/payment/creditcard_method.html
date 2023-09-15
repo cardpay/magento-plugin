@@ -1,0 +1,189 @@
+<div class="payment-method" data-bind="css: {'_active': (getCode() == isChecked())}">
+    <div class="payment-method-title field choice">
+        <input type="radio"
+               name="payment[method]"
+               class="radio"
+               data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()"/>
+        <label class="label" data-bind="attr: {'for': getCode()}">
+            <!-- Unlimit Logo -->
+            <span data-bind="text: getTitle()"></span>
+        </label>
+    </div>
+
+    <!-- //NOSONAR --><!-- ko if: getApiAccessMode() === 'pp' -->
+    <div id="unlimit_modal_bg" class="closed">
+        <div id="unlimit_modal_page" name="unlimit_modal_page">
+            <iframe id="unlimit_modal_iframe" width="100%" height="100%"
+                    title="unlimit_modal_iframe"></iframe>
+        </div>
+    </div>
+    <!--/ko-->
+    <div class="payment-method-content">
+        <!-- ko foreach: getRegion('messages') -->
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!--/ko-->
+
+        <div class="payment-method-billing-address">
+            <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
+
+        <form class="form" id="co-cardpay-form" action="#" method="post" data-bind="mageInit: {
+            'transparent':{
+                'context': context(),
+                'controller': getControllerName(),
+                'gateway': getCode(),
+                'orderSaveUrl':getPlaceOrderUrl(),
+                'cgiUrl': getCgiUrl(),
+                'dateDelim': getDateDelim(),
+                'cardFieldsMap': getCardFieldsMap(),
+                'nativeAction': getSaveOrderUrl()
+            }, 'validation':[]}">
+
+            <div id="cardpay-form">
+                <!-- //NOSONAR --><!-- ko if: getApiAccessMode() !== 'pp' -->
+                <div class="mp-box-inputs mp-col-100" style="position:relative">
+                    <label for="cardNumber"> <!-- ko i18n: 'Card number'--><!-- /ko --> <em>*</em></label>
+                    <input type="text" id="cardNumber" data-checkout="cardNumber" autocomplete="off" maxlength="23"
+                           minlength="16"
+                           data-bind="event: { keyup: onlyNumbersInCardNumber, blur: validateCardNumber }"/>
+                    <span id="card-brand" class="card-brand"></span>
+                    <span class="mp-error" id="mp-error-card-number" data-main="#cardNumber"> <!-- ko i18n: 'Card number is not valid'-->
+                        <!-- /ko --> </span>
+                    <span class="mp-error" id="mp-error-card-number-second" data-main="#cardNumber"> <!-- ko i18n: 'Please fill out card number'-->
+                        <!-- /ko --> </span>
+                </div>
+
+                <div class="mp-box-inputs mp-col-100">
+                    <label for="cardholderName"> <!-- ko i18n: 'Cardholder name'--><!-- /ko --> <em>*</em></label>
+                    <input type="text" id="cardholderName" name="cardpay_custom[cardholderName]"
+                           minlength="2"
+                           maxlength="50"
+                           data-checkout="cardholderName"
+                           autocomplete="off"
+                           data-bind="event: { blur: validateCardHolderName }"/>
+
+                    <span class="mp-error" id="mp-error-316" data-main="#cardholderName"> <!-- ko i18n: 'Cardholder name is not valid'-->
+                        <!-- /ko --> </span>
+                    <span class="mp-error" id="mp-error-317-second" data-main="#cardholderName"> <!-- ko i18n: 'Please fill out cardholder name'-->
+                        <!-- /ko --> </span>
+                </div>
+
+                <div class="mp-box-inputs mp-col-50">
+                    <label for="cardExpirationDate"> <!-- ko i18n: 'Expiration date'--><!-- /ko --> <em>*</em></label>
+                    <input type="text" id="cardExpirationDate" name="cardpay_custom[cardExpirationDate]"
+                           maxlength="5"
+                           data-checkout="cardExpirationDate"
+                           autocomplete="off"
+                           placeholder="MM/YY"
+                           data-bind="event: { keyup: formatCardExpirationDate, blur: validateCardExpirationDate }"
+                           style="width: 75%;"/>
+
+                    <span class="mp-error" id="mp-error-208-second" data-main="#cardExpirationDate"> <!-- ko i18n: 'Please fill out an expiration date'-->
+                        <!-- /ko --> </span>
+                    <span class="mp-error" id="mp-error-209" data-main="#cardExpirationDate"> <!-- ko i18n: 'Expiration date is not valid'-->
+                        <!-- /ko --> </span>
+                </div>
+
+                <div class="mp-box-inputs mp-col-50">
+                    <label for="securityCode" style="margin-left: 50px">
+                        <!-- ko i18n: 'CVV2/CVC2'--><!-- /ko -->
+                        <em>*</em></label>
+                    <input class="securityCodeMarginTop" type="password" id="securityCode" name="CVV2/CVC2"
+                           data-checkout="securityCode"
+                           autocomplete="off" minlength="3" maxlength="4"
+                           data-bind="event: { keyup: onlyNumbersInSecurityCode, blur: validateSecurityCode }"
+                           style="width: 75%;"/>
+
+                    <span class="mp-error securityCodeMarginTop" id="mp-error-224-second" data-main="#securityCode"> <!-- ko i18n: 'Please fill out a CVV2/CVC2'-->
+                        <!-- /ko -->  </span>
+                    <span class="mp-error securityCodeMarginTop" id="mp-error-E302" data-main="#securityCode"> <!-- ko i18n: 'This CVV2/CVC2 is not valid'-->
+                        <!-- /ko -->  </span>
+                </div>
+                <!-- /ko -->
+
+                <!-- ko if: areInstallmentsEnabled() -->
+                <div id="mp-box-installments">
+                    <div class="mp-box-inputs mp-col-100" id="mp-box-installments-selector">
+                        <label for="installments"> <!-- ko i18n: 'Installments'--><!-- /ko --> <em>*</em></label>
+                        <select id="installments" data-checkout="installments" name="cardpay_custom[installments]"
+                                class="validate-select"
+                                data-bind="afterRender: assignInstallmentOptions, event: { blur: validateInstallments }"></select>
+                    </div>
+
+                    <span class="mp-error" id="mp-error-210" data-main="#installments"> <!-- ko i18n: 'Please select number of installments'-->
+                        <!-- /ko --> </span>
+                </div>
+                <!-- /ko -->
+                <!-- //NOSONAR --><!-- ko if:  (getApiAccessMode() !== 'pp') && isCpfRequired() -->
+                <div class="mp-box-inputs mp-col-100">
+                    <label for="cpf"> <!-- ko i18n: 'CPF'--><!-- /ko --> <em>*</em></label>
+                    <input type="text" id="cpf" name="cardpay_custom[cpf]"
+                           data-checkout="cpf"
+                           data-format="***.***.***-**"
+                           data-mask="XXX.XXX.XXX-XX"
+                           placeholder="XXX.XXX.XXX-XX"
+                           autocomplete="off"
+                           data-bind="event: {keyup: applyInputMask, blur: validateCpf}"/>
+
+                    <span class="mp-error" id="mp-error-E303" data-main="#cpf"> <!-- ko i18n: 'CPF is invalid'-->
+                        <!-- /ko -->  </span>
+                    <span class="mp-error" id="mp-error-E304-second" data-main="#cpf"> <!-- ko i18n: 'Please fill out a CPF'-->
+                        <!-- /ko -->  </span>
+                </div>
+                <!-- /ko -->
+
+            </div>
+
+            <div class="mp-box-inputs mp-line">
+                <!-- NOT DELETE LOADING-->
+                <div class="mp-box-inputs mp-col-25">
+                    <div id="mp-box-loading">
+                    </div>
+                </div>
+            </div>
+
+            <div class="mp-box-inputs mp-col-100" id="cardpay-utilities">
+                <input type="text" id="site_id" name="cardpay_custom[site_id]"/>
+                <input type="text" id="amount" name="cardpay_custom[amount]"
+                       data-bind="attr: {value: getInitialGrandTotal()}"/>
+                <input type="hidden" id="campaign_id" name="cardpay_custom[campaign_id]"/>
+                <input type="hidden" id="campaign" name="cardpay_custom[campaign]"/>
+                <input type="text" id="paymentMethodId" name="cardpay_custom[paymentMethodId]"/>
+                <input type="text" id="token" name="cardpay_custom[token]"/>
+                <input type="text" id="cardTruncated" name="cardpay_custom[cardTruncated]"/>
+                <input type="text" id="CustomerAndCard" name="cardpay_custom[CustomerAndCard]"/>
+                <input type="text" id="MpGatewayMode" name="cardpay_custom[MpGatewayMode]"
+                       data-bind="attr: {value: getMpGatewayMode()}"/>
+            </div>
+
+            <div class="mp-box-inputs mp-col-100">
+                <img data-bind="attr: {src: getCardBrandsLogoURL()}" alt="Credit card" width="109" height="35"
+                     style="margin-top: 15px;"/>
+            </div>
+        </form>
+
+        <div class="checkout-agreements-block">
+            <!-- ko foreach: $parent.getRegion('before-place-order') -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
+
+        <div class="actions-toolbar">
+            <div class="primary mp-box-inputs mp-col-100">
+                <button data-role="review-save"
+                        type="submit"
+                        id="mp-custom-save-payment"
+                        data-bind="
+                            attr: {title: $t('Place Order')},
+                            enable: (getCode() == isChecked()),
+                            css: {disabled: !isPlaceOrderActionAllowed()},
+                            click: placeOrder"
+                        class="action primary checkout">
+                    <span data-bind="i18n: 'Place Order'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

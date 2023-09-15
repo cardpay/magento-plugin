@@ -1,4 +1,4 @@
-#co-cardpay-form, #co-cardpay-form-ticket, #co-cardpay-form-pix {
+#co-cardpay-form, #co-cardpay-form-ticket, #co-cardpay-form-pix, #co-cardpay-form-paypal {
     max-width: 400px;
 }
 
@@ -446,6 +446,24 @@
 }
 
 #co-cardpay-form-pix .field-error {
+    margin-top: -10px;
+}
+
+/* Paypal */
+#cardpay-paypal-form-general, .cardpay-box-form {
+    float: left;
+    width: 100%;
+}
+
+#cardpay-payment-methods-paypal {
+    margin: 0 0 0 -30px;
+}
+
+#cardpay-payment-methods-paypal li {
+    list-style: none;
+}
+
+#co-cardpay-form-paypal .field-error {
     margin-top: -10px;
 }
 

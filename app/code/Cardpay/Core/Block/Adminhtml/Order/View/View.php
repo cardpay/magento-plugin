@@ -6,6 +6,6 @@ class View extends \Magento\Sales\Block\Adminhtml\Order\AbstractOrder
 {
     public function translatePaymentStatus()
     {
-        return __('Payment Status');
+        return __('Payment status');
     }
 }

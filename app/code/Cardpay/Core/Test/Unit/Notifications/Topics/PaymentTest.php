@@ -57,7 +57,13 @@ class PaymentTest extends TestCase
         $this->invoiceSender = $this->createMock(InvoiceSender::class);
 
         $this->paymentMock = $this->getMockBuilder(Payment::class)
-            ->setMethodsExcept(['createInvoice', 'setCpHelper', 'setTransaction', 'setInvoiceSender', 'isValidResponse'])
+            ->setMethodsExcept([
+                'createInvoice',
+                'setCpHelper',
+                'setTransaction',
+                'setInvoiceSender',
+                'isValidResponse'
+            ])
             ->disableOriginalConstructor()
             ->getMock();
 

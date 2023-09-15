@@ -80,7 +80,10 @@ class Payment extends Fieldset
             if ($siteId !== "MLC" && $siteId !== "MCO") {
 
                 //get is active
-                $statusPaymentMethod = $this->scopeConfig->isSetFlag(ConfigData::PATH_CUSTOM_BANK_TRANSFER_ACTIVE, ScopeInterface::SCOPE_STORE);
+                $statusPaymentMethod = $this->scopeConfig->isSetFlag(
+                    ConfigData::PATH_CUSTOM_BANK_TRANSFER_ACTIVE,
+                    ScopeInterface::SCOPE_STORE
+                );
 
                 //check is active for disable
                 if ($statusPaymentMethod) {

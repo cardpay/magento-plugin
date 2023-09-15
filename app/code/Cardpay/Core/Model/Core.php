@@ -7,7 +7,6 @@ use Cardpay\Core\Helper\ConfigData;
 use Cardpay\Core\Helper\Data as dataHelper;
 use Cardpay\Core\Helper\Message\MessageInterface;
 use Cardpay\Core\Helper\Response;
-use Cardpay\Core\Lib\Api;
 use Cardpay\Core\Model\Api\V1\Exception;
 use Magento\Catalog\Helper\Image;
 use Magento\Customer\Model\Session;
@@ -192,54 +191,59 @@ class Core extends AbstractMethod
     protected $_version;
 
     /**
+     * @var ApiManager
+     */
+    protected $apiModel;
+
+    /**
      * Core constructor.
      *
-     * @param StoreManagerInterface $storeManager
-     * @param dataHelper $coreHelper
-     * @param OrderFactory $orderFactory
-     * @param MessageInterface $statusMessage
-     * @param MessageInterface $statusDetailMessage
-     * @param Context $context
-     * @param Registry $registry
-     * @param ExtensionAttributesFactory $extensionFactory
-     * @param AttributeValueFactory $customAttributeFactory
-     * @param Logger $logger
-     * @param Data $paymentData
-     * @param ScopeConfigInterface $scopeConfig
-     * @param TransactionFactory $transactionFactory
-     * @param InvoiceSender $invoiceSender
-     * @param OrderSender $orderSender
-     * @param Session $customerSession
-     * @param UrlInterface $urlBuilder
-     * @param Image $helperImage
-     * @param \Magento\Checkout\Model\Session $checkoutSession
-     * @param Version $version
-     * @param ProductMetadataInterface $productMetadata
+     * @param  StoreManagerInterface  $storeManager
+     * @param  dataHelper  $coreHelper
+     * @param  OrderFactory  $orderFactory
+     * @param  MessageInterface  $statusMessage
+     * @param  MessageInterface  $statusDetailMessage
+     * @param  Context  $context
+     * @param  Registry  $registry
+     * @param  ExtensionAttributesFactory  $extensionFactory
+     * @param  AttributeValueFactory  $customAttributeFactory
+     * @param  Logger  $logger
+     * @param  Data  $paymentData
+     * @param  ScopeConfigInterface  $scopeConfig
+     * @param  TransactionFactory  $transactionFactory
+     * @param  InvoiceSender  $invoiceSender
+     * @param  OrderSender  $orderSender
+     * @param  Session  $customerSession
+     * @param  UrlInterface  $urlBuilder
+     * @param  Image  $helperImage
+     * @param  \Magento\Checkout\Model\Session  $checkoutSession
+     * @param  Version  $version
+     * @param  ProductMetadataInterface  $productMetadata
      */
-    public function __construct(
-        StoreManagerInterface           $storeManager,
-        dataHelper                      $coreHelper,
-        OrderFactory                    $orderFactory,
-        MessageInterface                $statusMessage,
-        MessageInterface                $statusDetailMessage,
-        Context                         $context,
-        Registry                        $registry,
-        ExtensionAttributesFactory      $extensionFactory,
-        AttributeValueFactory           $customAttributeFactory,
-        Logger                          $logger,
-        Data                            $paymentData,
-        ScopeConfigInterface            $scopeConfig,
-        TransactionFactory              $transactionFactory,
-        InvoiceSender                   $invoiceSender,
-        OrderSender                     $orderSender,
-        Session                         $customerSession,
-        UrlInterface                    $urlBuilder,
-        Image                           $helperImage,
-        \Magento\Checkout\Model\Session $checkoutSession,
-        Version                         $version,
-        ProductMetadataInterface        $productMetadata
-    )
-    {
+    public function __construct( //NOSONAR
+        StoreManagerInterface $storeManager, //NOSONAR
+        dataHelper $coreHelper, //NOSONAR
+        OrderFactory $orderFactory, //NOSONAR
+        MessageInterface $statusMessage, //NOSONAR
+        MessageInterface $statusDetailMessage, //NOSONAR
+        Context $context, //NOSONAR
+        Registry $registry, //NOSONAR
+        ExtensionAttributesFactory $extensionFactory, //NOSONAR
+        AttributeValueFactory $customAttributeFactory, //NOSONAR
+        Logger $logger, //NOSONAR
+        Data $paymentData, //NOSONAR
+        ScopeConfigInterface $scopeConfig, //NOSONAR
+        TransactionFactory $transactionFactory, //NOSONAR
+        InvoiceSender $invoiceSender, //NOSONAR
+        OrderSender $orderSender, //NOSONAR
+        Session $customerSession, //NOSONAR
+        UrlInterface $urlBuilder, //NOSONAR
+        Image $helperImage, //NOSONAR
+        \Magento\Checkout\Model\Session $checkoutSession, //NOSONAR
+        Version $version, //NOSONAR
+        ProductMetadataInterface $productMetadata, //NOSONAR
+        ApiManager $apiModel //NOSONAR
+    ) {
         parent::__construct(
             $context,
             $registry,
@@ -267,6 +271,7 @@ class Core extends AbstractMethod
         $this->_checkoutSession = $checkoutSession;
         $this->_productMetaData = $productMetadata;
         $this->_version = $version;
+        $this->apiModel = $apiModel;
     }
 
     /**
@@ -284,7 +289,7 @@ class Core extends AbstractMethod
     /**
      * Retrieves Order
      *
-     * @param integer $incrementId
+     * @param  integer  $incrementId
      *
      * @return Order
      */
@@ -306,18 +311,18 @@ class Core extends AbstractMethod
         $payment = $order->getPayment();
         $info_payments = [];
         $fields = [
-            ['field' => 'cardholder_name', 'title' => 'CardHolder Name: %1'],
-            ['field' => 'trunc_card', 'title' => 'Card Number: %1'],
-            ['field' => 'payment_method', 'title' => 'Payment Method: %1'],
-            ['field' => 'expiration_date', 'title' => 'Expiration Date: %1'],
+            ['field' => 'cardholder_name', 'title' => 'CardHolder name: %1'],
+            ['field' => 'trunc_card', 'title' => 'Card number: %1'],
+            ['field' => 'payment_method', 'title' => 'Payment method: %1'],
+            ['field' => 'expiration_date', 'title' => 'Expiration date: %1'],
             ['field' => 'installments', 'title' => 'Installments: %1'],
-            ['field' => 'statement_descriptor', 'title' => 'Statement Descriptor: %1'],
+            ['field' => 'statement_descriptor', 'title' => 'Statement descriptor: %1'],
             ['field' => 'payment_id', 'title' => 'Payment id (Cardpay): %1'],
-            ['field' => 'status', 'title' => 'Payment Status: %1'],
-            ['field' => 'status_detail', 'title' => 'Payment Detail: %1'],
-            ['field' => 'activation_uri', 'title' => 'Generate Ticket'],
-            ['field' => 'payment_id_detail', 'title' => 'Unlimint Payment Id: %1'],
-            ['field' => 'id', 'title' => 'Collection Id: %1'],
+            ['field' => 'status', 'title' => 'Payment status: %1'],
+            ['field' => 'status_detail', 'title' => 'Payment detail: %1'],
+            ['field' => 'activation_uri', 'title' => 'Generate ticket'],
+            ['field' => 'payment_id_detail', 'title' => 'Unlimit payment id: %1'],
+            ['field' => 'id', 'title' => 'Collection id: %1'],
         ];
 
         foreach ($fields as $field) {
@@ -335,7 +340,7 @@ class Core extends AbstractMethod
         if (!empty($idType)) {
             $text = __($idType);
             $info_payments[$idType] = [
-                'text' => $text . ': ' . $payment->getAdditionalInformation('payer_identification_number')
+                'text' => $text.': '.$payment->getAdditionalInformation('payer_identification_number')
             ];
         }
 
@@ -392,11 +397,14 @@ class Core extends AbstractMethod
 
         if ($status === 'rejected') {
             if ((string)$statusDetail === 'cc_rejected_invalid_installments') {
-                $message['message'] = __($this->_statusDetailMessage->getMessage($statusDetail), strtoupper($payment_method), $installment);
+                $message['message'] = __($this->_statusDetailMessage->getMessage($statusDetail),
+                    strtoupper($payment_method), $installment);
             } elseif ((string)$statusDetail === 'cc_rejected_call_for_authorize') {
-                $message['message'] = __($this->_statusDetailMessage->getMessage($statusDetail), strtoupper($payment_method), $amount);
+                $message['message'] = __($this->_statusDetailMessage->getMessage($statusDetail),
+                    strtoupper($payment_method), $amount);
             } else {
-                $message['message'] = __($this->_statusDetailMessage->getMessage($statusDetail), strtoupper($payment_method));
+                $message['message'] = __($this->_statusDetailMessage->getMessage($statusDetail),
+                    strtoupper($payment_method));
             }
         } else {
             $message['message'] = __($rawMessage['message']);
@@ -463,9 +471,9 @@ class Core extends AbstractMethod
     /**
      * Return array with request params data by default to custom method
      *
-     * @param array $paymentInfo
-     * @param null $quote
-     * @param null $order
+     * @param  array  $paymentInfo
+     * @param  null  $quote
+     * @param  null  $order
      * @return array
      * @throws LocalizedException
      * @throws NoSuchEntityException
@@ -550,75 +558,13 @@ class Core extends AbstractMethod
         $notificationUrl = $this->_urlBuilder->getUrl('cardpay/redirect/callback', ['_secure' => true]);
 
         $requestParams['return_urls'] = [
-            'cancel_url' => $notificationUrl . 'action/cancel/orderId/' . $orderIncId,
-            'decline_url' => $notificationUrl . 'action/decline/orderId/' . $orderIncId,
-            'inprocess_url' => $notificationUrl . 'action/inprocess/orderId/' . $orderIncId,
-            'success_url' => $notificationUrl . 'action/success/orderId/' . $orderIncId
+            'cancel_url' => $notificationUrl.'action/cancel/orderId/'.$orderIncId,
+            'decline_url' => $notificationUrl.'action/decline/orderId/'.$orderIncId,
+            'inprocess_url' => $notificationUrl.'action/inprocess/orderId/'.$orderIncId,
+            'success_url' => $notificationUrl.'action/success/orderId/'.$orderIncId
         ];
 
         return $requestParams;
-    }
-
-    /**
-     * @param Order $order
-     *
-     * @throws \Exception
-     */
-    public function getApiInstance($order = null)
-    {
-        if (is_null($order)) {
-            $orderId = $this->getQuote()->getReservedOrderId();
-            $order = $this->getOrder($orderId);
-        }
-
-        return $this->_coreHelper->getApiInstance($order);
-    }
-
-    /**
-     * Return response of API to a preference
-     *
-     * @param $requestParams
-     *
-     * @return array
-     * @throws Exception
-     * @throws LocalizedException|\Exception
-     */
-    public function postPayment($requestParams, $order = null)
-    {
-        $url = "/api/payments";
-
-        /**
-         * @var Api
-         */
-        $api = $this->getApiInstance($order);
-        $response = $api->post($url, $requestParams);
-
-        $this->_coreHelper->log('Core Post Payment Return', 'cardpay', $response);
-
-        return $response;
-    }
-
-    /**
-     * Return response of api to a preference
-     *
-     * @param $preference
-     *
-     * @return array
-     * @throws Exception
-     * @throws LocalizedException|\Exception
-     */
-    public function postRefund($idPayment)
-    {
-        /**
-         * @var Api
-         */
-        $api = $this->getApiInstance();
-
-        $response = $api->refund($idPayment);
-
-        $this->_coreHelper->log('Core Cancel Payment Return', 'cardpay', $response);
-
-        return $response;
     }
 
     /**
@@ -632,9 +578,9 @@ class Core extends AbstractMethod
     {
         $errors = Response::PAYMENT_CREATION_ERRORS;
 
-        $unlimintApiErrorMessage = $this->getUnlimintApiErrorMessage($response, $errors);
-        if ($unlimintApiErrorMessage !== null) {
-            return $unlimintApiErrorMessage;
+        $unlimitApiErrorMessage = $this->getUnlimitApiErrorMessage($response, $errors);
+        if ($unlimitApiErrorMessage !== null) {
+            return $unlimitApiErrorMessage;
         }
 
         // set default error
@@ -652,7 +598,7 @@ class Core extends AbstractMethod
         return $messageErrorToClient;
     }
 
-    private function getUnlimintApiErrorMessage($response, $errors)
+    private function getUnlimitApiErrorMessage($response, $errors)
     {
         $apiError = null;
 
@@ -679,21 +625,6 @@ class Core extends AbstractMethod
     }
 
     /**
-     *  Return info of payment returned by CP api
-     *
-     * @param $order
-     * @param $paymentId
-     *
-     * @return array
-     * @throws \Exception
-     */
-    public function getApiPayment($order, $paymentId)
-    {
-        $api = $this->_coreHelper->getApiInstance($order);
-        return $api->get('/api/payments/' . $paymentId);
-    }
-
-    /**
      * @return mixed|string
      */
     public function getEmailCustomer()
@@ -713,36 +644,14 @@ class Core extends AbstractMethod
      */
     public function getAmount()
     {
-        return $this->getQuote()->getBaseGrandTotal();
-    }
-
-    /**
-     * Return info of order returned by CP api
-     *
-     * @param $merchantOrderId
-     *
-     * @return array
-     * @throws LocalizedException|\Exception
-     */
-    public function getMerchantOrder($merchantOrderId)
-    {
-        $api = $this->getApiInstance();
-
-        return $api->get('/merchant_orders/' . $merchantOrderId);
-    }
-
-    public function getPayment($paymentId)
-    {
-        $api = $this->getApiInstance();
-
-        return $api->get('/api/payments/' . $paymentId);
+        return $this->getQuote()->getGrandTotal();
     }
 
     /**
      * Refund specified amount for payment
      *
-     * @param DataObject|InfoInterface $payment
-     * @param float $amount
+     * @param  DataObject|InfoInterface  $payment
+     * @param  float  $amount
      * @return $this
      * @api
      */
@@ -753,9 +662,16 @@ class Core extends AbstractMethod
 
     private function assignRequestData($paymentInfo, $currencyCode, $requestParams)
     {
-        if (isset($paymentInfo['payment_method']) && $paymentInfo['payment_method'] === ConfigData::BANK_CARD_API_PAYMENT_METHOD) {
+        if (isset($paymentInfo['payment_method']) &&
+            $paymentInfo['payment_method'] === ConfigData::BANK_CARD_API_PAYMENT_METHOD) {
 
-            $areInstallmentsEnabled = (1 === (int)($this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_INSTALLMENT, ScopeInterface::SCOPE_STORE)));
+            $areInstallmentsEnabled = (1 === (int)(
+                $this->_scopeConfig->getValue(
+                    ConfigData::PATH_CUSTOM_INSTALLMENT,
+                    ScopeInterface::SCOPE_STORE
+                )
+                )
+            );
             if ($areInstallmentsEnabled) {
                 $numberOfInstallments = (int)$paymentInfo['installments'];
 
@@ -769,8 +685,14 @@ class Core extends AbstractMethod
 
         $requestParams[self::PAYMENT_DATA]['amount'] = $this->getAmount();
         $requestParams[self::PAYMENT_DATA]['currency'] = $currencyCode;
+        if (isset($paymentInfo['encrypted_data'])) {
+            $requestParams[self::PAYMENT_DATA]['encrypted_data'] = $paymentInfo['encrypted_data'];
+        }
 
-        $dynamicDescriptor = trim($this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_DESCRIPTOR, ScopeInterface::SCOPE_STORE));
+        $dynamicDescriptor = trim($this->_scopeConfig->getValue(
+            ConfigData::PATH_CUSTOM_DESCRIPTOR,
+            ScopeInterface::SCOPE_STORE
+        ));
         if (!empty($dynamicDescriptor)) {
             $requestParams[self::PAYMENT_DATA]['dynamic_descriptor'] = $dynamicDescriptor;
         }

@@ -19,8 +19,13 @@ $payment_method = $this->getPaymentMethod();
 
         <p>
             <?php /* @escapeNotVerified */
-            echo __('Your order %1 has been successfully generated.',
-                '<a href="' . $block->escapeUrl($this->getOrderUrl()) . '">' . $block->escapeHtml($order->getIncrementId()) . '</a>');
+            echo __(
+                'Your order %1 has been successfully generated.',
+                '<a href="' .
+                $block->escapeUrl($this->getOrderUrl()) .
+                '">' .
+                $block->escapeHtml($order->getIncrementId()) .
+                '</a>');
             ?>
         </p>
 
@@ -34,7 +39,9 @@ $payment_method = $this->getPaymentMethod();
         </p>
 
         <?php if ($paymentResponse['redirect_url']) { ?>
-            <a href="<?php echo $block->escapeUrl(urldecode($paymentResponse['redirect_url'])); ?>"
+            <a href="<?php echo $block->escapeUrl(
+                urldecode($paymentResponse['redirect_url'])
+            ); ?>"
                target="_blank" rel="noopener" id="btn-pix-cardpay">
                 <?php /* @escapeNotVerified */
                 echo __('Generate Pix'); ?>
@@ -47,7 +54,7 @@ $payment_method = $this->getPaymentMethod();
 </div>
 
 <div id="logo-cardpay">
-    <img src="<?php echo $block->getUrl("Cardpay_Core::images/cp_logo.jpg"); ?>" alt="Unlimint"/>
+    <img src="<?php echo $block->getUrl("Cardpay_Core::images/cp_logo.jpg"); ?>" alt="Unlimit"/>
 </div>
 
 <div class="primary button-success">

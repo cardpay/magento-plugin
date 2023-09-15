@@ -43,8 +43,13 @@ class Creditcard extends NotificationBase
      * @param Notifications $notifications
      * @param Request $request
      */
-    public function __construct(Context $context, Data $coreHelper, Core $coreModel, Notifications $notifications, Request $request)
-    {
+    public function __construct(
+        Context $context,
+        Data $coreHelper,
+        Core $coreModel,
+        Notifications $notifications,
+        Request $request
+    ) {
         $this->coreHelper = $coreHelper;
         $this->coreModel = $coreModel;
         $this->_notifications = $notifications;

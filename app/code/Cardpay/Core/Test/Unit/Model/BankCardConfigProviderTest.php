@@ -124,7 +124,7 @@ class BankCardConfigProviderTest extends TestCase
         $this->assertIsArray($config);
         $this->assertNotEmpty($config);
         $this->assertArrayHasKey('payment', $config);
-        $this->assertArrayHasKey('unlimint_bankcard', $config['payment']);
-        $this->assertCount(22, $config['payment']['unlimint_bankcard']);
+        $this->assertArrayHasKey('unlimit_bankcard', $config['payment']);
+        $this->assertCount(22, $config['payment']['unlimit_bankcard']);
     }
 }

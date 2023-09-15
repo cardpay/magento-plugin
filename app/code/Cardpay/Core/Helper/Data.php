@@ -2,20 +2,25 @@
 
 namespace Cardpay\Core\Helper;
 
+use Cardpay\Core\Exceptions\UnlimitBaseException;
 use Cardpay\Core\Helper\Message\MessageInterface;
 use Cardpay\Core\Lib\Api;
 use Cardpay\Core\Lib\RestClient;
 use Cardpay\Core\Logger\Logger;
 use Cardpay\Core\Model\Payment\BankCardPayment;
 use Cardpay\Core\Model\Payment\BoletoPayment;
+use Cardpay\Core\Model\Payment\GpayPayment;
+use Cardpay\Core\Model\Payment\MbWayPayment;
+use Cardpay\Core\Model\Payment\MultibancoPayment;
+use Cardpay\Core\Model\Payment\PaypalPayment;
 use Cardpay\Core\Model\Payment\PixPayment;
-use Exception;
+use Cardpay\Core\Model\Payment\SepaInstantPayment;
+use Cardpay\Core\Model\Payment\SpeiPayment;
 use Magento\Backend\Block\Store\Switcher;
 use Magento\Framework\App\Config\Initial;
 use Magento\Framework\App\Helper\Context;
 use Magento\Framework\App\ObjectManager;
 use Magento\Framework\Composer\ComposerInformation;
-use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Module\ResourceInterface;
 use Magento\Framework\Stdlib\DateTime\TimezoneInterface;
 use Magento\Framework\UrlInterface;
@@ -66,7 +71,7 @@ class Data extends \Magento\Payment\Helper\Data
     protected $_messageInterface;
 
     /**
-     * Unlimint Logging instance
+     * Unlimit Logging instance
      *
      * @var Logger
      */
@@ -109,38 +114,38 @@ class Data extends \Magento\Payment\Helper\Data
 
     /**
      * Data constructor.
-     * @param Message\MessageInterface $messageInterface
-     * @param Context $context
-     * @param LayoutFactory $layoutFactory
-     * @param Factory $paymentMethodFactory
-     * @param Emulation $appEmulation
-     * @param Config $paymentConfig
-     * @param Initial $initialConfig
-     * @param Logger $logger
-     * @param Collection $statusFactory
-     * @param OrderFactory $orderFactory
-     * @param Switcher $switcher
-     * @param ComposerInformation $composerInformation
-     * @param ResourceInterface $moduleResource
+     * @param  Message\MessageInterface  $messageInterface
+     * @param  Context  $context
+     * @param  LayoutFactory  $layoutFactory
+     * @param  Factory  $paymentMethodFactory
+     * @param  Emulation  $appEmulation
+     * @param  Config  $paymentConfig
+     * @param  Initial  $initialConfig
+     * @param  Logger  $logger
+     * @param  Collection  $statusFactory
+     * @param  OrderFactory  $orderFactory
+     * @param  Switcher  $switcher
+     * @param  ComposerInformation  $composerInformation
+     * @param  ResourceInterface  $moduleResource
      */
-    public function __construct(
-        Message\MessageInterface $messageInterface,
-        Context                  $context,
-        LayoutFactory            $layoutFactory,
-        Factory                  $paymentMethodFactory,
-        Emulation                $appEmulation,
-        Config                   $paymentConfig,
-        Initial                  $initialConfig,
-        Logger                   $logger,
-        Collection               $statusFactory,
-        OrderFactory             $orderFactory,
-        Switcher                 $switcher,
-        ComposerInformation      $composerInformation,
-        ResourceInterface        $moduleResource,
-        TimezoneInterface        $timezone
-    )
-    {
-        parent::__construct($context, $layoutFactory, $paymentMethodFactory, $appEmulation, $paymentConfig, $initialConfig);
+    public function __construct( //NOSONAR
+        Message\MessageInterface $messageInterface, //NOSONAR
+        Context $context, //NOSONAR
+        LayoutFactory $layoutFactory, //NOSONAR
+        Factory $paymentMethodFactory, //NOSONAR
+        Emulation $appEmulation, //NOSONAR
+        Config $paymentConfig, //NOSONAR
+        Initial $initialConfig, //NOSONAR
+        Logger $logger, //NOSONAR
+        Collection $statusFactory, //NOSONAR
+        OrderFactory $orderFactory, //NOSONAR
+        Switcher $switcher, //NOSONAR
+        ComposerInformation $composerInformation, //NOSONAR
+        ResourceInterface $moduleResource, //NOSONAR
+        TimezoneInterface $timezone //NOSONAR
+    ) {
+        parent::__construct($context, $layoutFactory, $paymentMethodFactory, $appEmulation, $paymentConfig,
+            $initialConfig);
 
         $this->_messageInterface = $messageInterface;
         $this->_mpLogger = $logger;
@@ -153,11 +158,11 @@ class Data extends \Magento\Payment\Helper\Data
     }
 
     /**
-     * Log custom message using Unlimint logger instance
+     * Log custom message using Unlimit logger instance
      *
      * @param        $message
-     * @param string $name
-     * @param null $extraDataForLog
+     * @param  string  $name
+     * @param  null  $extraDataForLog
      */
     public function log($message, $name = 'cardpay', $extraDataForLog = null)
     {
@@ -167,7 +172,7 @@ class Data extends \Magento\Payment\Helper\Data
         }
 
         if (!is_object($extraDataForLog) && !empty($extraDataForLog)) {
-            $message .= ' - ' . $this->maskSensitiveInfo(print_r($extraDataForLog, true));
+            $message .= ' - '.$this->maskSensitiveInfo(print_r($extraDataForLog, true));
         }
 
         $this->_mpLogger->setName($name);
@@ -188,11 +193,11 @@ class Data extends \Magento\Payment\Helper\Data
     }
 
     /**
-     * @param Order $order
-     * @param string $terminalCode
-     * @param string $terminalPassword
+     * @param  Order  $order
+     * @param  string  $terminalCode
+     * @param  string  $terminalPassword
      * @return Api
-     * @throws LocalizedException
+     * @throws UnlimitBaseException
      */
     public function getApiInstance($order = null, $terminalCode = null, $terminalPassword = null)
     {
@@ -206,11 +211,29 @@ class Data extends \Magento\Payment\Helper\Data
             } elseif (PixPayment::isPixPaymentMethod($order)) {
                 $terminalCode = ConfigData::PATH_PIX_TERMINAL_CODE;
                 $terminalPassword = ConfigData::PATH_PIX_TERMINAL_PASSWORD;
+            } elseif (PaypalPayment::isPaypalPaymentMethod($order)) {
+                $terminalCode = ConfigData::PATH_PAYPAL_TERMINAL_CODE;
+                $terminalPassword = ConfigData::PATH_PAYPAL_TERMINAL_PASSWORD;
+            } elseif (GpayPayment::isGpayPaymentMethod($order)) {
+                $terminalCode = ConfigData::PATH_GPAY_TERMINAL_CODE;
+                $terminalPassword = ConfigData::PATH_GPAY_TERMINAL_PASSWORD;
+            } elseif (SepaInstantPayment::isSepaInstantPaymentMethod($order)) {
+                $terminalCode = ConfigData::PATH_SEPA_TERMINAL_CODE;
+                $terminalPassword = ConfigData::PATH_SEPA_TERMINAL_PASSWORD;
+            } elseif (SpeiPayment::isSpeiPaymentMethod($order)) {
+                $terminalCode = ConfigData::PATH_SPEI_TERMINAL_CODE;
+                $terminalPassword = ConfigData::PATH_SPEI_TERMINAL_PASSWORD;
+            } elseif (MultibancoPayment::isMultibancoPaymentMethod($order)) {
+                $terminalCode = ConfigData::PATH_MULTIBANCO_TERMINAL_CODE;
+                $terminalPassword = ConfigData::PATH_MULTIBANCO_TERMINAL_PASSWORD;
+            } elseif (MbwayPayment::isMbWayPaymentMethod($order)) {
+                $terminalCode = ConfigData::PATH_MBWAY_TERMINAL_CODE;
+                $terminalPassword = ConfigData::PATH_MBWAY_TERMINAL_PASSWORD;
             }
         }
 
         if (is_null($terminalCode) || is_null($terminalPassword)) {
-            throw new Exception('Invalid API credentials');
+            throw new UnlimitBaseException('Invalid API credentials');
         }
 
         $api = new Api($terminalCode, $terminalPassword);
@@ -226,15 +249,17 @@ class Data extends \Magento\Payment\Helper\Data
         RestClient::setHelperData($this);
         RestClient::setModuleVersion((string)$this->getModuleVersion());
         RestClient::setUrlStore($this->getUrlStore());
-        RestClient::setEmailAdmin($this->scopeConfig->getValue('trans_email/ident_sales/email', ScopeInterface::SCOPE_STORE));
+        RestClient::setEmailAdmin($this->scopeConfig->getValue('trans_email/ident_sales/email',
+            ScopeInterface::SCOPE_STORE));
         RestClient::setCountryInitial($this->getCountryInitial());
-        RestClient::setSponsorID($this->scopeConfig->getValue('payment/cardpay/sponsor_id', ScopeInterface::SCOPE_STORE));
+        RestClient::setSponsorID($this->scopeConfig->getValue('payment/cardpay/sponsor_id',
+            ScopeInterface::SCOPE_STORE));
 
         return $api;
     }
 
     /**
-     * Calculate and set order Unlimint specific subtotals based on data values
+     * Calculate and set order Unlimit specific subtotals based on data values
      *
      * @param $data
      * @param $order
@@ -284,7 +309,7 @@ class Data extends \Magento\Payment\Helper\Data
         if (isset($payment['trunc_card'])) {
             $payment["trunc_card"] = $payment['trunc_card'];
         } elseif (isset($payment['card']) && isset($payment['card']['last_four_digits'])) {
-            $payment["trunc_card"] = "xxxx xxxx xxxx " . $payment['card']["last_four_digits"];
+            $payment["trunc_card"] = "xxxx xxxx xxxx ".$payment['card']["last_four_digits"];
         }
 
         if (isset($payment['card']["cardholder"]["name"])) {
@@ -340,7 +365,7 @@ class Data extends \Magento\Payment\Helper\Data
             $locale = explode('_', $locale);
 
             return $locale[1];
-        } catch (Exception $e) {
+        } catch (UnlimitBaseException $e) {
             return 'US';
         }
     }
@@ -353,7 +378,7 @@ class Data extends \Magento\Payment\Helper\Data
             $currentStore = $storeManager->getStore();
 
             return $currentStore->getBaseUrl();
-        } catch (Exception $e) {
+        } catch (UnlimitBaseException $e) {
             return "";
         }
     }
@@ -367,7 +392,7 @@ class Data extends \Magento\Payment\Helper\Data
      * Summary: Get client id from access token.
      * Description: Get client id from access token.
      *
-     * @param String $at
+     * @param  String  $at
      *
      * @return String client id.
      */
@@ -410,7 +435,7 @@ class Data extends \Magento\Payment\Helper\Data
     /**
      * Return array with request params by default to refund method
      *
-     * @param int $paymentId
+     * @param  int  $paymentId
      * @param $order
      * @param $amountToRefund
      *
@@ -456,18 +481,39 @@ class Data extends \Magento\Payment\Helper\Data
     }
 
     /**
-     * @throws Exception
+     * @throws UnlimitBaseException
      */
     public function getApiHost($terminalCode)
     {
         if (ConfigData::PATH_BANKCARD_TERMINAL_CODE === $terminalCode) {
-            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_BANKCARD_SANDBOX, ScopeInterface::SCOPE_STORE));
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_BANKCARD_SANDBOX,
+                    ScopeInterface::SCOPE_STORE));
         } elseif (ConfigData::PATH_BOLETO_TERMINAL_CODE === $terminalCode) {
-            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_BOLETO_SANDBOX, ScopeInterface::SCOPE_STORE));
-        }elseif (ConfigData::PATH_PIX_TERMINAL_CODE === $terminalCode) {
-            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_PIX_SANDBOX, ScopeInterface::SCOPE_STORE));
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_BOLETO_SANDBOX,
+                    ScopeInterface::SCOPE_STORE));
+        } elseif (ConfigData::PATH_PIX_TERMINAL_CODE === $terminalCode) {
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_PIX_SANDBOX,
+                    ScopeInterface::SCOPE_STORE));
+        } elseif (ConfigData::PATH_PAYPAL_TERMINAL_CODE === $terminalCode) {
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_PAYPAL_SANDBOX,
+                    ScopeInterface::SCOPE_STORE));
+        } elseif (ConfigData::PATH_GPAY_TERMINAL_CODE === $terminalCode) {
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_GPAY_SANDBOX,
+                    ScopeInterface::SCOPE_STORE));
+        } elseif (ConfigData::PATH_SEPA_TERMINAL_CODE === $terminalCode) {
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_SEPA_SANDBOX,
+                    ScopeInterface::SCOPE_STORE));
+        } elseif (ConfigData::PATH_SPEI_TERMINAL_CODE === $terminalCode) {
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_SPEI_SANDBOX,
+                    ScopeInterface::SCOPE_STORE));
+        } elseif (ConfigData::PATH_MULTIBANCO_TERMINAL_CODE === $terminalCode) {
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_MULTIBANCO_SANDBOX,
+                    ScopeInterface::SCOPE_STORE));
+        } elseif (ConfigData::PATH_MBWAY_TERMINAL_CODE === $terminalCode) {
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_MBWAY_SANDBOX,
+                    ScopeInterface::SCOPE_STORE));
         } else {
-            throw new Exception('Unable to get API host');
+            throw new UnlimitBaseException('Unable to get API host');
         }
 
         if ($isSandbox) {

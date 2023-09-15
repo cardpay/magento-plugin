@@ -14,7 +14,6 @@ use Magento\Framework\Exception\LocalizedException;
 use Magento\Framework\Message\ManagerInterface;
 use Magento\Framework\Phrase;
 use Magento\Sales\Model\Order;
-use Magento\Store\Model\ScopeInterface;
 
 class RefundObserverBeforeSave implements ObserverInterface
 {
@@ -46,18 +45,17 @@ class RefundObserverBeforeSave implements ObserverInterface
     /**
      * RefundObserverBeforeSave constructor.
      *
-     * @param Session $session
-     * @param Context $context
-     * @param Data $dataHelper
-     * @param ScopeConfigInterface $scopeConfig
+     * @param  Session  $session
+     * @param  Context  $context
+     * @param  Data  $dataHelper
+     * @param  ScopeConfigInterface  $scopeConfig
      */
     public function __construct(
-        Session              $session,
-        Context              $context,
-        Data                 $dataHelper,
+        Session $session,
+        Context $context,
+        Data $dataHelper,
         ScopeConfigInterface $scopeConfig
-    )
-    {
+    ) {
         $this->session = $session;
         $this->messageManager = $context->getMessageManager();
         $this->dataHelper = $dataHelper;
@@ -91,7 +89,7 @@ class RefundObserverBeforeSave implements ObserverInterface
      */
     protected function creditMemoRefundBeforeSave($order, $creditMemo)
     {
-        // Do not repeat the return of payment, if it is done through Unlimint
+        // Do not repeat the return of payment, if it is done through Unlimit
         if ($order->getExternalRequest()) {
             return;
         }
@@ -105,18 +103,14 @@ class RefundObserverBeforeSave implements ObserverInterface
         $payment = $order->getPayment();
         if ($payment !== null) {
             $additionalInformation = $payment->getAdditionalInformation();
-            if (!empty($payment->getAdditionalInformation()) && (isset($additionalInformation['raw_details_info']['filing']) && !empty($additionalInformation['raw_details_info']['filing']['id']))) {
+            if (!empty($payment->getAdditionalInformation()) &&
+                (isset($additionalInformation['raw_details_info']['filing']) &&
+                    !empty($additionalInformation['raw_details_info']['filing']['id']))
+            ) {
                 {
                     $this->throwRefundException(__("Refund is not available for installment payment"));
                 }
             }
-        }
-
-        // check is refund enabled
-        $refundAvailable = (int)$this->scopeConfig->getValue(ConfigData::PATH_ORDER_REFUND_AVAILABLE, ScopeInterface::SCOPE_STORE);
-        if ($refundAvailable === 0) {
-            $this->dataHelper->log('Core, RefundObserverBeforeSave::creditMemoRefundBeforeSave - Refund is disabled', ConfigData::CUSTOM_LOG_PREFIX);
-            $this->throwRefundException(__('Refund is disabled'));
         }
 
         // get amount refund
@@ -127,7 +121,11 @@ class RefundObserverBeforeSave implements ObserverInterface
 
         // get Payment Id
         $paymentID = $this->getPaymentId($paymentOrder);
-        $this->dataHelper->log('Core, RefundObserverBeforeSave::creditMemoRefundBeforeSave paymentId', ConfigData::CUSTOM_LOG_PREFIX, $paymentID);
+        $this->dataHelper->log(
+            'Core, RefundObserverBeforeSave::creditMemoRefundBeforeSave paymentId',
+            ConfigData::CUSTOM_LOG_PREFIX, $paymentID
+        );
+
         if (empty($paymentID)) {
             $this->throwRefundException(__('Refund can not be executed because the payment id was not found.'));
         }
@@ -136,7 +134,7 @@ class RefundObserverBeforeSave implements ObserverInterface
     }
 
     /**
-     * @param Order $order
+     * @param  Order  $order
      * @return bool
      */
     private function isPaymentMethodValid($order)
@@ -147,6 +145,7 @@ class RefundObserverBeforeSave implements ObserverInterface
         return $paymentMethod === ConfigData::BANKCARD_PAYMENT_METHOD
             || $paymentMethod === ConfigData::BOLETO_PAYMENT_METHOD
             || $paymentMethod === ConfigData::PIX_PAYMENT_METHOD
+            || $paymentMethod === ConfigData::PAYPAL_PAYMENT_METHOD
             || $paymentMethod === 'cardpay_basic';
     }
 
@@ -159,22 +158,38 @@ class RefundObserverBeforeSave implements ObserverInterface
         $api = $this->dataHelper->getApiInstance($order);
 
         $refundRequestParams = $this->dataHelper->getRefundRequestParams($paymentID, $order, $amountToRefund);
-        $this->dataHelper->log('Core, RefundObserverBeforeSave::creditMemoRefundBeforeSave data', ConfigData::CUSTOM_LOG_PREFIX, $refundRequestParams);
+        $this->dataHelper->log(
+            'Core, RefundObserverBeforeSave::creditMemoRefundBeforeSave data',
+            ConfigData::CUSTOM_LOG_PREFIX, $refundRequestParams
+        );
 
         $refundResponse = $api->refund($refundRequestParams);
-        $this->dataHelper->log('Core, RefundObserverBeforeSave::creditMemoRefundBeforeSave responseRefund', ConfigData::CUSTOM_LOG_PREFIX, $refundResponse);
+        $this->dataHelper->log(
+            'Core, RefundObserverBeforeSave::creditMemoRefundBeforeSave responseRefund',
+            ConfigData::CUSTOM_LOG_PREFIX, $refundResponse
+        );
 
-        if (!is_null($refundResponse) || (int)$refundResponse['status'] === 200 || (int)$refundResponse['status'] === 201) {
+        if (
+            !is_null($refundResponse) ||
+            (int)$refundResponse['status'] === 200 ||
+            (int)$refundResponse['status'] === 201
+        ) {
 
             if ($refundResponse['response']['payment_data']['remaining_amount'] === 0) {
                 $order->setCustomOrderAttribute('REFUNDED');
             }
 
-            $successMessageRefund = 'Unlimint - ' . __('Refund of %1 was processed successfully.', $amountToRefund);
+            $successMessageRefund = 'Unlimit - '.__('Refund of %1 was processed successfully.', $amountToRefund);
             $this->messageManager->addSuccessMessage($successMessageRefund);
-            $this->dataHelper->log('Core, RefundObserverBeforeSave::creditMemoRefundBeforeSave - ' . $successMessageRefund, ConfigData::CUSTOM_LOG_PREFIX, $refundResponse);
+            $this->dataHelper->log(
+                'Core, RefundObserverBeforeSave::creditMemoRefundBeforeSave - '.
+                $successMessageRefund,
+                ConfigData::CUSTOM_LOG_PREFIX, $refundResponse
+            );
         } else {
-            $this->throwRefundException(__('Could not process the refund, The Unlimint API returned an unexpected error. Check the log files.'), $refundResponse);
+            $this->throwRefundException(
+                __('Could not process the refund, The Unlimit API returned an unexpected error. Check the log files.'),
+                $refundResponse);
         }
     }
 
@@ -183,7 +198,13 @@ class RefundObserverBeforeSave implements ObserverInterface
      */
     protected function throwRefundException($message, $data = [])
     {
-        $this->dataHelper->log('Core, RefundObserverBeforeSave::sendRefundRequest - ' . $message, ConfigData::CUSTOM_LOG_PREFIX, $data);
+        $this->dataHelper->log(
+            'Core, RefundObserverBeforeSave::sendRefundRequest - '.
+            $message,
+            ConfigData::CUSTOM_LOG_PREFIX,
+            $data
+        );
+
         throw new LocalizedException(new Phrase($message));
     }
 

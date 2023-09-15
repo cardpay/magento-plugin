@@ -24,6 +24,42 @@ define(
                 component: 'Cardpay_Core/js/view/method-renderer/custom-method-pix'
             }
         );
+        rendererList.push(
+            {
+                type: 'cardpay_paypal',
+                component: 'Cardpay_Core/js/view/method-renderer/custom-method-paypal'
+            }
+        );
+        rendererList.push(
+            {
+                type: 'cardpay_gpay',
+                component: 'Cardpay_Core/js/view/method-renderer/custom-method-gpay'
+            }
+        );
+        rendererList.push(
+            {
+                type: 'cardpay_sepa',
+                component: 'Cardpay_Core/js/view/method-renderer/custom-method-sepa'
+            }
+        );
+        rendererList.push(
+            {
+                type: 'cardpay_spei',
+                component: 'Cardpay_Core/js/view/method-renderer/custom-method-spei'
+            }
+        );
+        rendererList.push(
+            {
+                type: 'cardpay_multibanco',
+                component: 'Cardpay_Core/js/view/method-renderer/custom-method-multibanco'
+            }
+        );
+        rendererList.push(
+            {
+                type: 'cardpay_mbway',
+                component: 'Cardpay_Core/js/view/method-renderer/custom-method-mbway'
+            }
+        );
 
         return Component.extend({});
     }

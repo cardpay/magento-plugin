@@ -3,7 +3,7 @@
 namespace Cardpay\Core\Model\Preference;
 
 use Cardpay\Core\Block\Adminhtml\System\Config\Version;
-use Cardpay\Core\Exceptions\UnlimintBaseException;
+use Cardpay\Core\Exceptions\UnlimitBaseException;
 use Cardpay\Core\Helper\ConfigData;
 use Cardpay\Core\Helper\Data as dataHelper;
 use Exception;
@@ -80,24 +80,23 @@ class Basic extends AbstractMethod
      */
     protected $_productMetaData;
 
-    public function __construct(
-        OrderFactory               $orderFactory,
-        Session                    $checkoutSession,
-        dataHelper                 $helperData,
-        Image                      $helperImage,
-        UrlInterface               $urlBuilder,
-        ScopeConfigInterface       $scopeConfig,
-        customerSession            $customerSession,
-        Context                    $context,
-        Registry                   $registry,
-        ExtensionAttributesFactory $extensionFactory,
-        AttributeValueFactory      $customAttributeFactory,
-        Data                       $paymentData,
-        Logger                     $logger,
-        Version                    $version,
-        ProductMetadataInterface   $productMetadata
-    )
-    {
+    public function __construct( //NOSONAR
+        OrderFactory $orderFactory, //NOSONAR
+        Session $checkoutSession, //NOSONAR
+        dataHelper $helperData, //NOSONAR
+        Image $helperImage, //NOSONAR
+        UrlInterface $urlBuilder, //NOSONAR
+        ScopeConfigInterface $scopeConfig, //NOSONAR
+        customerSession $customerSession, //NOSONAR
+        Context $context, //NOSONAR
+        Registry $registry, //NOSONAR
+        ExtensionAttributesFactory $extensionFactory, //NOSONAR
+        AttributeValueFactory $customAttributeFactory, //NOSONAR
+        Data $paymentData, //NOSONAR
+        Logger $logger, //NOSONAR
+        Version $version, //NOSONAR
+        ProductMetadataInterface $productMetadata //NOSONAR
+    ) {
         parent::__construct(
             $context,
             $registry,
@@ -129,7 +128,7 @@ class Basic extends AbstractMethod
     {
         $order = $this->_orderFactory->create()->loadByIncrementId($this->_checkoutSession->getLastRealOrderId());
         if (empty($order->getId())) {
-            throw new UnlimintBaseException(__('Error on create preference Basic Checkout - Exception on getOrderInfo'));
+            throw new UnlimitBaseException(__('Error on create preference Basic Checkout - Exception on getOrderInfo'));
         }
         return $order;
     }
@@ -146,7 +145,9 @@ class Basic extends AbstractMethod
         $customer = $this->_customerSession->getCustomer();
 
         if (is_null($customer)) {
-            throw new UnlimintBaseException(__('Error on create preference Basic Checkout - Exception on getCustomerInfo'));
+            throw new UnlimitBaseException(
+                __('Error on create preference Basic Checkout - Exception on getCustomerInfo')
+            );
         }
 
         return $customer;
@@ -159,23 +160,56 @@ class Basic extends AbstractMethod
     public function getConfig()
     {
         return [
-            'auto_return' => $this->_scopeConfig->getValue(ConfigData::PATH_BASIC_AUTO_RETURN, ScopeInterface::SCOPE_STORE),
-            'success_page' => $this->_scopeConfig->getValue(ConfigData::PATH_ADVANCED_SUCCESS_PAGE, ScopeInterface::SCOPE_STORE),
-            'sponsor_id' => $this->_scopeConfig->getValue(ConfigData::PATH_SPONSOR_ID, ScopeInterface::SCOPE_STORE),
-            'category_id' => $this->_scopeConfig->getValue(ConfigData::PATH_ADVANCED_CATEGORY, ScopeInterface::SCOPE_STORE),
-            'country' => $this->_scopeConfig->getValue(ConfigData::PATH_ADVANCED_COUNTRY, ScopeInterface::SCOPE_STORE),
-            'access_token' => $this->_scopeConfig->getValue(ConfigData::PATH_BANKCARD_TERMINAL_PASSWORD, ScopeInterface::SCOPE_STORE),
-            'binary_mode' => $this->_scopeConfig->getValue(ConfigData::PATH_BASIC_BINARY_MODE, ScopeInterface::SCOPE_STORE),
-            'expiration_time_preference' => $this->_scopeConfig->getValue(ConfigData::PATH_BASIC_EXPIRATION_TIME_PREFERENCE, ScopeInterface::SCOPE_STORE),
-            'statement_descriptor' => $this->_scopeConfig->getValue(ConfigData::PATH_BASIC_STATEMENT_DESCRIPTION, ScopeInterface::SCOPE_STORE),
-            'exclude_payment_methods' => $this->_scopeConfig->getValue(ConfigData::PATH_BASIC_EXCLUDE_PAYMENT_METHODS, ScopeInterface::SCOPE_STORE),
-            'gateway_mode' => $this->_scopeConfig->getValue(ConfigData::PATH_BASIC_GATEWAY_MODE, ScopeInterface::SCOPE_STORE)
+            'auto_return' => $this->_scopeConfig->getValue(
+                ConfigData::PATH_BASIC_AUTO_RETURN,
+                ScopeInterface::SCOPE_STORE
+            ),
+            'success_page' => $this->_scopeConfig->getValue(
+                ConfigData::PATH_ADVANCED_SUCCESS_PAGE,
+                ScopeInterface::SCOPE_STORE
+            ),
+            'sponsor_id' => $this->_scopeConfig->getValue(
+                ConfigData::PATH_SPONSOR_ID,
+                ScopeInterface::SCOPE_STORE
+            ),
+            'category_id' => $this->_scopeConfig->getValue(
+                ConfigData::PATH_ADVANCED_CATEGORY,
+                ScopeInterface::SCOPE_STORE
+            ),
+            'country' => $this->_scopeConfig->getValue(
+                ConfigData::PATH_ADVANCED_COUNTRY,
+                ScopeInterface::SCOPE_STORE
+            ),
+            'access_token' => $this->_scopeConfig->getValue(
+                ConfigData::PATH_BANKCARD_TERMINAL_PASSWORD,
+                ScopeInterface::SCOPE_STORE
+            ),
+            'binary_mode' => $this->_scopeConfig->getValue(
+                ConfigData::PATH_BASIC_BINARY_MODE,
+                ScopeInterface::SCOPE_STORE
+            ),
+            'expiration_time_preference' => $this->_scopeConfig->getValue(
+                ConfigData::PATH_BASIC_EXPIRATION_TIME_PREFERENCE,
+                ScopeInterface::SCOPE_STORE
+            ),
+            'statement_descriptor' => $this->_scopeConfig->getValue(
+                ConfigData::PATH_BASIC_STATEMENT_DESCRIPTION,
+                ScopeInterface::SCOPE_STORE
+            ),
+            'exclude_payment_methods' => $this->_scopeConfig->getValue(
+                ConfigData::PATH_BASIC_EXCLUDE_PAYMENT_METHODS,
+                ScopeInterface::SCOPE_STORE
+            ),
+            'gateway_mode' => $this->_scopeConfig->getValue(
+                ConfigData::PATH_BASIC_GATEWAY_MODE,
+                ScopeInterface::SCOPE_STORE
+            )
         ];
     }
 
     /**
-     * @param Order $order
-     * @param array $config
+     * @param  Order  $order
+     * @param  array  $config
      * @return array
      * @throws Exception
      */
@@ -200,29 +234,29 @@ class Basic extends AbstractMethod
         $this->calculateDiscountAmount($items, $order, $config);
         $this->calculateBaseTaxAmount($items, $order, $config);
 
-        $total_item = $this->getTotalItems($items);
-        $total_item += (float)$order->getBaseShippingAmount();
-        $order_amount = (float)$order->getBaseGrandTotal();
-        if (!$order_amount) {
-            $order_amount = (float)$order->getBasePrice() + $order->getBaseShippingAmount();
+        $totalItems = $this->getTotalItems($items);
+        $totalItems += (float)$order->getBaseShippingAmount();
+        $orderAmount = (float)$order->getBaseGrandTotal();
+        if (!$orderAmount) {
+            $orderAmount = (float)$order->getBasePrice() + $order->getBaseShippingAmount();
         }
 
-        if ($total_item > $order_amount || $total_item < $order_amount) {
-            $diff_price = $order_amount - $total_item;
+        if ($totalItems > $orderAmount || $totalItems < $orderAmount) {
+            $diffPrice = $orderAmount - $totalItems;
             $difference = [
                 'title' => 'Difference amount of the items with a total',
                 'description' => 'Difference amount of the items with a total',
                 'category_id' => $config['category_id'],
                 'quantity' => 1,
-                'unit_price' => (float)$diff_price
+                'unit_price' => (float)$diffPrice
             ];
-            $this->_helperData->log('Total items: ' . $total_item, ConfigData::BASIC_LOG_PREFIX);
-            $this->_helperData->log('Total order: ' . $order_amount, ConfigData::BASIC_LOG_PREFIX);
-            $this->_helperData->log('Difference add items: ' . $diff_price, ConfigData::BASIC_LOG_PREFIX);
+            $this->_helperData->log('Total items: '.$totalItems, ConfigData::BASIC_LOG_PREFIX);
+            $this->_helperData->log('Total order: '.$orderAmount, ConfigData::BASIC_LOG_PREFIX);
+            $this->_helperData->log('Difference add items: '.$diffPrice, ConfigData::BASIC_LOG_PREFIX);
         }
 
         if (!$items) {
-            throw new UnlimintBaseException(__('Error on create preference Basic Checkout - Exception on getItems'));
+            throw new UnlimitBaseException(__('Error on create preference Basic Checkout - Exception on getItems'));
         }
 
         return ['items' => $items, 'difference' => $difference];
@@ -247,7 +281,9 @@ class Basic extends AbstractMethod
         }
 
         if (empty($arr)) {
-            throw new UnlimintBaseException(__('Error on create preference Basic Checkout - Exception on calculateDiscountAmount'));
+            throw new UnlimitBaseException(
+                __('Error on create preference Basic Checkout - Exception on calculateDiscountAmount')
+            );
         }
     }
 
@@ -270,7 +306,9 @@ class Basic extends AbstractMethod
         }
 
         if (empty($arr)) {
-            throw new UnlimintBaseException(__('Error on create preference Basic Checkout - Exception on calculateBaseTaxAmount'));
+            throw new UnlimitBaseException(
+                __('Error on create preference Basic Checkout - Exception on calculateBaseTaxAmount')
+            );
         }
     }
 
@@ -287,7 +325,9 @@ class Basic extends AbstractMethod
         }
 
         if (empty($total)) {
-            throw new UnlimintBaseException(__('Error on create preference Basic Checkout - Exception on getTotalItems'));
+            throw new UnlimitBaseException(
+                __('Error on create preference Basic Checkout - Exception on getTotalItems')
+            );
         }
 
         return $total;
@@ -303,13 +343,17 @@ class Basic extends AbstractMethod
         $receiverAddress = [
             'floor' => '-',
             'zip_code' => $shippingAddress->getPostcode(),
-            'street_name' => $shippingAddress->getStreet()[0] . ' - ' . $shippingAddress->getCity() . ' - ' . $shippingAddress->getCountryId(),
+            'street_name' => $shippingAddress->getStreet()[0].' - '
+                .$shippingAddress->getCity().' - '
+                .$shippingAddress->getCountryId(),
             'apartment' => '-',
             'street_number' => ''
         ];
 
         if (!is_array($receiverAddress)) {
-            throw new UnlimintBaseException(__('Error on create preference Basic Checkout - Exception on getReceiverAddress'));
+            throw new UnlimitBaseException(
+                __('Error on create preference Basic Checkout - Exception on getReceiverAddress')
+            );
         }
 
         return $receiverAddress;
@@ -323,16 +367,18 @@ class Basic extends AbstractMethod
     protected function getExcludedPaymentsMethods($config)
     {
         $excludedMethods = [];
-        $excluded_payment_methods = $config['exclude_payment_methods'];
-        $arr_epm = explode(",", $excluded_payment_methods);
-        if (count($arr_epm) > 0) {
-            foreach ($arr_epm as $m) {
+        $excludedPaymentMethods = $config['exclude_payment_methods'];
+        $arrEpm = explode(",", $excludedPaymentMethods);
+        if (count($arrEpm) > 0) {
+            foreach ($arrEpm as $m) {
                 $excludedMethods[] = ["id" => $m];
             }
         }
 
         if (!is_array($excludedMethods)) {
-            throw new UnlimintBaseException(__('Error on create preference Basic Checkout - Exception on getExcludedPaymentsMethods'));
+            throw new UnlimitBaseException(
+                __('Error on create preference Basic Checkout - Exception on getExcludedPaymentsMethods')
+            );
         }
 
         return $excludedMethods;
@@ -351,23 +397,36 @@ class Basic extends AbstractMethod
         $billingAddress = $order->getBillingAddress()->getData();
         $payment = $order->getPayment();
 
-        $result['date_created'] = date('Y-m-d', $customer->getCreatedAtTimestamp()) . 'T' . date('H:i:s', $customer->getCreatedAtTimestamp());
-        $result['email'] = $customer->getId() ? htmlentities($customer->getEmail()) : htmlentities($billingAddress['email']);
-        $result['first_name'] = $customer->getId() ? htmlentities($customer->getFirstname()) : htmlentities($billingAddress['firstname']);
-        $result['last_name'] = $customer->getId() ? htmlentities($customer->getLastname()) : htmlentities($billingAddress['lastname']);
+        $result['date_created'] = date('Y-m-d', $customer->getCreatedAtTimestamp()).'T'.date('H:i:s',
+                $customer->getCreatedAtTimestamp());
+        $result['email'] = $customer->getId() ?
+            htmlentities($customer->getEmail()) :
+            htmlentities($billingAddress['email']
+            );
+        $result['first_name'] = $customer->getId() ?
+            htmlentities($customer->getFirstname()) :
+            htmlentities($billingAddress['firstname']
+            );
+        $result['last_name'] = $customer->getId() ?
+            htmlentities($customer->getLastname()) :
+            htmlentities($billingAddress['lastname']
+            );
 
-        if (isset($payment['additional_information']['doc_number']) && !empty($payment['additional_information']['doc_number'])) {
+        if (isset($payment['additional_information']['doc_number']) &&
+            !empty($payment['additional_information']['doc_number'])) {
             $result['identification'] = ["type" => "CPF", "number" => $payment['additional_information']['doc_number']];
         }
 
         $result['address'] = [
             'zip_code' => $billingAddress['postcode'],
-            'street_name' => $billingAddress['street'] . ' - ' . $billingAddress['city'] . ' - ' . $billingAddress['country_id'],
+            'street_name' => $billingAddress['street'].' - '.
+                $billingAddress['city'].' - '.
+                $billingAddress['country_id'],
             'street_number' => ''
         ];
 
         if (!is_array($result)) {
-            throw new UnlimintBaseException(__('Error on create preference Basic Checkout - Exception on getPayerInfo'));
+            throw new UnlimitBaseException(__('Error on create preference Basic Checkout - Exception on getPayerInfo'));
         }
 
         return $result;
@@ -384,10 +443,12 @@ class Basic extends AbstractMethod
         $successUrl = $config['success_page'] ? 'cardpay/checkout/page' : 'checkout/onepage/success';
         $result['success'] = $this->_urlBuilder->getUrl($successUrl);
         $result['pending'] = $this->_urlBuilder->getUrl($successUrl);
-        $result['failure'] = $config['success_page'] ? $this->_urlBuilder->getUrl(self::FAILURE_URL) : $this->_urlBuilder->getUrl('checkout/onepage/failure');
+        $result['failure'] = $config['success_page'] ?
+            $this->_urlBuilder->getUrl(self::FAILURE_URL) :
+            $this->_urlBuilder->getUrl('checkout/onepage/failure');
 
         if (!is_array($result)) {
-            throw new UnlimintBaseException(__('Error on create preference Basic Checkout - Exception on getBackUrls'));
+            throw new UnlimitBaseException(__('Error on create preference Basic Checkout - Exception on getBackUrls'));
         }
 
         return $result;
@@ -399,12 +460,12 @@ class Basic extends AbstractMethod
      */
     protected function getSponsorId($config)
     {
-        $sponsor_id = $config['sponsor_id'];
+        $sponsorId = $config['sponsor_id'];
 
-        $this->_helperData->log('Sponsor_id', ConfigData::BASIC_LOG_PREFIX, $sponsor_id);
-        if (!empty($sponsor_id)) {
-            $this->_helperData->log('Sponsor_id identificado', ConfigData::BASIC_LOG_PREFIX, $sponsor_id);
-            return (int)$sponsor_id;
+        $this->_helperData->log('Sponsor_id', ConfigData::BASIC_LOG_PREFIX, $sponsorId);
+        if (!empty($sponsorId)) {
+            $this->_helperData->log('Sponsor_id identificado', ConfigData::BASIC_LOG_PREFIX, $sponsorId);
+            return (int)$sponsorId;
         }
 
         return null;
@@ -469,7 +530,9 @@ class Basic extends AbstractMethod
 
             if (!empty($config['expiration_time_preference'])) {
                 $params['expires'] = true;
-                $params['expiration_date_to'] = date('Y-m-d\TH:i:s.000O', strtotime('+' . $config['expiration_time_preference'] . ' hours'));
+                $params['expiration_date_to'] = date(
+                    'Y-m-d\TH:i:s.000O',
+                    strtotime('+'.$config['expiration_time_preference'].' hours'));
             }
 
             $testMode = true;
@@ -503,13 +566,13 @@ class Basic extends AbstractMethod
             return $response;
 
         } catch (Exception $e) {
-            $this->_helperData->log('Error: ' . $e->getMessage(), ConfigData::BASIC_LOG_PREFIX);
+            $this->_helperData->log('Error: '.$e->getMessage(), ConfigData::BASIC_LOG_PREFIX);
             return ['status' => 500, 'message' => $e->getMessage()];
         }
     }
 
     /**
-     * @param ScopeConfigInterface $scopeConfig
+     * @param  ScopeConfigInterface  $scopeConfig
      */
     public function setScopeConfig(ScopeConfigInterface $scopeConfig): void
     {
@@ -517,13 +580,13 @@ class Basic extends AbstractMethod
     }
 
     /**
-     * @param Order $order
-     * @param array $params
-     * @param $category_id
+     * @param  Order  $order
+     * @param  array  $params
+     * @param $categoryId
      * @return array
      * @throws Exception
      */
-    private function assignShippingAddress($order, $params, $category_id)
+    private function assignShippingAddress($order, $params, $categoryId)
     {
         if ($order->canShip()) {
             $shippingAddress = $order->getShippingAddress();
@@ -539,7 +602,7 @@ class Basic extends AbstractMethod
                 $params['items'][] = [
                     'title' => 'Shipment cost',
                     'description' => 'Shipment cost',
-                    'category_id' => $category_id,
+                    'category_id' => $categoryId,
                     'quantity' => 1,
                     'unit_price' => (float)$order->getBaseShippingAmount()
                 ];

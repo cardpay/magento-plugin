@@ -2,7 +2,7 @@
 
 namespace Cardpay\Core\Config;
 
-class InstallmentType extends UnlimintBaseOption
+class InstallmentType extends UnlimitBaseOption
 {
     public const INSTALLMENT_TYPE_IF = 'IF';
     public const INSTALLMENT_TYPE_MF = 'MF_HOLD';

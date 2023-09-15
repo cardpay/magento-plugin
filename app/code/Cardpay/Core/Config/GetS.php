@@ -2,7 +2,7 @@
 
 namespace Cardpay\Core\Config;
 
-class GetS extends UnlimintBaseOption
+class GetS extends UnlimitBaseOption
 {
     protected const OPTIONS = ['currency' => ''];
 }

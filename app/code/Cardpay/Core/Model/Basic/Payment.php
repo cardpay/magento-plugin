@@ -79,22 +79,22 @@ class Payment extends AbstractMethod
      * @param Basic $basic
      * @param array $data
      */
-    public function __construct(
-        dataHelper                 $helperData,
-        Image                      $helperImage,
-        Session                    $checkoutSession,
-        customerSession            $customerSession,
-        OrderFactory               $orderFactory,
-        UrlInterface               $urlBuilder,
-        Context                    $context,
-        Registry                   $registry,
-        ExtensionAttributesFactory $extensionFactory,
-        AttributeValueFactory      $customAttributeFactory,
-        Data                       $paymentData,
-        ScopeConfigInterface       $scopeConfig,
-        Logger                     $logger,
-        Basic                      $basic,
-        array                      $data = []
+    public function __construct( //NOSONAR
+        dataHelper                 $helperData, //NOSONAR
+        Image                      $helperImage, //NOSONAR
+        Session                    $checkoutSession, //NOSONAR
+        customerSession            $customerSession, //NOSONAR
+        OrderFactory               $orderFactory, //NOSONAR
+        UrlInterface               $urlBuilder, //NOSONAR
+        Context                    $context, //NOSONAR
+        Registry                   $registry, //NOSONAR
+        ExtensionAttributesFactory $extensionFactory, //NOSONAR
+        AttributeValueFactory      $customAttributeFactory, //NOSONAR
+        Data                       $paymentData, //NOSONAR
+        ScopeConfigInterface       $scopeConfig, //NOSONAR
+        Logger                     $logger, //NOSONAR
+        Basic                      $basic, //NOSONAR
+        array                      $data = [] //NOSONAR
     )
     {
         parent::__construct(
@@ -156,7 +156,10 @@ class Payment extends AbstractMethod
             return $array_assign;
 
         } catch (Exception $e) {
-            $this->_helperData->log('Fatal Error: Model Basic Payment PostPago:' . $e->getMessage(), ConfigData::BASIC_LOG_PREFIX);
+            $this->_helperData->log(
+                'Fatal Error: Model Basic Payment PostPago:' . $e->getMessage(),
+                ConfigData::BASIC_LOG_PREFIX
+            );
             return [];
         }
     }
@@ -188,7 +191,10 @@ class Payment extends AbstractMethod
      */
     public function getOrderPlaceRedirectUrl()
     {
-        $successPage = $this->_scopeConfig->getValue(ConfigData::PATH_ADVANCED_SUCCESS_PAGE, ScopeInterface::SCOPE_STORE);
+        $successPage = $this->_scopeConfig->getValue(
+            ConfigData::PATH_ADVANCED_SUCCESS_PAGE,
+            ScopeInterface::SCOPE_STORE
+        );
         $successUrl = $successPage ? 'cardpay/checkout/page' : 'checkout/onepage/success';
 
         return $this->_urlBuilder->getUrl($successUrl, ['_secure' => true]);

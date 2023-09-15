@@ -634,7 +634,7 @@ textarea.has-error {
     display: none;
 }
 
-#unlimint_modal_bg {
+#unlimit_modal_bg, .unlimit_modal_bg {
     position: fixed;
     top: 0;
     left: 0;
@@ -646,21 +646,21 @@ textarea.has-error {
     padding: 0
 }
 
-#unlimint_modal_bg .closed {
+#unlimit_modal_bg .closed, .unlimit_modal_bg .closed {
     display: none;
 }
 
-#unlimint_modal_close {
+#unlimit_modal_close, .unlimit_modal_close {
     position: fixed;
     top: 4px;
     right: 4px;
 }
 
-#unlimint_modal_page {
+#unlimit_modal_page, .unlimit_modal_page {
     background: #FFF;
 }
 
-#unimint_modal_iframe {
+#unlimit_modal_iframe, .unlimit_modal_iframe {
     border: 0;
     height: 100%;
     width: 100%;

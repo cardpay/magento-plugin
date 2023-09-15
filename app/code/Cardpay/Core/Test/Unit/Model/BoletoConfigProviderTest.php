@@ -126,7 +126,7 @@ class BoletoConfigProviderTest extends TestCase
         $this->assertIsArray($config);
         $this->assertNotEmpty($config);
         $this->assertArrayHasKey('payment', $config);
-        $this->assertArrayHasKey('unlimint_boleto', $config['payment']);
-        $this->assertCount(14, $config['payment']['unlimint_boleto']);
+        $this->assertArrayHasKey('unlimit_boleto', $config['payment']);
+        $this->assertCount(14, $config['payment']['unlimit_boleto']);
     }
 }

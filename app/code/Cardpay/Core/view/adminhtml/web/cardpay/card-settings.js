@@ -1,4 +1,4 @@
-const unlimintSettingsFields = {
+const unlimitSettingsFields = {
     active: 'active',
     api_access_mode: 'api_access_mode',
     ask_cpf: 'ask_cpf',
@@ -14,7 +14,7 @@ const unlimintSettingsFields = {
     saveButtonID: 'save'
 };
 
-const unlimintCardSettings = {
+const unlimitCardSettings = {
     prefix: '',
     selPaymentPage: null,
     selEnabled: null,
@@ -46,17 +46,17 @@ const unlimintCardSettings = {
 
         const id = (jQuery(firstField).attr('id'));
         this.prefix = id.replace('active', '');
-        this.selPaymentPage = jQuery(`#${this.prefix}${unlimintSettingsFields.api_access_mode}`);
-        this.selInstType = jQuery(`#${this.prefix}${unlimintSettingsFields.installment_type}`);
-        this.selEnabled = jQuery(`#${this.prefix}${unlimintSettingsFields.active}`);
-        this.selInstEnabled = jQuery(`#${this.prefix}${unlimintSettingsFields.installment}`);
-        this.minimumInstallmentAmount = jQuery(`#${this.prefix}${unlimintSettingsFields.minimum_installment_amount}`);
-        this.maximumAcceptedInstallments = jQuery(`#${this.prefix}${unlimintSettingsFields.maximum_accepted_installments}`);
+        this.selPaymentPage = jQuery(`#${this.prefix}${unlimitSettingsFields.api_access_mode}`);
+        this.selInstType = jQuery(`#${this.prefix}${unlimitSettingsFields.installment_type}`);
+        this.selEnabled = jQuery(`#${this.prefix}${unlimitSettingsFields.active}`);
+        this.selInstEnabled = jQuery(`#${this.prefix}${unlimitSettingsFields.installment}`);
+        this.minimumInstallmentAmount = jQuery(`#${this.prefix}${unlimitSettingsFields.minimum_installment_amount}`);
+        this.maximumAcceptedInstallments = jQuery(`#${this.prefix}${unlimitSettingsFields.maximum_accepted_installments}`);
         this.askCpf = jQuery(`#${this.prefix}ask_cpf`);
         this.installmentSettingsFields = [
-            unlimintSettingsFields.minimum_installment_amount,
-            unlimintSettingsFields.maximum_accepted_installments,
-            unlimintSettingsFields.installment_type
+            unlimitSettingsFields.minimum_installment_amount,
+            unlimitSettingsFields.maximum_accepted_installments,
+            unlimitSettingsFields.installment_type
         ];
         this.toggleSettings();
         this.selectPpAndInstType();
@@ -67,7 +67,7 @@ const unlimintCardSettings = {
         this.checkMinimumInstallmentAmount();
     },
     setupInstallmentsTypes: function () {
-        if (jQuery(this.selInstType).find('option[value="MF_HOLD"]').length == 0 && jQuery(this.selPaymentPage).val() === 'gateway') {
+        if (jQuery(this.selInstType).find('option[value="MF_HOLD"]').length === 0 && jQuery(this.selPaymentPage).val() === 'gateway') {
             jQuery(this.selInstType).append('<option value="MF_HOLD">Merchant financed</option>');
         } else if (jQuery(this.selPaymentPage).val() !== 'gateway') {
             jQuery(this.selInstType).find('option[value="MF_HOLD"]').remove();
@@ -75,7 +75,7 @@ const unlimintCardSettings = {
     },
     setupListeners: function () {
         const obj = this;
-        jQuery(`#${unlimintSettingsFields.saveButtonID}`).on('click', function (e) {
+        jQuery(`#${unlimitSettingsFields.saveButtonID}`).on('click', function (e) {
             obj.onFormSubmit(e);
         });
         jQuery(obj.selPaymentPage).on('change', function () {
@@ -101,25 +101,34 @@ const unlimintCardSettings = {
         });
     },
     checkMinimumInstallmentAmount: function () {
-        document.querySelector("#row_payment_other_cardpay_configurations_custom_checkout_minimum_installment_amount > td.label > label > span").innerText = 'Minimum installment amount ' + GET_CURRENCY_SYMBOL['currency'];
+        const labelElement = document.querySelector("#row_payment_other_cardpay_configurations_custom_checkout_minimum_installment_amount > td.label > label > span");
+        const currencySymbol = GET_CURRENCY_SYMBOL['currency'];
+        labelElement.innerText = 'Minimum installment amount ' + currencySymbol;
+
+
         let val = parseFloat(this.minimumInstallmentAmount.val()).toFixed(4);
-        if (val < 0) {
+
+        if (Number(val) < 0) {
             highlightUlAdminError(jQuery(this.minimumInstallmentAmount).attr('id'));
         }
+
         if (isNaN(val)) {
             val = 0;
         }
+
         val = val + '';
         val = val.replace(/^0+|0+$/g, '').replace(/\.$/, '');
+
         this.minimumInstallmentAmount.val(val);
     },
+
     validateForm: function (displayError) {
         let error = false;
-        error = !validateUlAdminField(this.prefix + unlimintSettingsFields.terminal_code, 128, 'terminal code', true, displayError) || error;
-        error = !validateUlAdminField(this.prefix + unlimintSettingsFields.terminal_password, 128, 'terminal password', false, displayError) || error;
-        error = !validateUlAdminField(this.prefix + unlimintSettingsFields.callback_secret, 128, 'callback secret', false, displayError) || error;
-        error = !validateUlAdminField(this.prefix + unlimintSettingsFields.title, 128, 'payment title', false, displayError) || error;
-        error = !validateUlAdminField(this.prefix + unlimintSettingsFields.dynamic_descriptor, 22, 'dynamic descriptor', false, displayError) || error;
+        error = !validateUlAdminField(this.prefix + unlimitSettingsFields.terminal_code, 128, 'terminal code', true, displayError) || error;
+        error = !validateUlAdminField(this.prefix + unlimitSettingsFields.terminal_password, 128, 'terminal password', false, displayError) || error;
+        error = !validateUlAdminField(this.prefix + unlimitSettingsFields.callback_secret, 128, 'callback secret', false, displayError) || error;
+        error = !validateUlAdminField(this.prefix + unlimitSettingsFields.title, 128, 'payment title', false, displayError) || error;
+        error = !validateUlAdminField(this.prefix + unlimitSettingsFields.dynamic_descriptor, 22, 'dynamic descriptor', false, displayError) || error;
         if (jQuery(this.selInstEnabled).val() === '1') {
             error = !this.checkMaximumAcceptedInstallments(displayError) || error;
         }
@@ -224,6 +233,7 @@ const unlimintCardSettings = {
                 jQuery(obj.maximumAcceptedInstallments).val(obj.defaultInstallments);
                 return true;
             }
+            return false;
         })
 
         let value = jQuery(obj.maximumAcceptedInstallments).val();
@@ -285,5 +295,5 @@ const unlimintCardSettings = {
 };
 
 document.addEventListener('DOMContentLoaded', function () {
-    unlimintCardSettings.initScript();
+    unlimitCardSettings.initScript();
 }, false);

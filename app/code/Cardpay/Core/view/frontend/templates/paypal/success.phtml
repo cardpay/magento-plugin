@@ -1,0 +1,42 @@
+<?php
+/**
+ * @var Cardpay\Core\Block\Custom\Success $block
+ */
+
+$order = $this->getOrder();
+$payment = $this->getPayment();
+
+//generate link to order
+$successMsg = 'Your order %1 has been successfully generated.';
+$link_to_order = '<a href="' .
+    $block->escapeUrl($this->getOrderUrl()) .
+    '">' .
+    $block->escapeHtml($order->getIncrementId()) .
+    '</a>';
+
+$paymentResponse = $payment->getAdditionalInformation("paymentResponse");
+
+?>
+
+<div id="box-cardpay">
+
+   <pre>
+        <?php print_r($paymentResponse); ?>
+   </pre>
+</div>
+
+<div id="logo-cardpay">
+    <img src="<?php echo $block->getUrl("Cardpay_Core::images/cp_logo.jpg"); ?>" alt="Unlimit"/>
+</div>
+
+<div class="primary button-success">
+    <?php if ($paymentResponse['status'] == 'rejected'): ?>
+        <a class="action primary continue"
+           href="<?php echo $block->escapeUrl($block->getReOrderUrl()) ?>"><span><?php /* @escapeNotVerified */
+                echo __('Retry order') ?></span></a>
+    <?php else: ?>
+        <a class="action primary continue"
+           href="<?php echo $block->escapeUrl($block->getUrl()) ?>"><span><?php /* @escapeNotVerified */
+                echo __('Continue Shopping') ?></span></a>
+    <?php endif; ?>
+</div>

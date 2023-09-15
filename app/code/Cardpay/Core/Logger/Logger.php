@@ -3,7 +3,7 @@
 namespace Cardpay\Core\Logger;
 
 /**
- * Unlimint custom logger allows name changing to differentiate log call origin
+ * Unlimit custom logger allows name changing to differentiate log call origin
  * Class Logger
  *
  * @package Cardpay\Core\Logger

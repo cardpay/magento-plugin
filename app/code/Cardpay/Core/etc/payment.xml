@@ -1,0 +1,32 @@
+<?xml version="1.0"?>
+<payment xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Payment:etc/payment.xsd">
+    <methods>
+        <method name="cardpay_custom">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="cardpay_customticket">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="cardpay_custompix">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="cardpay_paypal">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="cardpay_gpay">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="cardpay_sepa">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="cardpay_spei">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="cardpay_multibanco">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+        <method name="cardpay_mbway">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
+    </methods>
+</payment>

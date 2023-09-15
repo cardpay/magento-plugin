@@ -48,23 +48,28 @@ class Info extends \Magento\Payment\Block\Info
             $data[$title->__toString()] = $paymentResponse['id'];
         }
 
-        if (isset($paymentResponse['card']) && isset($paymentResponse['card']['first_six_digits']) && isset($paymentResponse['card']['last_four_digits'])) {
-            $title = __('Card Number');
-            $data[$title->__toString()] = $paymentResponse['card']['first_six_digits'] . "..." . $paymentResponse['card']['last_four_digits'];
+        if (
+            isset($paymentResponse['card']['first_six_digits']) &&
+            isset($paymentResponse['card']['last_four_digits'])
+        ) {
+            $title = __('Card number');
+            $data[$title->__toString()] =
+                $paymentResponse['card']['first_six_digits'] . "..." . $paymentResponse['card']['last_four_digits'];
         }
 
-        if (isset($paymentResponse['card']) && isset($paymentResponse['card']['expiration_month']) && isset($paymentResponse['card']['expiration_year'])) {
+        if (isset($paymentResponse['card']['expiration_month']) && isset($paymentResponse['card']['expiration_year'])) {
             $title = __('Expiration date');
-            $data[$title->__toString()] = $paymentResponse['card']['expiration_month'] . "/" . $paymentResponse['card']['expiration_year'];
+            $data[$title->__toString()] =
+                $paymentResponse['card']['expiration_month'] . "/" . $paymentResponse['card']['expiration_year'];
         }
 
-        if (isset($paymentResponse['card']) && isset($paymentResponse['card']['cardholder']) && isset($paymentResponse['card']['cardholder']['name'])) {
-            $title = __('CardHolder Name');
+        if (isset($paymentResponse['card']['cardholder']['name'])) {
+            $title = __('CardHolder name');
             $data[$title->__toString()] = $paymentResponse['card']['cardholder']['name'];
         }
 
         if (isset($paymentResponse['payment_method_id'])) {
-            $title = __('Payment Method');
+            $title = __('Payment method');
             $data[$title->__toString()] = ucfirst($paymentResponse['payment_method_id']);
         }
 
@@ -74,17 +79,17 @@ class Info extends \Magento\Payment\Block\Info
         }
 
         if (isset($paymentResponse['statement_descriptor'])) {
-            $title = __('Statement Descriptor');
+            $title = __('Statement descriptor');
             $data[$title->__toString()] = $paymentResponse['statement_descriptor'];
         }
 
         if (isset($paymentResponse['status'])) {
-            $title = __('Payment Status');
+            $title = __('Payment status');
             $data[$title->__toString()] = ucfirst($paymentResponse['status']);
         }
 
         if (isset($paymentResponse['status_detail'])) {
-            $title = __('Payment Status Detail');
+            $title = __('Payment status detail');
             $data[$title->__toString()] = ucfirst($paymentResponse['status_detail']);
         }
 

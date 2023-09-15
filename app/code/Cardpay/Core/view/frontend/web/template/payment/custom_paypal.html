@@ -1,0 +1,57 @@
+<div class="payment-method" data-bind="css: {'_active': (getCode() == isChecked())}">
+    <div class="payment-method-title field choice">
+        <input type="radio" name="payment[method]" class="radio"
+               data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()"/>
+        <label class="label" data-bind="attr: {'for': getCode()}">
+            <!-- Unlimit Logo -->
+            <span data-bind="text: getTitle()"></span>
+        </label>
+    </div>
+
+    <!-- //NOSONAR --><!-- ko if: getApiAccessMode() === 'pp' -->
+    <div id="unlimit_paypal_modal_bg" class="closed unlimit_modal_bg">
+        <div id="unlimit_paypal_modal_page" name="unlimit_modal_page" class="unlimit_modal_page">
+            <iframe id="unlimit_paypal_modal_iframe" width="100%" height="100%" class="unlimit_modal_iframe"
+                    title="unlimit_modal_iframe"></iframe>
+        </div>
+    </div>
+    <!--/ko-->
+    <div class="payment-method-content">
+        <!-- ko foreach: getRegion('messages') -->
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!--/ko-->
+        <div class="payment-method-billing-address">
+            <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
+
+        <div>
+            <img data-bind="attr: {src: getPaypalLogoURL()}" alt="Paypal" width="53" height="35"
+                 style="margin-top: 15px;"/>
+        </div>
+
+        <div class="checkout-agreements-block">
+            <!-- ko foreach: $parent.getRegion('before-place-order') -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
+
+        <div class="actions-toolbar">
+            <div class="primary" style="margin-top: 30px;">
+                <button data-role="review-save"
+                        type="submit"
+                        data-bind="
+                               attr: {title: $t('Place Order')},
+                               enable: (getCode() == isChecked()),
+                               click: placeOrder,
+                               css: {disabled: !isPlaceOrderActionAllowed()},
+                           "
+                        class="action primary checkout"
+                        disabled>
+                    <span data-bind="i18n: 'Place Order'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

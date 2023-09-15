@@ -1,6 +1,3 @@
-// CPv1
-// Handlers Form Unlimint v1
-
 const INLINE_BLOCK = 'inline-block';
 
 (function () {
@@ -357,41 +354,6 @@ const INLINE_BLOCK = 'inline-block';
         }
 
         return isValidCNPJ(strCNPJ);
-    }
-
-    function isValidCNPJ(strCNPJ) {
-        let numeros, soma, i, resultado, pos, tamanho;
-
-        tamanho = strCNPJ.length - 2
-        numeros = strCNPJ.substring(0, tamanho);
-        const digitos = strCNPJ.substring(tamanho);
-        soma = 0;
-        pos = tamanho - 7;
-        for (i = tamanho; i >= 1; i--) {
-            soma += numeros.charAt(tamanho - i) * pos--;
-            if (pos < 2) {
-                pos = 9;
-            }
-        }
-
-        resultado = String(soma % 11 < 2 ? 0 : 11 - soma % 11);
-        if (resultado !== digitos.charAt(0)) {
-            return false;
-        }
-
-        tamanho = tamanho + 1;
-        numeros = strCNPJ.substring(0, tamanho);
-        soma = 0;
-        pos = tamanho - 7;
-        for (i = tamanho; i >= 1; i--) {
-            soma += numeros.charAt(tamanho - i) * pos--;
-            if (pos < 2) {
-                pos = 9;
-            }
-        }
-
-        resultado = soma % 11 < 2 ? 0 : 11 - soma % 11;
-        return resultado === digitos.charAt(1);
     }
 
     CPv1Ticket.execFormatDocument = function () {

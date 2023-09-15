@@ -51,7 +51,7 @@ class Callback extends AbstractRedirectAction
                 $statusResponse = $e->getCode();
             }
 
-            $message = 'Unlimint - There was an error processing the redirection.';
+            $message = 'Unlimit - There was an error processing the redirection.';
             $this->setResponseHttp($statusResponse, $message, ['exception_error' => $e->getMessage()]);
         }
     }

@@ -28,22 +28,21 @@ class AbstractSuccess extends Template
     protected $_scopeConfig;
 
     /**
-     * @param \Magento\Framework\View\Element\Template\Context $context
-     * @param \Cardpay\Core\Model\CoreFactory $coreFactory
-     * @param \Magento\Sales\Model\OrderFactory $orderFactory
-     * @param \Magento\Checkout\Model\Session $checkoutSession
-     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
-     * @param array $data
+     * @param  \Magento\Framework\View\Element\Template\Context  $context
+     * @param  \Cardpay\Core\Model\CoreFactory  $coreFactory
+     * @param  \Magento\Sales\Model\OrderFactory  $orderFactory
+     * @param  \Magento\Checkout\Model\Session  $checkoutSession
+     * @param  \Magento\Framework\App\Config\ScopeConfigInterface  $scopeConfig
+     * @param  array  $data
      */
     public function __construct(
-        \Magento\Framework\View\Element\Template\Context   $context,
-        \Cardpay\Core\Model\CoreFactory                    $coreFactory,
-        \Magento\Sales\Model\OrderFactory                  $orderFactory,
-        \Magento\Checkout\Model\Session                    $checkoutSession,
+        \Magento\Framework\View\Element\Template\Context $context,
+        \Cardpay\Core\Model\CoreFactory $coreFactory,
+        \Magento\Sales\Model\OrderFactory $orderFactory,
+        \Magento\Checkout\Model\Session $checkoutSession,
         \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig,
-        array                                              $data = []
-    )
-    {
+        array $data = []
+    ) {
         $this->_coreFactory = $coreFactory;
         $this->_orderFactory = $orderFactory;
         $this->_checkoutSession = $checkoutSession;
@@ -117,7 +116,7 @@ class AbstractSuccess extends Template
     /**
      * Return a message to show in success page
      *
-     * @param object $payment
+     * @param  object  $payment
      *
      * @return string
      */
@@ -129,7 +128,13 @@ class AbstractSuccess extends Template
         $amount = !empty($payment['transaction_amount']) ? $payment['transaction_amount'] : '';
         $installments = !empty($payment['installments']) ? $payment['installments'] : '';
 
-        return $this->_coreFactory->create()->getMessageByStatus($status, $status_detail, $payment_method, $installments, $amount);
+        return $this->_coreFactory->create()->getMessageByStatus(
+            $status,
+            $status_detail,
+            $payment_method,
+            $installments,
+            $amount
+        );
     }
 
     /**

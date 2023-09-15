@@ -8,7 +8,10 @@ $payment = $this->getPayment();
 
 //generate link to order
 $successMsg = 'Your order %1 has been successfully generated.';
-$link_to_order = '<a href="' . $block->escapeUrl($this->getOrderUrl()) . '">' . $block->escapeHtml($order->getIncrementId()) . '</a>';
+$link_to_order = '<a href="' .
+    $block->escapeUrl($this->getOrderUrl()) .
+    '">' . $block->escapeHtml($order->getIncrementId()) .
+    '</a>';
 
 $paymentResponse = $payment->getAdditionalInformation("paymentResponse");
 
@@ -38,7 +41,10 @@ $paymentResponse = $payment->getAdditionalInformation("paymentResponse");
                 echo __($successMsg, $link_to_order); ?></p>
         <?php } ?>
 
-        <?php if ($paymentResponse['status'] != 'rejected' && (isset($message_status['title']) && isset($message_status['message']))): ?>
+        <?php if (
+            $paymentResponse['status'] != 'rejected' &&
+            (isset($message_status['title']) && isset($message_status['message']))
+        ): ?>
             <p><?php /* @escapeNotVerified */
                 echo __($successMsg, $link_to_order); ?></p>
         <?php endif; ?>
@@ -50,20 +56,40 @@ $paymentResponse = $payment->getAdditionalInformation("paymentResponse");
             <p><?php echo __('Payment id (Cardpay): %1', $paymentResponse['id']); ?></p>
         <?php } ?>
 
-        <?php if (isset($paymentResponse['card']) && isset($paymentResponse['card']['first_six_digits']) && isset($paymentResponse['card']['last_four_digits'])) { ?>
-            <p><?php echo __('Card Number: %1', $paymentResponse['card']['first_six_digits'] . "xxxxxx" . $paymentResponse['card']['last_four_digits']); ?></p>
+        <?php if (
+            isset($paymentResponse['card']) &&
+            isset($paymentResponse['card']['first_six_digits']) &&
+            isset($paymentResponse['card']['last_four_digits'])
+        ) { ?>
+            <p><?php echo __(
+                'Card number: %1',
+                $paymentResponse['card']['first_six_digits'] .
+                "xxxxxx" .
+                $paymentResponse['card']['last_four_digits']
+                ); ?></p>
         <?php } ?>
 
-        <?php if (isset($paymentResponse['card']) && isset($paymentResponse['card']['expiration_month']) && isset($paymentResponse['card']['expiration_year'])) { ?>
-            <p><?php echo __('Expiration Date: %1', $paymentResponse['card']['expiration_month'] . "/" . $paymentResponse['card']['expiration_year']); ?></p>
+        <?php if (isset($paymentResponse['card']) &&
+            isset($paymentResponse['card']['expiration_month']) &&
+            isset($paymentResponse['card']['expiration_year'])
+        ) { ?>
+            <p><?php echo __(
+                'Expiration date: %1',
+                $paymentResponse['card']['expiration_month'] .
+                "/" .
+                $paymentResponse['card']['expiration_year']
+                ); ?></p>
         <?php } ?>
 
-        <?php if (isset($paymentResponse['card']) && isset($paymentResponse['card']['cardholder']) && isset($paymentResponse['card']['cardholder']['name'])) { ?>
-            <p><?php echo __('CardHolder Name: %1', $paymentResponse['card']['cardholder']['name']); ?></p>
+        <?php if (isset($paymentResponse['card']) &&
+            isset($paymentResponse['card']['cardholder']) &&
+            isset($paymentResponse['card']['cardholder']['name'])
+        ) { ?>
+            <p><?php echo __('CardHolder name: %1', $paymentResponse['card']['cardholder']['name']); ?></p>
         <?php } ?>
 
         <?php if (isset($paymentResponse['payment_method_id'])) { ?>
-            <p><?php echo __('Payment Method: %1', ucfirst($paymentResponse['payment_method_id'])); ?></p>
+            <p><?php echo __('Payment method: %1', ucfirst($paymentResponse['payment_method_id'])); ?></p>
         <?php } ?>
 
         <?php if (isset($paymentResponse['installments'])) { ?>
@@ -71,22 +97,22 @@ $paymentResponse = $payment->getAdditionalInformation("paymentResponse");
         <?php } ?>
 
         <?php if (isset($paymentResponse['statement_descriptor'])) { ?>
-            <p><?php echo __('Statement Descriptor: %1', $paymentResponse['statement_descriptor']); ?></p>
+            <p><?php echo __('Statement descriptor: %1', $paymentResponse['statement_descriptor']); ?></p>
         <?php } ?>
 
         <?php if (isset($paymentResponse['status'])) { ?>
-            <p><?php echo __('Payment Status: %1', ucfirst($paymentResponse['status'])); ?></p>
+            <p><?php echo __('Payment status: %1', ucfirst($paymentResponse['status'])); ?></p>
         <?php } ?>
 
         <?php if (isset($paymentResponse['id'])) { ?>
-            <p><?php echo __('Payment Status Detail: %1', ucfirst($paymentResponse['status_detail'])); ?></p>
+            <p><?php echo __('Payment status detail: %1', ucfirst($paymentResponse['status_detail'])); ?></p>
         <?php } ?>
 
     <?php } ?>
 </div>
 
 <div id="logo-cardpay">
-    <img src="<?php echo $block->getUrl("Cardpay_Core::images/cp_logo.jpg"); ?>" alt="Unlimint"/>
+    <img src="<?php echo $block->getUrl("Cardpay_Core::images/cp_logo.jpg"); ?>" alt="Unlimit"/>
 </div>
 
 <div class="primary button-success">

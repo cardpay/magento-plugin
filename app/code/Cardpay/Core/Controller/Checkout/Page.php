@@ -5,7 +5,7 @@ namespace Cardpay\Core\Controller\Checkout;
 use Cardpay\Core\Controller\ParamsContainer\ParamContextContainer;
 use Cardpay\Core\Helper\ConfigData;
 use Cardpay\Core\Helper\Data;
-use Cardpay\Core\Model\Core;
+use Cardpay\Core\Model\ApiManager;
 use Cardpay\Core\Model\Notifications\Topics\Payment as PaymentNotification;
 use Exception;
 use Magento\Catalog\Model\Session as CatalogSession;
@@ -56,9 +56,9 @@ class Page extends Action
     protected $_helperData;
 
     /**
-     * @var Core
+     * @var ApiManager
      */
-    protected $_core;
+    protected $_apiManager;
 
     /**
      * @var Registry
@@ -78,7 +78,7 @@ class Page extends Action
      * @param LoggerInterface $logger
      * @param Data $helperData
      * @param ScopeConfigInterface $scopeConfig
-     * @param Core $core
+     * @param ApiManager $apiManager
      * @param CatalogSession $catalogSession
      * @param PaymentNotification $paymentNotification
      */
@@ -98,7 +98,7 @@ class Page extends Action
         $this->_logger = $logger;
         $this->_helperData = $paramContainer->getData();
         $this->_scopeConfig = $paramContainer->getScopeConfig();
-        $this->_core = $paramContainer->getCore();
+        $this->_apiManager = $paramContainer->getCore();
         $this->_catalogSession = $catalogSession;
         $this->_paymentNotification = $paymentNotification;
 
@@ -169,7 +169,7 @@ class Page extends Action
         if (isset($paymentResponseArray[self::PAYMENT_DATA]['id'])) {
             if ($this->_scopeConfig->isSetFlag(ConfigData::PATH_CUSTOM_BINARY_MODE, ScopeInterface::SCOPE_STORE)) {
                 $paymentId = $paymentResponseArray[self::PAYMENT_DATA]['id'];
-                $paymentResponse = $this->_core->getApiPayment($order, $paymentId);
+                $paymentResponse = $this->_apiManager->getApiPayment($order, $paymentId);
                 if ((int)$paymentResponse['status'] === 200) {
                     $this->_paymentNotification->updateStatusOrderByPayment($paymentResponse['response']);
                 }

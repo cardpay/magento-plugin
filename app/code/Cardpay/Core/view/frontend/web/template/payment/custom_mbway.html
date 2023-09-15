@@ -1,0 +1,71 @@
+<div class="payment-method" data-bind="css: {'_active': (getCode() == isChecked())}">
+    <div class="payment-method-title field choice">
+        <input type="radio" name="payment[method]" class="radio"
+               data-bind="attr: {'id': getCode()}, value: getCode(), checked: isChecked, click: selectPaymentMethod, visible: isRadioButtonVisible()"/>
+        <label class="label" data-bind="attr: {'for': getCode()}">
+            <!-- Unlimit Logo -->
+            <span data-bind="text: getTitle()"></span>
+        </label>
+    </div>
+
+    <!-- //NOSONAR --><!-- ko if: getApiAccessMode() === 'pp' -->
+    <div id="unlimit_mbway_modal_bg" class="closed unlimit_modal_bg">
+        <div id="unlimit_mbway_modal_page" name="unlimit_modal_page" class="unlimit_modal_page">
+            <iframe id="unlimit_mbway_modal_iframe" width="100%" height="100%" class="unlimit_modal_iframe"
+                    title="unlimit_modal_iframe"></iframe>
+        </div>
+    </div>
+    <!--/ko-->
+    <div class="payment-method-content">
+        <!-- ko foreach: getRegion('messages') -->
+        <!-- ko template: getTemplate() --><!-- /ko -->
+        <!--/ko-->
+        <div class="payment-method-billing-address">
+            <!-- ko foreach: $parent.getRegion(getBillingAddressFormName()) -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
+        <form class="form" id="co-cardpay-form-mbway" action="#" method="post"
+              data-bind="visible: isPlaceOrderActionAllowed(), mageInit: {'transparent':{'context': context()}, 'validation':[]}">
+            <div id="cardpay-form-mbway">
+                <div class="mp-box-inputs mp-col-60">
+                    <label for="mbWayPhone"> <!-- ko i18n: 'MB WAY phone number'--><!-- /ko --> <em>*</em></label>
+                    <input type="text" id="mbWayPhone" name="cardpay_custom_mbway[mbway_phone]"
+                           data-bind="event: {blur: validateMbWayPhone}"/>
+
+                    <span class="mp-error" id="mp-error-100" data-main="#mbway"> <!-- ko i18n: 'Please fill out a MB WAY phone number'-->
+                        <!-- /ko -->  </span>
+                    <span class="mp-error" id="mp-error-101-second" data-main="#mbway"> <!-- ko i18n: 'MB WAY phone number is invalid'-->
+                        <!-- /ko -->  </span>
+                </div>
+
+                <div class="mp-box-inputs mp-col-60">
+                    <img data-bind="attr: {src: getMbWayLogoURL()}" alt="MbWay" width="60" height="22"
+                         style="margin-top: 15px;"/>
+                </div>
+            </div>
+        </form>
+
+        <div class="checkout-agreements-block">
+            <!-- ko foreach: $parent.getRegion('before-place-order') -->
+            <!-- ko template: getTemplate() --><!-- /ko -->
+            <!--/ko-->
+        </div>
+        <div class="actions-toolbar">
+            <div class="primary" style="margin-top: 30px;">
+                <button data-role="review-save"
+                        type="submit"
+                        data-bind="
+                               attr: {title: $t('Place Order')},
+                               enable: (getCode() == isChecked()),
+                               click: placeOrder,
+                               css: {disabled: !isPlaceOrderActionAllowed()},
+                           "
+                        class="action primary checkout"
+                        disabled>
+                    <span data-bind="i18n: 'Place Order'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -4,6 +4,7 @@ namespace Cardpay\Core\Observer;
 
 use Cardpay\Core\Helper\Data;
 use Cardpay\Core\Helper\Response;
+use Cardpay\Core\Model\ApiManager;
 use Cardpay\Core\Model\Core;
 use Cardpay\Core\Model\Notifications\Topics\Transaction;
 use Magento\Framework\Event\Observer;
@@ -22,9 +23,9 @@ class PaymentStatusHandler
     protected $helperData;
 
     /**
-     * @var Core
+     * @var ApiManager
      */
-    protected $coreModel;
+    protected $apiModel;
 
     /**
      * @var Transaction
@@ -32,24 +33,23 @@ class PaymentStatusHandler
     private $transaction;
 
     /**
-     * @param Data $helperData
-     * @param Core $coreModel
+     * @param  Data  $helperData
+     * @param  ApiManager  $apiModel
      */
     public function __construct(
-        Data             $helperData,
-        Core             $coreModel,
+        Data $helperData,
+        ApiManager $apiModel,
         BuilderInterface $transactionBuilder
-    )
-    {
+    ) {
         $this->helperData = $helperData;
-        $this->coreModel = $coreModel;
+        $this->apiModel = $apiModel;
         $this->transaction = new Transaction($helperData, $transactionBuilder);
     }
 
     /**
-     * @param Observer $observer
-     * @param string $statusTo
-     * @param string $expectedResponseStatus
+     * @param  Observer  $observer
+     * @param  string  $statusTo
+     * @param  string  $expectedResponseStatus
      * @return bool
      * @throws LocalizedException
      */
@@ -76,7 +76,8 @@ class PaymentStatusHandler
 
         $paymentResponse = $payment['additional_information']['paymentResponse'];
 
-        if ('cardpay_custom' === $payment['additional_information']['method'] && !empty($payment['additional_information']['installments'])) {
+        if ('cardpay_custom' === $payment['additional_information']['method'] &&
+            !empty($payment['additional_information']['installments'])) {
             $paymentResponse['installments'] = $payment['additional_information']['installments'];
         }
 
@@ -94,16 +95,17 @@ class PaymentStatusHandler
             throw new LocalizedException(__(self::ERROR_MESSAGE));
         }
 
-        $url = $apiEndpoint . $paymentResponse[$apiStructure]['id'];
+        $url = $apiEndpoint.$paymentResponse[$apiStructure]['id'];
         $requestParams = $this->getChangeStatusParams($observer, $statusTo, $apiStructure);
 
-        $api = $this->coreModel->getApiInstance($order);
+        $api = $this->apiModel->getApiInstance($order);
 
-        $this->helperData->log('PaymentStatusHandler::changePaymentStatus, request: ' . print_r($requestParams, true));
+        $this->helperData->log('PaymentStatusHandler::changePaymentStatus, request: '.print_r($requestParams, true));
         $response = $api->patch($url, $requestParams);
-        $this->helperData->log('PaymentStatusHandler::changePaymentStatus, response: ' . print_r($response, true));
+        $this->helperData->log('PaymentStatusHandler::changePaymentStatus, response: '.print_r($response, true));
 
-        if ($response !== null && isset($response['status']) && (Response::METHOD_NOT_ALLOWED === $response['status'])) {
+        if ($response !== null && isset($response['status']) &&
+            (Response::METHOD_NOT_ALLOWED === $response['status'])) {
             throw new LocalizedException(__(self::ERROR_MESSAGE));
         }
 
@@ -112,8 +114,8 @@ class PaymentStatusHandler
     }
 
     /**
-     * @param Observer $observer
-     * @param string $paymentId
+     * @param  Observer  $observer
+     * @param  string  $paymentId
      */
     private function createTransactionForInvoice($observer, $paymentData)
     {
@@ -131,7 +133,7 @@ class PaymentStatusHandler
         $this->transaction->createTransaction($paymentData, $order);
         $order->save();
 
-        $this->helperData->log('Transaction created, id = ' . $paymentId);
+        $this->helperData->log('Transaction created, id = '.$paymentId);
     }
 
     private function canPaymentStatusBeChanged($payment): bool
@@ -155,9 +157,9 @@ class PaymentStatusHandler
     }
 
     /**
-     * @param Observer $observer
-     * @param string $statusTo
-     * @param string $apiStructure
+     * @param  Observer  $observer
+     * @param  string  $statusTo
+     * @param  string  $apiStructure
      * @return array
      */
     private function getChangeStatusParams($observer, $statusTo, $apiStructure)

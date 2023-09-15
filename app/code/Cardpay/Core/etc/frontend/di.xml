@@ -13,6 +13,24 @@
                 <item name="cardpay_core_customPix_provider" xsi:type="object">
                     Cardpay\Core\Model\PixConfigProvider
                 </item>
+                <item name="cardpay_core_paypal_provider" xsi:type="object">
+                    Cardpay\Core\Model\PaypalConfigProvider
+                </item>
+                <item name="cardpay_core_gpay_provider" xsi:type="object">
+                    Cardpay\Core\Model\GpayConfigProvider
+                </item>
+                <item name="cardpay_core_sepa_provider" xsi:type="object">
+                    Cardpay\Core\Model\SepaInstantConfigProvider
+                </item>
+                <item name="cardpay_core_spei_provider" xsi:type="object">
+                    Cardpay\Core\Model\SpeiConfigProvider
+                </item>
+                <item name="cardpay_core_multibanco_provider" xsi:type="object">
+                    Cardpay\Core\Model\MultibancoConfigProvider
+                </item>
+                <item name="cardpay_core_mbway_provider" xsi:type="object">
+                    Cardpay\Core\Model\MbWayConfigProvider
+                </item>
             </argument>
         </arguments>
     </type>
@@ -22,6 +40,12 @@
                 <item name="cardpay_custom" xsi:type="const">Cardpay\Core\Model\Payment\BankCardPayment::CODE</item>
                 <item name="cardpay_customticket" xsi:type="const">Cardpay\Core\Model\Payment\BoletoPayment::CODE</item>
                 <item name="cardpay_custompix" xsi:type="const">Cardpay\Core\Model\Payment\PixPayment::CODE</item>
+                <item name="cardpay_paypal" xsi:type="const">Cardpay\Core\Model\Payment\PaypalPayment::CODE</item>
+                <item name="cardpay_gpay" xsi:type="const">Cardpay\Core\Model\Payment\GpayPayment::CODE</item>
+                <item name="cardpay_sepa" xsi:type="const">Cardpay\Core\Model\Payment\SepaInstantPayment::CODE</item>
+                <item name="cardpay_spei" xsi:type="const">Cardpay\Core\Model\Payment\SpeiPayment::CODE</item>
+                <item name="cardpay_multibanco" xsi:type="const">Cardpay\Core\Model\Payment\MultibancoPayment::CODE</item>
+                <item name="cardpay_mbway" xsi:type="const">Cardpay\Core\Model\Payment\MbWayPayment::CODE</item>
             </argument>
         </arguments>
     </type>

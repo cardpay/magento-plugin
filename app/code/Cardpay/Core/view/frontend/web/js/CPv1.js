@@ -1,6 +1,6 @@
 /*
  * CPv1
- * Handlers Form Unlimint v1
+ * Handlers Form Unlimit v1
  */
 
 const ELLIPSIS = '...';
@@ -605,7 +605,7 @@ const DATA_CHECKOUT_SELECTOR = '[data-checkout]';
 
         // flow: customer & cards
         const selectorPmCustomerAndCards = document.querySelector(CPv1.selectors.pmCustomerAndCards);
-        if (!selectorPmCustomerAndCards || !CPv1.customer_and_card.default || !parseInt(selectorPmCustomerAndCards.childElementCount) > 0) {
+        if (!selectorPmCustomerAndCards || !CPv1.customer_and_card.default || !(parseInt(selectorPmCustomerAndCards.childElementCount) > 0)) {
             // if customer & cards is disabled or customer does not have cards
             CPv1.customer_and_card.status = false;
             document.querySelector(CPv1.selectors.formCustomerAndCard).style.display = 'none';

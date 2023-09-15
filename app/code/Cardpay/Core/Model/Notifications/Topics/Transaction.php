@@ -21,21 +21,20 @@ class Transaction
     private $transactionBuilder;
 
     /**
-     * @param Data $helperData
-     * @param BuilderInterface $transactionBuilder
+     * @param  Data  $helperData
+     * @param  BuilderInterface  $transactionBuilder
      */
     public function __construct(
-        Data             $helperData,
+        Data $helperData,
         BuilderInterface $transactionBuilder
-    )
-    {
+    ) {
         $this->helpderData = $helperData;
         $this->transactionBuilder = $transactionBuilder;
     }
 
     /**
      * @param $paymentData
-     * @param Order $order
+     * @param  Order  $order
      */
     public function createTransaction($paymentData, $order = null)
     {
@@ -58,7 +57,9 @@ class Transaction
                 ->setOrder($order)
                 ->setTransactionId($paymentData['id'])
                 ->setAdditionalInformation(
-                    ['raw_details_info' => (array)$paymentData]      // Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS
+                    [
+                        'raw_details_info' => (array)$paymentData
+                    ]      // Magento\Sales\Model\Order\Payment\Transaction::RAW_DETAILS
                 )
                 ->setFailSafe(true)
                 ->build(TransactionInterface::TYPE_CAPTURE);

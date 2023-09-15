@@ -3,7 +3,7 @@
 namespace Cardpay\Core\Observer;
 
 use Cardpay\Core\Helper\Data;
-use Cardpay\Core\Model\Core;
+use Cardpay\Core\Model\ApiManager;
 use Magento\Framework\Event\Observer;
 use Magento\Framework\Event\ObserverInterface;
 use Magento\Framework\Exception\LocalizedException;
@@ -24,31 +24,33 @@ class InvoiceRegisterObserver implements ObserverInterface
     protected $helperData;
 
     /**
-     * @param Data $helperData
-     * @param Core $coreModel
+     * @param  Data  $helperData
+     * @param  ApiManager  $apiManager
      */
-    public function __construct(Data $helperData, Core $coreModel, BuilderInterface $transactionBuilder)
+    public function __construct(Data $helperData, ApiManager $apiManager, BuilderInterface $transactionBuilder)
     {
         $this->helperData = $helperData;
-        $this->paymentStatusHandler = new PaymentStatusHandler($helperData, $coreModel, $transactionBuilder);
+        $this->paymentStatusHandler = new PaymentStatusHandler($helperData, $apiManager, $transactionBuilder);
     }
 
     public function execute(Observer $observer)
     {
         $this->helperData->log('InvoiceRegisterObserver, execute');
 
-        $isUnlimintPaymentCompleted = $this->paymentStatusHandler->changePaymentStatus(
+        $isUnlimitPaymentCompleted = $this->paymentStatusHandler->changePaymentStatus(
             $observer,
             self::COMPLETE_STATUS,
             $this->getExpectedResponseStatus($observer)
         );
-        if (!$isUnlimintPaymentCompleted) {
-            throw new LocalizedException(__('An error occurred while completing Unlimint payment. Please try again later.'));
+        if (!$isUnlimitPaymentCompleted) {
+            throw new LocalizedException(
+                __('An error occurred while completing Unlimit payment. Please try again later.')
+            );
         }
     }
 
     /**
-     * @param Observer $observer
+     * @param  Observer  $observer
      * @throws LocalizedException
      */
     private function getExpectedResponseStatus($observer)

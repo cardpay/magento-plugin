@@ -5,7 +5,7 @@
         <column name="custom_order_attribute">
             <argument name="data" xsi:type="array">
                 <item name="config" xsi:type="array">
-                    <item name="label" xsi:type="string" translate="true">Payment Status</item>
+                    <item name="label" xsi:type="string" translate="true">Payment status</item>
                 </item>
             </argument>
         </column>

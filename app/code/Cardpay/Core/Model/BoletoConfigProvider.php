@@ -29,9 +29,17 @@ class BoletoConfigProvider extends BasicConfigProvider
         return [
             'payment' => [
                 $this->methodCode => [
-                    'country' => strtoupper($this->getConfigWithDefault(ConfigData::PATH_SITE_ID, ScopeInterface::SCOPE_STORE)),
-                    'bannerUrl' => $this->getConfigWithDefault(ConfigData::PATH_TICKET_BANNER, ScopeInterface::SCOPE_STORE),
-                    'logEnabled' => $this->getConfigWithDefault(ConfigData::PATH_ADVANCED_LOG, ScopeInterface::SCOPE_STORE),
+                    'country' => strtoupper(
+                        $this->getConfigWithDefault(ConfigData::PATH_SITE_ID, ScopeInterface::SCOPE_STORE)
+                    ),
+                    'bannerUrl' => $this->getConfigWithDefault(
+                        ConfigData::PATH_TICKET_BANNER,
+                        ScopeInterface::SCOPE_STORE
+                    ),
+                    'logEnabled' => $this->getConfigWithDefault(
+                        ConfigData::PATH_ADVANCED_LOG,
+                        ScopeInterface::SCOPE_STORE
+                    ),
                     'options' => $paymentMethods,
                     'grand_total' => $this->checkoutSession->getQuote()->getGrandTotal(),
                     'success_url' => $this->methodInstance->getConfigData('order_place_redirect_url'),

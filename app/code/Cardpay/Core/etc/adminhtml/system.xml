@@ -2,11 +2,16 @@
     <system>
         <section id="payment">
             <group id="cardpay_configurations" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
-                <label>Unlimint</label>
+                <label>Unlimit</label>
                 <include path="Cardpay_Core::system/custom_checkout.xml"/>
                 <include path="Cardpay_Core::system/custom_checkout_boleto.xml"/>
+                <include path="Cardpay_Core::system/custom_checkout_gpay.xml"/>
+                <include path="Cardpay_Core::system/custom_checkout_mbway.xml"/>
+                <include path="Cardpay_Core::system/custom_checkout_multibanco.xml"/>
+                <include path="Cardpay_Core::system/custom_checkout_paypal.xml"/>
                 <include path="Cardpay_Core::system/custom_checkout_pix.xml"/>
-                <include path="Cardpay_Core::system/order_management.xml"/>
+                <include path="Cardpay_Core::system/custom_checkout_sepainstant.xml"/>
+                <include path="Cardpay_Core::system/custom_checkout_spei.xml"/>
                 <include path="Cardpay_Core::system/advanced.xml"/>
             </group>
         </section>

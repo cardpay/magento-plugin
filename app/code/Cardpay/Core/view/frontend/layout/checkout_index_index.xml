@@ -4,6 +4,7 @@
     <head>
         <css src="Cardpay_Core::css/style.css"/>
         <css src="Cardpay_Core::css/CPv1.css"/>
+        <script src="https://pay.google.com/gp/p/js/pay.js" src_type="url"/>
     </head>
     <body>
         <referenceBlock name="checkout.root">
@@ -40,6 +41,55 @@
                                                                             </item>
                                                                         </item>
                                                                         <item name="cardpay_custompix"
+                                                                              xsi:type="array">
+                                                                            <item name="isBillingAddressRequired"
+                                                                                  xsi:type="boolean">
+                                                                                true
+                                                                            </item>
+                                                                        </item>
+                                                                        <item name="cardpay_paypal"
+                                                                              xsi:type="array">
+                                                                            <item name="isBillingAddressRequired"
+                                                                                  xsi:type="boolean">
+                                                                                true
+                                                                            </item>
+                                                                        </item>
+                                                                        <item name="cardpay_gpay"
+                                                                              xsi:type="array">
+                                                                            <item name="isBillingAddressRequired"
+                                                                                  xsi:type="boolean">
+                                                                                true
+                                                                            </item>
+                                                                        </item>
+                                                                        <item name="cardpay_apay"
+                                                                              xsi:type="array">
+                                                                            <item name="isBillingAddressRequired"
+                                                                                  xsi:type="boolean">
+                                                                                true
+                                                                            </item>
+                                                                        </item>
+                                                                        <item name="cardpay_sepa"
+                                                                              xsi:type="array">
+                                                                            <item name="isBillingAddressRequired"
+                                                                                  xsi:type="boolean">
+                                                                                true
+                                                                            </item>
+                                                                        </item>
+                                                                        <item name="cardpay_spei"
+                                                                              xsi:type="array">
+                                                                            <item name="isBillingAddressRequired"
+                                                                                  xsi:type="boolean">
+                                                                                true
+                                                                            </item>
+                                                                        </item>
+                                                                        <item name="cardpay_multibanco"
+                                                                              xsi:type="array">
+                                                                            <item name="isBillingAddressRequired"
+                                                                                  xsi:type="boolean">
+                                                                                true
+                                                                            </item>
+                                                                        </item>
+                                                                        <item name="cardpay_mbway"
                                                                               xsi:type="array">
                                                                             <item name="isBillingAddressRequired"
                                                                                   xsi:type="boolean">
