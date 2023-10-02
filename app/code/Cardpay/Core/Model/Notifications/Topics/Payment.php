@@ -8,7 +8,6 @@ use Cardpay\Core\Helper\Data as cpHelper;
 use Cardpay\Core\Helper\Message\MessageInterface;
 use Cardpay\Core\Helper\Response;
 use Cardpay\Core\Model\ApiManager;
-use Cardpay\Core\Model\Core;
 use Magento\Framework\App\Config\ScopeConfigInterface;
 use Magento\Framework\DB\TransactionFactory;
 use Magento\Framework\Exception\LocalizedException;
@@ -83,7 +82,8 @@ class Payment extends TopicsAbstract
         InvoiceService $invoiceService, //NOSONAR
         BuilderInterface $transactionBuilder //NOSONAR
 
-    ) {
+    )
+    {
         $this->cpHelper = $cpHelper;
         $this->scopeConfig = $scopeConfig;
         $this->apiModel = $apiModel;
@@ -125,11 +125,10 @@ class Payment extends TopicsAbstract
         if (!in_array(
             $paymentMethod,
             [
-                'cardpay_custom',
-                ConfigData::BOLETO_PAYMENT_METHOD,
-                ConfigData::PIX_PAYMENT_METHOD,
                 ConfigData::BANKCARD_PAYMENT_METHOD,
                 ConfigData::PAYPAL_PAYMENT_METHOD,
+                ConfigData::GPAY_PAYMENT_METHOD,
+                ConfigData::MBWAY_PAYMENT_METHOD,
                 'cardpay_basic'
             ]
         )) {

@@ -122,8 +122,10 @@ class RefundObserverBeforeSave implements ObserverInterface
         $payment = $order->getPayment();
         $paymentMethod = (string)$payment->getMethodInstance()->getCode();
 
-        return $paymentMethod === 'cardpay_custom'
-            || $paymentMethod === ConfigData::BANKCARD_PAYMENT_METHOD
+        return $paymentMethod === ConfigData::BANKCARD_PAYMENT_METHOD
+            || $paymentMethod === ConfigData::PAYPAL_PAYMENT_METHOD
+            || $paymentMethod === ConfigData::GPAY_PAYMENT_METHOD
+            || $paymentMethod === ConfigData::MBWAY_PAYMENT_METHOD
             || $paymentMethod === 'cardpay_basic';
     }
 

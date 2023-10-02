@@ -20,8 +20,8 @@ class Info extends \Magento\Payment\Block\Info
     /**
      * Constructor
      *
-     * @param Context $context
-     * @param array $data
+     * @param  Context  $context
+     * @param  array  $data
      */
     public function __construct(Context $context, OrderFactory $orderFactory, array $data = [])
     {
@@ -32,7 +32,7 @@ class Info extends \Magento\Payment\Block\Info
     /**
      * Prepare information specific to current payment method
      *
-     * @param null | array $transport
+     * @param  null | array  $transport
      * @return \Magento\Framework\DataObject
      */
     protected function _prepareSpecificInformation($transport = null)
@@ -54,13 +54,13 @@ class Info extends \Magento\Payment\Block\Info
         ) {
             $title = __('Card number');
             $data[$title->__toString()] =
-                $paymentResponse['card']['first_six_digits'] . "..." . $paymentResponse['card']['last_four_digits'];
+                $paymentResponse['card']['first_six_digits']."...".$paymentResponse['card']['last_four_digits'];
         }
 
         if (isset($paymentResponse['card']['expiration_month']) && isset($paymentResponse['card']['expiration_year'])) {
             $title = __('Expiration date');
             $data[$title->__toString()] =
-                $paymentResponse['card']['expiration_month'] . "/" . $paymentResponse['card']['expiration_year'];
+                $paymentResponse['card']['expiration_month']."/".$paymentResponse['card']['expiration_year'];
         }
 
         if (isset($paymentResponse['card']['cardholder']['name'])) {

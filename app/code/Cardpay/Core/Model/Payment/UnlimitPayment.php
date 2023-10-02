@@ -239,9 +239,10 @@ class UnlimitPayment extends Cc implements GatewayInterface
         \Magento\Framework\Module\ModuleListInterface $moduleList, //NOSONAR
         \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate, //NOSONAR
         \Cardpay\Core\Model\Core $coreModel, //NOSONAR
-        \Cardpay\Core\Model\ApiManager  $apiModel, //NOSONAR
+        \Cardpay\Core\Model\ApiManager $apiModel, //NOSONAR
         RequestInterface $request //NOSONAR
-    ) {
+    )
+    {
         parent::__construct(
             $context,
             $registry,
@@ -421,7 +422,12 @@ class UnlimitPayment extends Cc implements GatewayInterface
         $disabledRefundInstType = $refundForMfHold === 'IF' ||
             ($refundForMfHold === 'MF_HOLD' && empty($getAdditionalInformation['raw_details_info']['installments']));
 
-        if ($this->_code === 'cardpay_custom' && $disabledRefundInstType) {
+        if (($this->_code === 'cardpay_custom' && $disabledRefundInstType) ||
+            $this->_code === 'cardpay_gpay' ||
+            $this->_code === 'cardpay_apay' ||
+            $this->_code === 'cardpay_paypal' ||
+            $this->_code === 'cardpay_mbway'
+        ) {
             return $this->_canRefund = true;
         }
 

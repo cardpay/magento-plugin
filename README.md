@@ -15,22 +15,22 @@ Unlimit Magento 2 plugin is able to work in following modes:
 Unlimit’s Magento 2 plugin is open-source and compatible with:
 
 * Magento Open Source 2.4.2 and 2.4.3
-* PHP 7.x in accordance with the
+* PHP 7.4 and PHP 8.1 (or higher) according to the
   official [Magento 2 specification](https://experienceleague.adobe.com/docs/commerce-operations/installation-guide/system-requirements.html?lang=en)
 
 ### Supported payment methods
 
-| Payment method          | Country        | Payment | Installment | Void/Cancel | Refund |
-|-------------------------|----------------|---------|-------------|-------------|--------|
-| Bank сard (Credit Card) | Global         | Yes     | Yes         | Yes         | Yes    |
-| Boleto                  | Brazil         | Yes     | No          | No          | No     |
-| Google Pay              | Global         | Yes     | No          | No          | No     |
-| MB WAY                  | Portugal       | Yes     | No          | No          | No     |
-| Multibanco              | Portugal       | Yes     | No          | No          | No     |
-| PayPal                  | Global         | Yes     | No          | No          | No     |
-| Pix                     | Brazil         | Yes     | No          | No          | No     |
-| SEPA Instant            | Europe         | Yes     | No          | No          | No     |
-| SPEI                    | Mexico         | Yes     | No          | No          | No     |
+| Payment method | Country  | Payment | Installment | Void/Cancel | Online refund | Offline refund |
+|----------------|----------|---------|-------------|-------------|---------------|----------------|
+| Credit Card    | Global   | Yes     | Yes         | Yes         | Yes           | Yes            |
+| Boleto         | Brazil   | Yes     | No          | No          | No            | Yes            |
+| Google Pay     | Global   | Yes     | No          | No          | Yes           | Yes            |
+| MB WAY         | Portugal | Yes     | No          | No          | Yes           | Yes            |
+| Multibanco     | Portugal | Yes     | No          | No          | No            | Yes            |
+| PayPal         | Global   | Yes     | No          | No          | Yes           | Yes            |
+| Pix            | Brazil   | Yes     | No          | No          | No            | Yes            |
+| SEPA Instant   | Europe   | Yes     | No          | No          | No            | Yes            |
+| SPEI           | Mexico   | Yes     | No          | No          | No            | Yes            |
 
 ### Supported localizations
 
@@ -89,7 +89,7 @@ methods.
    configure the Unlimit payment methods.
 
 3. To enable payment methods in the **Magento** plugin:
-    - Bank сard (Credit Card)
+    - Credit Card
     - Boleto
     - Google Pay
     - MB WAY
@@ -358,7 +358,12 @@ The order status is changed to **Canceled**
 
 ### Refund (Credit Memo) (online refund)
 
-The **Refund (Credit memo)** operation is supported only with the **Credit Card** payment method.
+The **Refund (Credit memo)** operation is supported only for following payment methods:
+
+* Credit Card
+* Google Pay
+* MB WAY
+* PayPal
 
 To create a **Refund**, navigate to **Orders** and select any **Order** in **Processing** or **Complete**
 status.
