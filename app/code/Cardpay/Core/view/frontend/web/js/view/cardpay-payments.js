@@ -14,6 +14,12 @@ define(
         );
         rendererList.push(
             {
+                type: 'cardpay_apay',
+                component: 'Cardpay_Core/js/view/method-renderer/custom-method-apay'
+            }
+        );
+        rendererList.push(
+            {
                 type: 'cardpay_customticket',
                 component: 'Cardpay_Core/js/view/method-renderer/custom-method-ticket'
             }

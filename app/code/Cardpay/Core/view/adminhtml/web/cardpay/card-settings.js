@@ -58,11 +58,8 @@ const unlimitCardSettings = {
             unlimitSettingsFields.maximum_accepted_installments,
             unlimitSettingsFields.installment_type
         ];
-        this.toggleSettings();
         this.selectPpAndInstType();
-        this.processInstallmentSettings();
         this.setupListeners();
-        this.validateForm();
         this.setupInstallmentsTypes();
         this.checkMinimumInstallmentAmount();
     },
@@ -75,11 +72,7 @@ const unlimitCardSettings = {
     },
     setupListeners: function () {
         const obj = this;
-        jQuery(`#${unlimitSettingsFields.saveButtonID}`).on('click', function (e) {
-            obj.onFormSubmit(e);
-        });
         jQuery(obj.selPaymentPage).on('change', function () {
-            obj.toggleSettings();
             obj.setupInstallmentsTypes();
             if (jQuery(obj.selPaymentPage).val() === 'payment_page') {
                 obj.selectPpAndInstType();
@@ -87,10 +80,6 @@ const unlimitCardSettings = {
         });
         jQuery(obj.selInstType).on('change', function () {
             obj.selectPpAndInstType();
-        });
-
-        jQuery(obj.selInstEnabled).on('change', function () {
-            obj.processInstallmentSettings();
         });
 
         jQuery(obj.maximumAcceptedInstallments).on('change keyup', function (e) {
@@ -102,7 +91,11 @@ const unlimitCardSettings = {
     },
     checkMinimumInstallmentAmount: function () {
         const labelElement = document.querySelector("#row_payment_other_cardpay_configurations_custom_checkout_minimum_installment_amount > td.label > label > span");
-        const currencySymbol = GET_CURRENCY_SYMBOL['currency'];
+        let currencySymbol = GET_CURRENCY_SYMBOL['currency'];
+        if (currencySymbol === null) {
+            currencySymbol = '';
+        }
+
         labelElement.innerText = 'Minimum installment amount ' + currencySymbol;
 
 
@@ -121,27 +114,6 @@ const unlimitCardSettings = {
 
         this.minimumInstallmentAmount.val(val);
     },
-
-    validateForm: function (displayError) {
-        let error = false;
-        error = !validateUlAdminField(this.prefix + unlimitSettingsFields.terminal_code, 128, 'terminal code', true, displayError) || error;
-        error = !validateUlAdminField(this.prefix + unlimitSettingsFields.terminal_password, 128, 'terminal password', false, displayError) || error;
-        error = !validateUlAdminField(this.prefix + unlimitSettingsFields.callback_secret, 128, 'callback secret', false, displayError) || error;
-        error = !validateUlAdminField(this.prefix + unlimitSettingsFields.title, 128, 'payment title', false, displayError) || error;
-        error = !validateUlAdminField(this.prefix + unlimitSettingsFields.dynamic_descriptor, 22, 'dynamic descriptor', false, displayError) || error;
-        if (jQuery(this.selInstEnabled).val() === '1') {
-            error = !this.checkMaximumAcceptedInstallments(displayError) || error;
-        }
-        return !error;
-    },
-    onFormSubmit: function (e) {
-        if (!jQuery(this.selPaymentPage).is(':visible')) {
-            return;
-        }
-        if (!this.validateForm(true)) {
-            e.preventDefault(e);
-        }
-    },
     processInstallmentSettings: function () {
         const obj = this;
         const show = (jQuery(obj.selInstEnabled).val() === '1');
@@ -153,14 +125,6 @@ const unlimitCardSettings = {
                 el.hide();
             }
         });
-    },
-    toggleSettings: function () {
-        const cpfEl = jQuery(this.askCpf).parent().parent();
-        if (jQuery(this.selPaymentPage).val() !== 'gateway') {
-            cpfEl.hide();
-        } else {
-            cpfEl.show();
-        }
     },
     normalizeIntVal: function (val) {
         val = val.replace(/[\D]/g, '');

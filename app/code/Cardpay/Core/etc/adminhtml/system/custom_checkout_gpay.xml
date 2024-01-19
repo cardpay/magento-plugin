@@ -17,6 +17,10 @@
                showInStore="1">
             <label>Terminal code</label>
             <config_path>payment/cardpay_gpay/terminal_code_gpay</config_path>
+            <validate>required-entry</validate>
+            <depends>
+                <field id="active">1</field>
+            </depends>
         </field>
 
         <field id="access_token" translate="label comment" type="password" sortOrder="30" showInDefault="1"
@@ -24,12 +28,20 @@
             <label>Terminal password</label>
             <config_path>payment/cardpay_gpay/terminal_password_gpay</config_path>
             <comment><![CDATA[Get your credentials, visit the <a href="https://unlimit.com/">unlimit.com</a>.]]></comment>
+            <validate>required-entry</validate>
+            <depends>
+                <field id="active">1</field>
+            </depends>
         </field>
 
         <field id="callback_secret" translate="label" type="password" sortOrder="40" showInDefault="1" showInWebsite="1"
                showInStore="1">
             <label>Callback secret</label>
             <config_path>payment/cardpay_gpay/callback_secret_gpay</config_path>
+            <validate>required-entry</validate>
+            <depends>
+                <field id="active">1</field>
+            </depends>
         </field>
 
         <field id="merchant_id" translate="label comment" type="password" sortOrder="45" showInDefault="1" showInWebsite="1"
@@ -37,6 +49,10 @@
             <label>Google merchant ID</label>
             <config_path>payment/cardpay_gpay/merchant_id</config_path>
             <comment>Your Merchant ID, provided by Google.</comment>
+            <validate>required-entry</validate>
+            <depends>
+                <field id="active">1</field>
+            </depends>
         </field>
 
         <field id="sandbox" translate="label comment" type="select" sortOrder="50" showInDefault="1" showInWebsite="1"
@@ -45,12 +61,20 @@
             <config_path>payment/cardpay_gpay/sandbox_gpay</config_path>
             <comment>In test environment, the data is sent to the sandbox only. Test and prod credentials (terminal code, terminal password, callback secret) are different.</comment>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+            <validate>required-entry</validate>
+            <depends>
+                <field id="active">1</field>
+            </depends>
         </field>
 
         <field id="title" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1"
                showInStore="1">
             <label>Payment title</label>
             <config_path>payment/cardpay_gpay/title</config_path>
+            <validate>required-entry</validate>
+            <depends>
+                <field id="active">1</field>
+            </depends>
         </field>
 
         <field id="sort_order" translate="label comment" type="text" sortOrder="70" showInDefault="1" showInWebsite="1"
@@ -59,6 +83,10 @@
             <frontend_class>validate-number</frontend_class>
             <config_path>payment/cardpay_gpay/sort_order</config_path>
             <comment>This setting will be the position in which the payment method will be available to the buyer.</comment>
+            <validate>required-entry</validate>
+            <depends>
+                <field id="active">1</field>
+            </depends>
         </field>
     </group>
 </include>

@@ -126,6 +126,7 @@ class Payment extends TopicsAbstract
             $paymentMethod,
             [
                 ConfigData::BANKCARD_PAYMENT_METHOD,
+                ConfigData::APAY_PAYMENT_METHOD,
                 ConfigData::PAYPAL_PAYMENT_METHOD,
                 ConfigData::GPAY_PAYMENT_METHOD,
                 ConfigData::MBWAY_PAYMENT_METHOD,

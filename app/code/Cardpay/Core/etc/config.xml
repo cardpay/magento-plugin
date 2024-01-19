@@ -19,6 +19,16 @@
                 <sandbox>1</sandbox>
                 <ask_cpf>0</ask_cpf>
             </cardpay_custom>
+            <cardpay_apay>
+                <active>0</active>
+                <model>Cardpay\Core\Model\Payment\ApayPayment</model>
+                <title translate="label">Apple Pay - Unlimit</title>
+                <merchant_id></merchant_id>
+                <allowspecific>0</allowspecific>
+                <sort_order>4</sort_order>
+                <payment_action>authorize</payment_action>
+                <sandbox_apay>1</sandbox_apay>
+            </cardpay_apay>
             <cardpay_customticket>
                 <active>0</active>
                 <model>Cardpay\Core\Model\Payment\BoletoPayment</model>

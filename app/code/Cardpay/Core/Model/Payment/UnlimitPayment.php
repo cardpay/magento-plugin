@@ -26,7 +26,7 @@ class UnlimitPayment extends Cc implements GatewayInterface
     /**
      * @var string
      */
-    protected $_code = self::CODE;
+    protected $_code = self::CODE; //NOSONAR
 
     /**
      * Availability option
@@ -34,8 +34,6 @@ class UnlimitPayment extends Cc implements GatewayInterface
      * @var bool
      */
     protected $_isGateway = true;
-
-    protected $_isOffline = false;
 
     /**
      * Availability option
@@ -422,11 +420,11 @@ class UnlimitPayment extends Cc implements GatewayInterface
         $disabledRefundInstType = $refundForMfHold === 'IF' ||
             ($refundForMfHold === 'MF_HOLD' && empty($getAdditionalInformation['raw_details_info']['installments']));
 
-        if (($this->_code === 'cardpay_custom' && $disabledRefundInstType) ||
-            $this->_code === 'cardpay_gpay' ||
-            $this->_code === 'cardpay_apay' ||
-            $this->_code === 'cardpay_paypal' ||
-            $this->_code === 'cardpay_mbway'
+        if (($this->_code === 'cardpay_custom' && $disabledRefundInstType) || //NOSONAR
+            $this->_code === 'cardpay_gpay' || //NOSONAR
+            $this->_code === 'cardpay_apay' || //NOSONAR
+            $this->_code === 'cardpay_paypal' || //NOSONAR
+            $this->_code === 'cardpay_mbway' //NOSONAR
         ) {
             return $this->_canRefund = true;
         }

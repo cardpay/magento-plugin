@@ -4,6 +4,7 @@
             <group id="cardpay_configurations" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
                 <label>Unlimit</label>
                 <include path="Cardpay_Core::system/custom_checkout.xml"/>
+                <include path="Cardpay_Core::system/custom_checkout_apay.xml"/>
                 <include path="Cardpay_Core::system/custom_checkout_boleto.xml"/>
                 <include path="Cardpay_Core::system/custom_checkout_gpay.xml"/>
                 <include path="Cardpay_Core::system/custom_checkout_mbway.xml"/>

@@ -198,15 +198,26 @@ define(
             setModalSize: function () {
                 const backWindow = jQuery('#unlimit_modal_page');
                 const w = jQuery(window).width();
-                const h = jQuery(window).height();
-                backWindow.css('margin-top', '40px');
-                backWindow.css('margin-bottom', '40px');
-                let newWidth = (w - this.iframePadding);
-                newWidth = (newWidth > this.maxIframeWidth) ? this.maxIframeWidth : newWidth;
+                const {iframePadding, maxIframeWidth} = this;
+
+                const marginTop = 40;
+                const marginBottom = 20;
+
+                const newWidth = Math.min(w - iframePadding, maxIframeWidth);
                 const margin = Math.round((w - newWidth) / 2);
-                backWindow.css('margin-left', margin + 'px');
-                backWindow.width(newWidth);
-                backWindow.height(h - 40 - this.iframePadding * 2);
+
+                backWindow.css({
+                    'background': '#FFF',
+                    'max-height': '800px',
+                    'height': '100%',
+                    'border-radius': '10px',
+                    'padding': '10px',
+                    'box-shadow': '0 0 10px rgba(0, 0, 0, 0.2)',
+                    'margin-top': marginTop + 'px',
+                    'margin-left': margin + 'px',
+                    'margin-bottom': marginBottom + 'px',
+                    'width': newWidth + 'px',
+                });
             },
             redirectFunc: function () {
                 this.initModalSize();
@@ -362,7 +373,7 @@ define(
                     },
                     {
                         cbType: 'elo',
-                        pattern: /^(50(67(0[78]|1[5789]|2[012456789]|3[01234569]|4[0-7]|53|7[4-8])|9(0(0[0123478]|14|2[0-2]|3[359]|4[01235678]|5[1-9]|6[0-9]|7[0134789]|8[04789]|9[12349])|1(0[34568]|4[6-9]|83)|2(20|5[7-9]|6[0-6])|4(0[7-9]|1[0-2]|31)|7(22|6[5-9])))|4(0117[89]|3(1274|8935)|5(1416|7(393|63[12])))|6(27780|36368|5(0(0(3[12356789]|4[0-9]|5[01789]|6[01345678]|7[78])|4(0[6-9]|1[0-3]|2[2-6]|3[4-9]|8[5-9]|9[0-9])|5(0[012346789]|1[0-9]|2[0-9]|3[0-8]|7[7-9]|8[0-9]|9[0-8])|72[0-7]|9(0[1-9]|1[0-9]|2[0128]|3[89]|4[6-9]|5[045]|6[25678]|71))|16(5[2-9]|6[0-9]|7[01456789])|50(0[0-9]|1[0-9]|2[1-9]|3[0-6]|5[1-7]))))/, // NOSONAR
+                        pattern: /^(50(67(0[78]|1[5789]|2[012456789]|3[01234569]|4[0-7]|53|7[4-8])|9(0(0[0123478]|14|2[0-2]|3[359]|4[01235678]|5[1-9]|6[0-9]|7[0134789]|8[04789]|9[12349])|1(0[34568]|4[6-9]|83)|2(20|5[7-9]|6[0-6])|4(0[7-9]|1[0-2]|31)|7(22|6[5-9])))|4(0117[89]|3(1274|8935)|5(1416|7(393|63[12])))|6(27780|36368|5(0(0(3[12356789]|4[0-9]|5[01789]|6[01345678]|7[78])|4(0[6-9]|1[0-3]|2[2-6]|3[4-9]|8[5-9]|9[0-9])|5(0[012346789]|1[0-9]|2[0-9]|3[0-8]|7[7-9]|8[0-9]|9[0-8])|72[0-7]|9(0[1-9]|1[0-9]|2[0128]|3[89]|4[6-9]|5[045]|6[25678]|71))|16(5[2-9]|6[0-9]|7[01456789])|50(0[0-9]|1[0-9]|2[1-9]|3[0-6]|5[1-7]))))/,
                         cnLength: [13, 16, 19],
                     },
                     {

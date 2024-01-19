@@ -24,7 +24,7 @@ class BankCardConfigProviderTest extends TestCase
     /**
      * @var BankCardConfigProvider
      */
-    private $сonfigProvider;
+    private $configProvider;
 
     /**
      * @var Context|MockObject
@@ -105,7 +105,7 @@ class BankCardConfigProviderTest extends TestCase
         $this->productMetadataMock = $this->createMock(ProductMetadata::class);
         $this->coreHelperMock = $this->createMock(CoreHelper::class);
 
-        $this->сonfigProvider = new BankCardConfigProvider(
+        $this->configProvider = new BankCardConfigProvider(
             $this->contextMock,
             $this->paymentHelperMock,
             $this->scopeConfigMock,
@@ -119,7 +119,7 @@ class BankCardConfigProviderTest extends TestCase
 
     public function testGetConfig()
     {
-        $config = $this->сonfigProvider->getConfig();
+        $config = $this->configProvider->getConfig();
 
         $this->assertIsArray($config);
         $this->assertNotEmpty($config);

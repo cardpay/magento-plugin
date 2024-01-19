@@ -60,6 +60,45 @@
             </field>
         </group>
 
+        <group id="cardpay_order_management_apay" translate="label" type="text" sortOrder="90" showInDefault="1"
+               showInWebsite="1" showInStore="1">
+            <label>Apple Pay</label>
+            <field id="order_status_authorized" translate="label" type="select" sortOrder="30" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Order status when payment is authorized</label>
+                <source_model>Cardpay\Core\Model\System\Config\Source\Order\Status</source_model>
+                <config_path>payment/cardpay_apay/order_status_authorized</config_path>
+            </field>
+
+            <field id="order_status_completed" translate="label" type="select" sortOrder="80" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Order status when order is completed</label>
+                <source_model>Cardpay\Core\Model\System\Config\Source\Order\Status</source_model>
+                <config_path>payment/cardpay_apay/order_status_completed</config_path>
+            </field>
+
+            <field id="order_status_declined" translate="label" type="select" sortOrder="40" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Order status when payment is declined</label>
+                <source_model>Cardpay\Core\Model\System\Config\Source\Order\Status</source_model>
+                <config_path>payment/cardpay_apay/order_status_declined</config_path>
+            </field>
+
+            <field id="order_status_chargeback" translate="label" type="select" sortOrder="70" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Order status when payment is charged back</label>
+                <source_model>Cardpay\Core\Model\System\Config\Source\Order\Status</source_model>
+                <config_path>payment/cardpay_apay/order_status_chargeback</config_path>
+            </field>
+
+            <field id="order_status_resolved" translate="label" type="select" sortOrder="80" showInDefault="1"
+                   showInWebsite="1" showInStore="1">
+                <label>Order status when chargeback is resolved</label>
+                <source_model>Cardpay\Core\Model\System\Config\Source\Order\Status</source_model>
+                <config_path>payment/cardpay_apay/order_status_resolved</config_path>
+            </field>
+        </group>
+
         <group id="cardpay_order_management_boleto" translate="label" type="text" sortOrder="50" showInDefault="1"
                showInWebsite="1" showInStore="1">
             <label>Boleto</label>

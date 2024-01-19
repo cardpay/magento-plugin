@@ -21,9 +21,7 @@ class MbWayPayment extends UnlimitPayment
 
     const MBWAY_MESSAGE = 'MBWAYPayment::initialize';
 
-    protected $_isOffline = true;
-
-    protected $_code = self::CODE;
+    protected $_code = self::CODE; //NOSONAR
 
     protected $fields_febraban = [
         'firstName',

@@ -9,6 +9,7 @@ use Cardpay\Core\Helper\Response;
 use Cardpay\Core\Model\Notifications\Topics\MerchantOrder;
 use Cardpay\Core\Model\Notifications\Topics\Payment;
 use Cardpay\Core\Model\Payment\BankCardPayment;
+use Cardpay\Core\Model\Payment\ApayPayment;
 use Cardpay\Core\Model\Payment\BoletoPayment;
 use Cardpay\Core\Model\Payment\GpayPayment;
 use Cardpay\Core\Model\Payment\MbWayPayment;
@@ -132,39 +133,53 @@ class Notifications
         if (BankCardPayment::isBankCardPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_BANKCARD_CALLBACK_SECRET,
-                ScopeInterface::SCOPE_STORE);
+                ScopeInterface::SCOPE_STORE
+            );
+        } elseif (ApayPayment::isApayPaymentMethod($order)) {
+            $callbackSecret = $this->scopeConfig->getValue(
+                ConfigData::PATH_APAY_CALLBACK_SECRET,
+                ScopeInterface::SCOPE_STORE
+            );
         } elseif (BoletoPayment::isBoletoPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_BOLETO_CALLBACK_SECRET,
-                ScopeInterface::SCOPE_STORE);
+                ScopeInterface::SCOPE_STORE
+            );
         } elseif (PixPayment::isPixPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_PIX_CALLBACK_SECRET,
-                ScopeInterface::SCOPE_STORE);
+                ScopeInterface::SCOPE_STORE
+            );
         } elseif (PaypalPayment::isPaypalPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_PAYPAL_CALLBACK_SECRET,
-                ScopeInterface::SCOPE_STORE);
+                ScopeInterface::SCOPE_STORE
+            );
         } elseif (GpayPayment::isGpayPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_GPAY_CALLBACK_SECRET,
-                ScopeInterface::SCOPE_STORE);
+                ScopeInterface::SCOPE_STORE
+            );
         } elseif (SepaInstantPayment::isSepaInstantPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_SEPA_CALLBACK_SECRET,
-                ScopeInterface::SCOPE_STORE);
+                ScopeInterface::SCOPE_STORE
+            );
         } elseif (SpeiPayment::isSpeiPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_SPEI_CALLBACK_SECRET,
-                ScopeInterface::SCOPE_STORE);
+                ScopeInterface::SCOPE_STORE
+            );
         } elseif (MultibancoPayment::isMultibancoPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_MULTIBANCO_CALLBACK_SECRET,
-                ScopeInterface::SCOPE_STORE);
+                ScopeInterface::SCOPE_STORE
+            );
         } elseif (MbWayPayment::isMbWayPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_MBWAY_CALLBACK_SECRET,
-                ScopeInterface::SCOPE_STORE);
+                ScopeInterface::SCOPE_STORE
+            );
         } else {
             throw new UnlimitBaseException(__('Unable to detect Unlimit callback secret'), null,
                 Response::HTTP_BAD_REQUEST);

@@ -19,7 +19,7 @@ class BankCardPayment extends UnlimitPayment
      */
     const CODE = ConfigData::BANKCARD_PAYMENT_METHOD;
 
-    protected $_code = self::CODE;
+    protected $ulCode = self::CODE;
 
     const BANCARD_MESSAGE = 'BankCardPayment::initialize';
 

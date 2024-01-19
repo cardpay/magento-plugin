@@ -646,3 +646,7 @@ Cannot operate between users from different countries.", "Não é possível oper
 "Please fill out a MB WAY phone number", "Por favor, preencha um número de telefone MB WAY"
 "Google merchant ID", "ID do comerciante do Google"
 "Your Merchant ID, provided by Google.", "Seu ID de comerciante, fornecido pelo Google."
+"Apple merchant ID","ID do comerciante Apple"
+"Payment processing certificate","Certificado de processamento de pagamento"
+"Merchant identity certificate","Certificado de identidade do comerciante"
+"Invalid file format","Formato de arquivo inválido"

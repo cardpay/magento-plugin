@@ -6,6 +6,7 @@ class ConfigData
 {
     // payment methods
     public const BANKCARD_PAYMENT_METHOD = 'cardpay_custom';
+    public const APAY_PAYMENT_METHOD = 'cardpay_apay';
     public const BOLETO_PAYMENT_METHOD = 'cardpay_customticket';
     public const PIX_PAYMENT_METHOD = 'cardpay_custompix';
     public const PAYPAL_PAYMENT_METHOD = 'cardpay_paypal';
@@ -17,6 +18,7 @@ class ConfigData
 
     // Unlimit API payment methods
     public const BANK_CARD_API_PAYMENT_METHOD = 'BANKCARD';
+    public const APAY_API_PAYMENT_METHOD = 'APPLEPAY';
     public const BOLETO_API_PAYMENT_METHOD = 'BOLETO';
     public const PIX_API_PAYMENT_METHOD = 'PIX';
     public const PAYPAL_API_PAYMENT_METHOD = 'PAYPAL';
@@ -48,6 +50,16 @@ class ConfigData
     public const PATH_BASIC_ORDER_STATUS = 'payment/cardpay_basic/order_status';
     public const PATH_BASIC_BINARY_MODE = 'payment/cardpay_basic/binary_mode';
     public const PATH_BASIC_GATEWAY_MODE = 'payment/cardpay_basic/gateway_mode';
+
+    // credentials path (Apple Pay)
+    public const PATH_APAY_TERMINAL_CODE = 'payment/cardpay_apay/terminal_code_apay';
+    public const PATH_APAY_TERMINAL_PASSWORD = 'payment/cardpay_apay/terminal_password_apay';
+    public const PATH_APAY_CALLBACK_SECRET = 'payment/cardpay_apay/callback_secret_apay';
+    public const PATH_APAY_SANDBOX = 'payment/cardpay_apay/sandbox_apay';
+    public const PATH_APAY_ACTIVE = 'payment/cardpay_apay/active';
+    public const PATH_APAY_MERCHANT_ID = 'payment/cardpay_apay/merchant_id';
+    public const PATH_APAY_MERCHANT_CERTIFICATE = 'payment/cardpay_apay/merchant_certificate';
+    public const PATH_APAY_MERCHANT_KEY = 'payment/cardpay_apay/merchant_key';
 
     // credentials path (Boleto)
     public const PATH_BOLETO_TERMINAL_CODE = 'payment/cardpay_customticket/terminal_code_boleto';
@@ -125,6 +137,7 @@ class ConfigData
 
     public const PREFIX_PAYMENT = [
         'BANKCARD' => 'payment/cardpay_custom/',
+        'APPLEPAY' => 'payment/cardpay_apay/',
         'BOLETO' => 'payment/cardpay_customticket/',
         'PIX' => 'payment/cardpay_custompix/',
         'PAYPAL' => 'payment/cardpay_paypal/',
@@ -185,3 +198,4 @@ class ConfigData
         return str_replace('payment/cardpay_custom/', $replace, $path);
     }
 }
+

@@ -4,6 +4,9 @@
         <method name="cardpay_custom">
             <allow_multiple_address>1</allow_multiple_address>
         </method>
+        <method name="cardpay_apay">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
         <method name="cardpay_customticket">
             <allow_multiple_address>1</allow_multiple_address>
         </method>

@@ -243,7 +243,8 @@ class Core extends AbstractMethod
         Version $version, //NOSONAR
         ProductMetadataInterface $productMetadata, //NOSONAR
         ApiManager $apiModel //NOSONAR
-    ) {
+    )
+    {
         parent::__construct(
             $context,
             $registry,
@@ -681,20 +682,19 @@ class Core extends AbstractMethod
                 ];
 
             }
+            $dynamicDescriptor = trim($this->_scopeConfig->getValue(
+                ConfigData::PATH_CUSTOM_DESCRIPTOR,
+                ScopeInterface::SCOPE_STORE
+            ));
+            if (!empty($dynamicDescriptor)) {
+                $requestParams[self::PAYMENT_DATA]['dynamic_descriptor'] = $dynamicDescriptor;
+            }
         }
 
         $requestParams[self::PAYMENT_DATA]['amount'] = $this->getAmount();
         $requestParams[self::PAYMENT_DATA]['currency'] = $currencyCode;
         if (isset($paymentInfo['encrypted_data'])) {
             $requestParams[self::PAYMENT_DATA]['encrypted_data'] = $paymentInfo['encrypted_data'];
-        }
-
-        $dynamicDescriptor = trim($this->_scopeConfig->getValue(
-            ConfigData::PATH_CUSTOM_DESCRIPTOR,
-            ScopeInterface::SCOPE_STORE
-        ));
-        if (!empty($dynamicDescriptor)) {
-            $requestParams[self::PAYMENT_DATA]['dynamic_descriptor'] = $dynamicDescriptor;
         }
 
         return $requestParams;

@@ -7,6 +7,9 @@
                 <item name="cardpay_core_custom_provider" xsi:type="object">
                     Cardpay\Core\Model\BankCardConfigProvider
                 </item>
+                <item name="cardpay_core_apay_provider" xsi:type="object">
+                    Cardpay\Core\Model\ApayConfigProvider
+                </item>
                 <item name="cardpay_core_customTicket_provider" xsi:type="object">
                     Cardpay\Core\Model\BoletoConfigProvider
                 </item>
@@ -38,6 +41,7 @@
         <arguments>
             <argument name="methodCodes" xsi:type="array">
                 <item name="cardpay_custom" xsi:type="const">Cardpay\Core\Model\Payment\BankCardPayment::CODE</item>
+                <item name="cardpay_apay" xsi:type="const">Cardpay\Core\Model\Payment\ApayPayment::CODE</item>
                 <item name="cardpay_customticket" xsi:type="const">Cardpay\Core\Model\Payment\BoletoPayment::CODE</item>
                 <item name="cardpay_custompix" xsi:type="const">Cardpay\Core\Model\Payment\PixPayment::CODE</item>
                 <item name="cardpay_paypal" xsi:type="const">Cardpay\Core\Model\Payment\PaypalPayment::CODE</item>

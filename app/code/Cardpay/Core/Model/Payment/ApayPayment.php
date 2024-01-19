@@ -12,18 +12,18 @@ use Magento\Quote\Model\Quote;
 use Magento\Sales\Model\Order;
 use Magento\Store\Model\ScopeInterface;
 
-class PixPayment extends UnlimitPayment
+class ApayPayment extends UnlimitPayment
 {
     /**
      * Define payment method code
      */
-    const CODE = ConfigData::PIX_PAYMENT_METHOD;
+    const CODE = ConfigData::APAY_PAYMENT_METHOD;
 
-    const PIX_MESSAGE = 'PixPayment::initialize';
+    const APAY_MESSAGE = 'ApayPayment::initialize';
 
     protected $_code = self::CODE; //NOSONAR
 
-    protected $fields_febraban = [
+    protected $fieldsFebraban = [
         'firstName',
         'lastName',
         'docType',
@@ -37,39 +37,37 @@ class PixPayment extends UnlimitPayment
 
     /**
      * @param  DataObject  $data
-     * @return $this|PixPayment
+     * @return $this|ApayPayment
      * @throws LocalizedException
      */
     public function assignData(DataObject $data)
     {
         $infoForm = $data->getData();
 
-        if (isset($infoForm['additional_data'])) {
-            if (empty($infoForm['additional_data'])) {
-                return $this;
-            }
-            $additionalData = $infoForm['additional_data'];
+        if (!isset($infoForm['additional_data']) || empty($infoForm['additional_data'])) {
+            return $this;
+        }
 
-            $info = $this->getInfoInstance();
+        $additionalData = $infoForm['additional_data'];
 
-            if (!empty($infoForm['method'])) {
-                $info->setAdditionalInformation('method', $infoForm['method']);
-            }
+        $info = $this->getInfoInstance();
 
-            if (!empty($additionalData['payment_method_pix'])) {
-                $info->setAdditionalInformation('payment_method', $additionalData['payment_method_pix']);
-                $info->setAdditionalInformation('payment_method_id', $additionalData['payment_method_pix']);
-            }
+        if (!empty($infoForm['method'])) {
+            $info->setAdditionalInformation('method', $infoForm['method']);
+        }
 
-            if (!empty($additionalData['cpf'])) {
-                $info->setAdditionalInformation('cpf',
-                    preg_replace('/[^0-9]+/', '', $additionalData['cpf']));   // leave only digits
-            }
+        if (!empty($additionalData['payment_method_apay'])) {
+            $info->setAdditionalInformation('payment_method', $additionalData['payment_method_apay']);
+            $info->setAdditionalInformation('payment_method_id', $additionalData['payment_method_apay']);
+        }
 
-            foreach ($this->fields_febraban as $key) {
-                if (isset($additionalData[$key])) {
-                    $info->setAdditionalInformation($key, $additionalData[$key]);
-                }
+        if (!empty($additionalData['encrypted_data'])) {
+            $info->setAdditionalInformation('encrypted_data', $additionalData['encrypted_data']);
+        }
+
+        foreach ($this->fieldsFebraban as $key) {
+            if (isset($additionalData[$key])) {
+                $info->setAdditionalInformation($key, $additionalData[$key]);
             }
         }
 
@@ -85,7 +83,7 @@ class PixPayment extends UnlimitPayment
     public function initialize($paymentAction, $stateObject)
     {
         try {
-            $this->_helperData->log(self::PIX_MESSAGE." - Pix: init prepare post payment", self::LOG_NAME);
+            $this->_helperData->log(self::APAY_MESSAGE." - Apay: init prepare post payment", self::LOG_NAME);
 
             /**
              * @var Quote
@@ -99,50 +97,37 @@ class PixPayment extends UnlimitPayment
             $payment = $order->getPayment();
 
             $paymentInfo = [];
-            if (!empty($payment->getAdditionalInformation('cpf'))) {
-                $paymentInfo['cpf'] = $payment->getAdditionalInformation('cpf');
+
+            if (!empty($payment->getAdditionalInformation('encrypted_data'))) {
+                $paymentInfo['encrypted_data'] = base64_encode($payment->getAdditionalInformation('encrypted_data'));
             }
 
-            $paymentInfo['payment_method'] = ConfigData::PIX_API_PAYMENT_METHOD;
+            $paymentInfo['payment_method'] = ConfigData::APAY_API_PAYMENT_METHOD;
             $requestParams = $this->_coreModel->getDefaultRequestParams($paymentInfo, $quote, $order, []);
             $requestParams['customer']['full_name'] = trim($order->getCustomerName());
 
-            $requestParams['payment_method'] = ConfigData::PIX_API_PAYMENT_METHOD;
+            $requestParams['payment_method'] = ConfigData::APAY_API_PAYMENT_METHOD;
             $requestParams['customer']['full_name'] = trim($order->getCustomerName());
 
-            $this->_helperData->log(self::PIX_MESSAGE." - Preference to POST", 'cardpay.log', $requestParams);
+            $this->_helperData->log(self::APAY_MESSAGE." - Preference to POST", 'cardpay.log', $requestParams);
         } catch (Exception $e) {
-            $this->_helperData->log(self::PIX_MESSAGE.
+            $this->_helperData->log(
+                self::APAY_MESSAGE.
                 " - There was an error retrieving the information to create the payment, more details: ".
                 $e->getMessage());
             throw new LocalizedException(__(Response::PAYMENT_CREATION_ERRORS['INTERNAL_ERROR_MODULE']));
         }
 
         $response = $this->_apiModel->postPayment($requestParams, $order);
-        $this->_helperData->log(self::PIX_MESSAGE." - POST RESPONSE", self::LOG_NAME, $response);
+        $this->_helperData->log(self::APAY_MESSAGE." - POST RESPONSE", self::LOG_NAME, $response);
 
-        return $this->handleApiResponse($response, self::PIX_MESSAGE);
-    }
-
-    /**
-     * Return tickets options
-     *
-     * @return array
-     */
-    public function getPixOptions()
-    {
-        $pm['id'] = 1;
-        $pm['payment_type_id'] = 'pix';
-
-        $tickets[] = $pm;
-
-        return $tickets;
+        return $this->handleApiResponse($response, self::APAY_MESSAGE);
     }
 
     /**
      * @throws LocalizedException
      */
-    function setOrderSubtotals($data)
+    public function setOrderSubtotals($data)
     {
         $total = $data['transaction_details']['total_paid_amount'];
 
@@ -162,20 +147,22 @@ class PixPayment extends UnlimitPayment
      */
     public function isAvailable(CartInterface $quote = null)
     {
-        $isActive = (int)$this->_scopeConfig->getValue(ConfigData::PATH_PIX_ACTIVE, ScopeInterface::SCOPE_STORE);
+        $isActive = (int)$this->_scopeConfig->getValue(ConfigData::PATH_APAY_ACTIVE, ScopeInterface::SCOPE_STORE);
         if (0 === $isActive) {
             return false;
         }
 
-        return $this->isPaymentMethodAvailable(ConfigData::PATH_PIX_TERMINAL_CODE,
-            ConfigData::PATH_PIX_TERMINAL_PASSWORD);
+        return $this->isPaymentMethodAvailable(
+            ConfigData::PATH_APAY_TERMINAL_CODE,
+            ConfigData::PATH_APAY_TERMINAL_PASSWORD
+        );
     }
 
     /**
      * @param  Order  $order
      * @throws LocalizedException
      */
-    public static function isPixPaymentMethod($order)
+    public static function isApayPaymentMethod($order)
     {
         if (is_null($order)) {
             return false;
@@ -191,6 +178,6 @@ class PixPayment extends UnlimitPayment
 
         $paymentMethod = $payment->getMethodInstance()->getCode();
 
-        return ConfigData::PIX_PAYMENT_METHOD === $paymentMethod;
+        return ConfigData::APAY_PAYMENT_METHOD === $paymentMethod;
     }
 }

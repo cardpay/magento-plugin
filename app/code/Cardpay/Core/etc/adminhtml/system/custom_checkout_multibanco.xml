@@ -19,25 +19,43 @@
             <config_path>payment/cardpay_multibanco/api_access_mode</config_path>
             <comment>IF "Payment page" mode is selected - payment page by Unlimit in iFrame is used for customer data collecting. IF "Gateway" mode is selected - embedded payment form in plugin is used for customer data collecting.</comment>
             <source_model>Cardpay\Core\Config\ApiAccessMode</source_model>
+            <validate>required-entry</validate>
+            <depends>
+                <field id="active">1</field>
+            </depends>
         </field>
 
         <field id="code" translate="label" type="text" sortOrder="20" showInDefault="1" showInWebsite="1"
                showInStore="1">
             <label>Terminal code</label>
             <config_path>payment/cardpay_multibanco/terminal_code_multibanco</config_path>
+            <comment>If "API access mode" setting is changed - then "Terminal code" value need to be checked and changed (if needed).</comment>
+            <validate>required-entry</validate>
+            <depends>
+                <field id="active">1</field>
+            </depends>
         </field>
 
         <field id="access_token" translate="label comment" type="password" sortOrder="30" showInDefault="1"
                showInWebsite="1" showInStore="1">
             <label>Terminal password</label>
             <config_path>payment/cardpay_multibanco/terminal_password_multibanco</config_path>
-            <comment><![CDATA[Get your credentials, visit the <a href="https://unlimit.com/">unlimit.com</a>.]]></comment>
+            <comment><![CDATA[Get your credentials, visit the <a href="https://unlimit.com/">unlimit.com</a>. If "API access mode" setting is changed - then "Terminal password" value need to be checked and changed (if needed).]]></comment>
+            <validate>required-entry</validate>
+            <depends>
+                <field id="active">1</field>
+            </depends>
         </field>
 
         <field id="callback_secret" translate="label" type="password" sortOrder="40" showInDefault="1" showInWebsite="1"
                showInStore="1">
             <label>Callback secret</label>
             <config_path>payment/cardpay_multibanco/callback_secret_multibanco</config_path>
+            <comment>If "API access mode" setting is changed - then "Callback secret" value need to be checked and changed (if needed).</comment>
+            <validate>required-entry</validate>
+            <depends>
+                <field id="active">1</field>
+            </depends>
         </field>
 
         <field id="sandbox" translate="label comment" type="select" sortOrder="50" showInDefault="1" showInWebsite="1"
@@ -46,12 +64,20 @@
             <config_path>payment/cardpay_multibanco/sandbox_multibanco</config_path>
             <comment>In test environment, the data is sent to the sandbox only. Test and prod credentials (terminal code, terminal password, callback secret) are different.</comment>
             <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+            <validate>required-entry</validate>
+            <depends>
+                <field id="active">1</field>
+            </depends>
         </field>
 
         <field id="title" translate="label" type="text" sortOrder="60" showInDefault="1" showInWebsite="1"
                showInStore="1">
             <label>Payment title</label>
             <config_path>payment/cardpay_multibanco/title</config_path>
+            <validate>required-entry</validate>
+            <depends>
+                <field id="active">1</field>
+            </depends>
         </field>
 
         <field id="sort_order" translate="label comment" type="text" sortOrder="70" showInDefault="1" showInWebsite="1"
@@ -60,6 +86,10 @@
             <frontend_class>validate-number</frontend_class>
             <config_path>payment/cardpay_multibanco/sort_order</config_path>
             <comment>This setting will be the position in which the payment method will be available to the buyer.</comment>
+            <validate>required-entry</validate>
+            <depends>
+                <field id="active">1</field>
+            </depends>
         </field>
     </group>
 </include>

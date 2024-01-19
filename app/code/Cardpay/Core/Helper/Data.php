@@ -8,6 +8,7 @@ use Cardpay\Core\Lib\Api;
 use Cardpay\Core\Lib\RestClient;
 use Cardpay\Core\Logger\Logger;
 use Cardpay\Core\Model\Payment\BankCardPayment;
+use Cardpay\Core\Model\Payment\ApayPayment;
 use Cardpay\Core\Model\Payment\BoletoPayment;
 use Cardpay\Core\Model\Payment\GpayPayment;
 use Cardpay\Core\Model\Payment\MbWayPayment;
@@ -205,6 +206,9 @@ class Data extends \Magento\Payment\Helper\Data
             if (BankCardPayment::isBankCardPaymentMethod($order)) {
                 $terminalCode = ConfigData::PATH_BANKCARD_TERMINAL_CODE;
                 $terminalPassword = ConfigData::PATH_BANKCARD_TERMINAL_PASSWORD;
+            } elseif (ApayPayment::isApayPaymentMethod($order)) {
+                $terminalCode = ConfigData::PATH_APAY_TERMINAL_CODE;
+                $terminalPassword = ConfigData::PATH_APAY_TERMINAL_PASSWORD;
             } elseif (BoletoPayment::isBoletoPaymentMethod($order)) {
                 $terminalCode = ConfigData::PATH_BOLETO_TERMINAL_CODE;
                 $terminalPassword = ConfigData::PATH_BOLETO_TERMINAL_PASSWORD;
@@ -486,32 +490,55 @@ class Data extends \Magento\Payment\Helper\Data
     public function getApiHost($terminalCode)
     {
         if (ConfigData::PATH_BANKCARD_TERMINAL_CODE === $terminalCode) {
-            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_BANKCARD_SANDBOX,
-                    ScopeInterface::SCOPE_STORE));
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(
+                ConfigData::PATH_BANKCARD_SANDBOX,
+                ScopeInterface::SCOPE_STORE
+            ));
+        } elseif (ConfigData::PATH_APAY_TERMINAL_CODE === $terminalCode) {
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(
+                ConfigData::PATH_APAY_SANDBOX,
+                ScopeInterface::SCOPE_STORE
+            ));
         } elseif (ConfigData::PATH_BOLETO_TERMINAL_CODE === $terminalCode) {
-            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_BOLETO_SANDBOX,
-                    ScopeInterface::SCOPE_STORE));
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(
+                ConfigData::PATH_BOLETO_SANDBOX,
+                ScopeInterface::SCOPE_STORE
+            ));
         } elseif (ConfigData::PATH_PIX_TERMINAL_CODE === $terminalCode) {
-            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_PIX_SANDBOX,
-                    ScopeInterface::SCOPE_STORE));
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(
+                ConfigData::PATH_PIX_SANDBOX,
+                ScopeInterface::SCOPE_STORE
+            ));
         } elseif (ConfigData::PATH_PAYPAL_TERMINAL_CODE === $terminalCode) {
-            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_PAYPAL_SANDBOX,
-                    ScopeInterface::SCOPE_STORE));
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(
+                ConfigData::PATH_PAYPAL_SANDBOX,
+                ScopeInterface::SCOPE_STORE
+            ));
         } elseif (ConfigData::PATH_GPAY_TERMINAL_CODE === $terminalCode) {
-            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_GPAY_SANDBOX,
-                    ScopeInterface::SCOPE_STORE));
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(
+                ConfigData::PATH_GPAY_SANDBOX,
+                ScopeInterface::SCOPE_STORE
+            ));
         } elseif (ConfigData::PATH_SEPA_TERMINAL_CODE === $terminalCode) {
-            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_SEPA_SANDBOX,
-                    ScopeInterface::SCOPE_STORE));
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(
+                ConfigData::PATH_SEPA_SANDBOX,
+                ScopeInterface::SCOPE_STORE
+            ));
         } elseif (ConfigData::PATH_SPEI_TERMINAL_CODE === $terminalCode) {
-            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_SPEI_SANDBOX,
-                    ScopeInterface::SCOPE_STORE));
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(
+                ConfigData::PATH_SPEI_SANDBOX,
+                ScopeInterface::SCOPE_STORE
+            ));
         } elseif (ConfigData::PATH_MULTIBANCO_TERMINAL_CODE === $terminalCode) {
-            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_MULTIBANCO_SANDBOX,
-                    ScopeInterface::SCOPE_STORE));
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(
+                ConfigData::PATH_MULTIBANCO_SANDBOX,
+                ScopeInterface::SCOPE_STORE
+            ));
         } elseif (ConfigData::PATH_MBWAY_TERMINAL_CODE === $terminalCode) {
-            $isSandbox = (1 === (int)$this->scopeConfig->getValue(ConfigData::PATH_MBWAY_SANDBOX,
-                    ScopeInterface::SCOPE_STORE));
+            $isSandbox = (1 === (int)$this->scopeConfig->getValue(
+                ConfigData::PATH_MBWAY_SANDBOX,
+                ScopeInterface::SCOPE_STORE
+            ));
         } else {
             throw new UnlimitBaseException('Unable to get API host');
         }
