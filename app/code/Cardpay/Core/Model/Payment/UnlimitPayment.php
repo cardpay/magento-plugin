@@ -15,6 +15,8 @@ use Magento\Payment\Model\Method\Online\GatewayInterface;
 use Magento\Quote\Api\Data\CartInterface;
 use Magento\Quote\Model\Quote;
 use Magento\Store\Model\ScopeInterface;
+use Magento\Framework\Phrase;
+use Magento\Framework\Message\ManagerInterface;
 
 class UnlimitPayment extends Cc implements GatewayInterface
 {
@@ -62,6 +64,11 @@ class UnlimitPayment extends Cc implements GatewayInterface
      * @var bool
      */
     protected $_canRefund;
+
+    /**
+     * @var ManagerInterface
+     */
+    protected $messageManager;
 
     /**
      * Availability option
@@ -238,6 +245,7 @@ class UnlimitPayment extends Cc implements GatewayInterface
         \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate, //NOSONAR
         \Cardpay\Core\Model\Core $coreModel, //NOSONAR
         \Cardpay\Core\Model\ApiManager $apiModel, //NOSONAR
+        ManagerInterface $managerInterface, //NOSONAR
         RequestInterface $request //NOSONAR
     )
     {
@@ -252,8 +260,8 @@ class UnlimitPayment extends Cc implements GatewayInterface
             $moduleList,
             $localeDate
         );
-
         $this->_helperData = $helperData;
+        $this->messageManager = $managerInterface;
         $this->_coreModel = $coreModel;
         $this->_apiModel = $apiModel;
         $this->_checkoutSession = $checkoutSession;
@@ -376,11 +384,113 @@ class UnlimitPayment extends Cc implements GatewayInterface
      */
     public function refund(InfoInterface $payment, $amount)
     {
+        $order = $payment->getOrder();
+        $paymentOrder = $order->getPayment();
         if (!$this->canRefund()) {
             throw new LocalizedException(__('The refund action is not available.'));
         }
 
+        if ($payment !== null) {
+            $additionalInformation = $payment->getAdditionalInformation();
+            if (!empty($payment->getAdditionalInformation()) &&
+                 (isset($additionalInformation['raw_details_info']['filing']) &&
+                  !empty($additionalInformation['raw_details_info']['filing']['id']))
+            ) {
+                {
+                    $this->throwRefundException(__("Refund is not available for installment payment"));
+                }
+            }
+        }
+
+        // get amount refund
+        $amountToRefund = $payment->getCreditMemo()->getGrandTotal();
+        if ($amountToRefund <= 0) {
+            $this->throwRefundException(__('The refunded amount must be greater than 0.'));
+        }
+
+        // get Payment Id
+        $paymentID = $this->getPaymentId($paymentOrder);
+        $this->_helperData->log(
+            'Core, UnlimitPayment Refund::creditMemoRefundBeforeSave paymentId',
+            ConfigData::CUSTOM_LOG_PREFIX,
+            $paymentID
+        );
+
+        if (empty($paymentID)) {
+            $this->throwRefundException(__('Refund can not be executed because the payment id was not found.'));
+        }
+
+        $refundTransId = $this->performRefund($paymentID, $order, $amountToRefund);
+
+        $payment->setTransactionId($refundTransId);
         return $this;
+    }
+
+    /**
+     * @throws LocalizedException
+     */
+    protected function throwRefundException($message, $data = [])
+    {
+        $this->_helperData->log(
+            'Core, UnlimitPayment Refund::sendRefundRequest - ' .
+            $message,
+            ConfigData::CUSTOM_LOG_PREFIX,
+            $data
+        );
+
+        throw new LocalizedException(new Phrase($message));
+    }
+
+    /**
+     * @throws LocalizedException
+     * @return string|null
+     */
+    private function performRefund($paymentID, $order, $amountToRefund)
+    {
+        // get API Instance
+        $api = $this->_helperData->getApiInstance($order);
+
+        $refundRequestParams = $this->_helperData->getRefundRequestParams($paymentID, $order, $amountToRefund);
+        $this->_helperData->log(
+            'Core, UnlimitPayment Refund::creditMemoRefundBeforeSave data',
+            ConfigData::CUSTOM_LOG_PREFIX,
+            $refundRequestParams
+        );
+
+        $refundResponse = $api->refund($refundRequestParams);
+        $this->_helperData->log(
+            'Core, UnlimitPayment Refund::creditMemoRefundBeforeSave responseRefund',
+            ConfigData::CUSTOM_LOG_PREFIX,
+            $refundResponse
+        );
+        $completeArray = ['AUTHORIZED', 'COMPLETED', 'REFUNDED'];
+        if (
+			!is_null($refundResponse) &&
+            ((int)$refundResponse['status'] === 200 ||
+            (int)$refundResponse['status'] === 201) &&
+            in_array($refundResponse['response']['refund_data']['status'], $completeArray)
+        ) {
+            // Refund was successful, proceed with creating credit memo
+            if ($refundResponse['response']['payment_data']['remaining_amount'] === 0) {
+                $order->setCustomOrderAttribute('REFUNDED');
+            }
+
+            $successMessageRefund = 'Unlimit - ' . __('Refund of %1 was processed successfully.', $amountToRefund);
+            $this->messageManager->addSuccessMessage($successMessageRefund);
+            $this->_helperData->log(
+                'Core, UnlimitPayment Refund::creditMemoRefundBeforeSave - ' .
+                $successMessageRefund . ' Order ID: ' . $order->getId(),
+                ConfigData::CUSTOM_LOG_PREFIX,
+                $refundResponse
+            );
+            return $refundResponse['response']['refund_data']['id'];
+        } else {
+            $this->throwRefundException(
+                __('Could not process the refund, The Unlimit API returned an unexpected error. Check the log files.'),
+                $refundResponse
+            );
+        }
+        return null;
     }
 
     /**
@@ -452,6 +562,13 @@ class UnlimitPayment extends Cc implements GatewayInterface
         );
 
         throw new LocalizedException(__($messageErrorToClient));
+    }
+
+    private function getPaymentId($paymentOrder)
+    {
+        $id = $paymentOrder->getTransactionId();
+
+        return substr($id, 0, strpos($id, '-'));
     }
 
 }

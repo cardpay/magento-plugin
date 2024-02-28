@@ -453,7 +453,7 @@ class Data extends \Magento\Payment\Helper\Data
         $requestParams['request']['time'] = date('c');
 
         $requestParams['merchant_order']['id'] = $order->getIncrementId();
-        $requestParams['merchant_order']['description'] = __(
+        $requestParams['merchant_order']['description'] = "APIREFUND - ".__(
             "Refund Order # %1",
             $order->getIncrementId(),
             $this->getStoreManager()->getStore()->getBaseUrl(UrlInterface::URL_TYPE_LINK)

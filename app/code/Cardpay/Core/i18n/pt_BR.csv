@@ -60,7 +60,7 @@ Se a configuração"==================== CREDENTIALS CONFIGURATION PAGE ========
 "Advanced","Avançado"
 "Store Settings","Configurações da Loja"
 "Category of your store","Categoría da sua Loja"
-"Use Unlimit Success Page","Utilizar página de resultado de pago de Cardpay"
+"Use Unlimit Success Page","Utilizar página de resultado de pago de Unlimit"
 "The successful page of the Unlimit module is prepared to show messages for each Payment status, this page is also prepared to show the payment button with ticket. If you use the default page of Magento, you will have to customize it to show the button for payment of the Ticket.","A página de sucesso de pagamento do Unlimit está preparada para mostrar mensagens para cada status de pagamento. Essa página também está preparada para mostrar o botão de pagamento para métodos de pagamento offline. Se você usar a página do Magento, você terá que personalizar a página para mostrar o botão de pagamento dos meios de pagamento offline."
 "Email Options","Opções de Email"
 "Order creation email","E-mail de criação de pedidos"
@@ -323,7 +323,7 @@ Se a configuração"==================== CREDENTIALS CONFIGURATION PAGE ========
 "The refunded amount must be greater than 0.", "O valor a ser devolvido tem que ser superior a 0."
 "Refund can not be executed because the payment id was not found.", "Não foi possível realizar a devolução, o id do pagamento não foi encontrado na orden."
 "Refund can not be performed because ACCESS_TOKEN has not been configured.", "Não foi possível realizar a devolução, porque o ACCESS_TOKEN não esta configurado."
-"Could not process the refund, The Unlimit API returned an unexpected error. Check the log files.", "Não foi possível realizar a devolução, devido a não esperado retornado pela a API do Cardpay. Valide os arquivos de Logs."
+"Could not process the refund, The Unlimit API returned an unexpected error. Check the log files.", "Não foi possível realizar a devolução, devido a não esperado retornado pela a API do Unlimit. Valide os arquivos de Logs."
 "The payment has not been refunded, you can only refund payments with status approved. The payment status is ", "Não foi possível realizar a devolução, só é possível devolver um pagamento com status aprovado. O status do pagamento é "
 "An error occurred while getting the status of the payment in the API Cardpay.", "Ocorreu um erro ao obter o status do pagamento na API do Cardpay, tente novamente em breve."
 

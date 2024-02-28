@@ -426,6 +426,7 @@ The order status is changed to **Canceled**
 The **Refund (Credit memo)** operation is supported only for following payment methods:
 
 * Credit Card
+* Apple Pay
 * Google Pay
 * MB WAY
 * PayPal

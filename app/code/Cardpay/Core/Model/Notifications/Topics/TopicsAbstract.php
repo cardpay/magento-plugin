@@ -228,6 +228,7 @@ abstract class TopicsAbstract
 
             $creditMemo->setGrandTotal($amount);
             $creditMemo->setBaseGrandTotal($amount);
+            $creditMemo->setTransactionId($payment['refund_data']['id']);
             $creditMemo->setState(2);
             $creditMemo->getResource()->save($creditMemo);
 

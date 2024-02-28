@@ -119,6 +119,19 @@ class Payment extends TopicsAbstract
             return;
         }
 
+        $completeArray = ['AUTHORIZED', 'COMPLETED', 'REFUNDED'];
+
+        if (!in_array($requestParams['refund_data']['status'], $completeArray)) {
+            $this->cpHelper->log(
+                __FUNCTION__.' - '.__('Could not process the refund'),
+                ConfigData::CUSTOM_LOG_PREFIX,
+                $requestParams
+            );
+            throw new UnlimitBaseException(
+                __('Could not process the refund, The Unlimit API returned an unexpected error. Check the log files.')
+            );
+        }
+
         // get payment order object
         $paymentOrder = $order->getPayment();
         $paymentMethod = $paymentOrder->getMethodInstance()->getCode();
@@ -132,8 +145,29 @@ class Payment extends TopicsAbstract
                 ConfigData::MBWAY_PAYMENT_METHOD,
                 'cardpay_basic'
             ]
-        )) {
+        ) || strpos($requestParams['merchant_order']['description'], 'APIREFUND') !== false) {
+
+            $this->cpHelper->log(
+                __FUNCTION__.' - '.__('Refund should not be processed'),
+                ConfigData::CUSTOM_LOG_PREFIX,
+                $requestParams
+            );
             return;
+        }
+
+        $refundTransId = $requestParams['refund_data']['id'];
+        $existingCreditMemos = $order->getCreditmemosCollection();
+        if ($existingCreditMemos) {
+            foreach ($existingCreditMemos as $existingCreditMemo) {
+                if ($refundTransId === $existingCreditMemo->getTransactionId()) {
+                    $this->cpHelper->log(
+                        __FUNCTION__.' - '.__('Credit memo already exists - '. $existingCreditMemo->getIncrementId()),
+                        ConfigData::CUSTOM_LOG_PREFIX,
+                        $existingCreditMemo
+                    );
+                    return;
+                }
+            }
         }
 
         // get amount refund

@@ -88,8 +88,6 @@ class PaymentStatusHandler
             throw new LocalizedException(__(self::ERROR_MESSAGE));
         }
 
-        $this->createTransactionForInvoice($observer, $paymentResponse[$apiStructure]);
-
         // only 2-phase payment can be updated
         if ('AUTHORIZED' !== $paymentResponse[$apiStructure]['status']) {
             throw new LocalizedException(__(self::ERROR_MESSAGE));
@@ -109,8 +107,14 @@ class PaymentStatusHandler
             throw new LocalizedException(__(self::ERROR_MESSAGE));
         }
 
-        return isset($response['response'][$apiStructure]['status'])
-            && $expectedResponseStatus === $response['response'][$apiStructure]['status'];
+        if (isset($response['response'][$apiStructure]['status'])
+            && $expectedResponseStatus === $response['response'][$apiStructure]['status']) {
+            $this->createTransactionForInvoice($observer, $paymentResponse[$apiStructure]);
+            return true;
+        }
+
+
+        return false;
     }
 
     /**
