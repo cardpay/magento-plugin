@@ -3,6 +3,7 @@
 namespace Cardpay\Core\Model;
 
 use Cardpay\Core\Block\Adminhtml\System\Config\Version;
+use Cardpay\Core\Exceptions\UnlimitBaseException;
 use Cardpay\Core\Helper\ConfigData;
 use Cardpay\Core\Helper\Data as dataHelper;
 use Cardpay\Core\Helper\Message\MessageInterface;
@@ -198,27 +199,27 @@ class Core extends AbstractMethod
     /**
      * Core constructor.
      *
-     * @param  StoreManagerInterface  $storeManager
-     * @param  dataHelper  $coreHelper
-     * @param  OrderFactory  $orderFactory
-     * @param  MessageInterface  $statusMessage
-     * @param  MessageInterface  $statusDetailMessage
-     * @param  Context  $context
-     * @param  Registry  $registry
-     * @param  ExtensionAttributesFactory  $extensionFactory
-     * @param  AttributeValueFactory  $customAttributeFactory
-     * @param  Logger  $logger
-     * @param  Data  $paymentData
-     * @param  ScopeConfigInterface  $scopeConfig
-     * @param  TransactionFactory  $transactionFactory
-     * @param  InvoiceSender  $invoiceSender
-     * @param  OrderSender  $orderSender
-     * @param  Session  $customerSession
-     * @param  UrlInterface  $urlBuilder
-     * @param  Image  $helperImage
-     * @param  \Magento\Checkout\Model\Session  $checkoutSession
-     * @param  Version  $version
-     * @param  ProductMetadataInterface  $productMetadata
+     * @param StoreManagerInterface $storeManager
+     * @param dataHelper $coreHelper
+     * @param OrderFactory $orderFactory
+     * @param MessageInterface $statusMessage
+     * @param MessageInterface $statusDetailMessage
+     * @param Context $context
+     * @param Registry $registry
+     * @param ExtensionAttributesFactory $extensionFactory
+     * @param AttributeValueFactory $customAttributeFactory
+     * @param Logger $logger
+     * @param Data $paymentData
+     * @param ScopeConfigInterface $scopeConfig
+     * @param TransactionFactory $transactionFactory
+     * @param InvoiceSender $invoiceSender
+     * @param OrderSender $orderSender
+     * @param Session $customerSession
+     * @param UrlInterface $urlBuilder
+     * @param Image $helperImage
+     * @param \Magento\Checkout\Model\Session $checkoutSession
+     * @param Version $version
+     * @param ProductMetadataInterface $productMetadata
      */
     public function __construct( //NOSONAR
         StoreManagerInterface $storeManager, //NOSONAR
@@ -290,7 +291,7 @@ class Core extends AbstractMethod
     /**
      * Retrieves Order
      *
-     * @param  integer  $incrementId
+     * @param integer $incrementId
      *
      * @return Order
      */
@@ -341,7 +342,7 @@ class Core extends AbstractMethod
         if (!empty($idType)) {
             $text = __($idType);
             $info_payments[$idType] = [
-                'text' => $text.': '.$payment->getAdditionalInformation('payer_identification_number')
+                'text' => $text . ': ' . $payment->getAdditionalInformation('payer_identification_number')
             ];
         }
 
@@ -398,14 +399,22 @@ class Core extends AbstractMethod
 
         if ($status === 'rejected') {
             if ((string)$statusDetail === 'cc_rejected_invalid_installments') {
-                $message['message'] = __($this->_statusDetailMessage->getMessage($statusDetail),
-                    strtoupper($payment_method), $installment);
+                $message['message'] = __(
+                    $this->_statusDetailMessage->getMessage($statusDetail),
+                    strtoupper($payment_method),
+                    $installment
+                );
             } elseif ((string)$statusDetail === 'cc_rejected_call_for_authorize') {
-                $message['message'] = __($this->_statusDetailMessage->getMessage($statusDetail),
-                    strtoupper($payment_method), $amount);
+                $message['message'] = __(
+                    $this->_statusDetailMessage->getMessage($statusDetail),
+                    strtoupper($payment_method),
+                    $amount
+                );
             } else {
-                $message['message'] = __($this->_statusDetailMessage->getMessage($statusDetail),
-                    strtoupper($payment_method));
+                $message['message'] = __(
+                    $this->_statusDetailMessage->getMessage($statusDetail),
+                    strtoupper($payment_method)
+                );
             }
         } else {
             $message['message'] = __($rawMessage['message']);
@@ -472,9 +481,9 @@ class Core extends AbstractMethod
     /**
      * Return array with request params data by default to custom method
      *
-     * @param  array  $paymentInfo
-     * @param  null  $quote
-     * @param  null  $order
+     * @param array $paymentInfo
+     * @param null $quote
+     * @param null $order
      * @return array
      * @throws LocalizedException
      * @throws NoSuchEntityException
@@ -499,7 +508,7 @@ class Core extends AbstractMethod
 
         $this->_coreHelper->log('getDefaultRequestParams -> init');
 
-        $requestParams['request']['id'] = time();
+        $requestParams['request']['id'] = uniqid('', true);
         $requestParams['request']['time'] = date('c');
 
         $requestParams['merchant_order']['id'] = $order->getIncrementId();
@@ -525,10 +534,7 @@ class Core extends AbstractMethod
         $billingAddress = $quote->getBillingAddress();
         $billingAddressData = $billingAddress->getData();
         if (!empty($billingAddressData['telephone'])) {
-            $billingPhone = trim($billingAddressData['telephone']);
-            if (strlen($billingPhone) < 5) {
-                $billingPhone = str_pad($billingPhone, 5, '0');
-            }
+            $billingPhone = $this->validateAndFormatPhoneNumber($billingAddressData['telephone']);
 
             $requestParams['customer']['phone'] = $billingPhone;
         }
@@ -540,10 +546,7 @@ class Core extends AbstractMethod
                 $zipcode = $paymentInfo['zip'];
             }
 
-            $shippingPhone = trim($shipping['telephone']);
-            if (strlen($shippingPhone) < 5) {
-                $shippingPhone = str_pad($shippingPhone, 5, '0');
-            }
+            $shippingPhone = $this->validateAndFormatPhoneNumber($shipping['telephone']);
 
             $requestParams['merchant_order']['shipping_address'] = [
                 'addr_line_1' => $shipping['street'],
@@ -559,13 +562,41 @@ class Core extends AbstractMethod
         $notificationUrl = $this->_urlBuilder->getUrl('cardpay/redirect/callback', ['_secure' => true]);
 
         $requestParams['return_urls'] = [
-            'cancel_url' => $notificationUrl.'action/cancel/orderId/'.$orderIncId,
-            'decline_url' => $notificationUrl.'action/decline/orderId/'.$orderIncId,
-            'inprocess_url' => $notificationUrl.'action/inprocess/orderId/'.$orderIncId,
-            'success_url' => $notificationUrl.'action/success/orderId/'.$orderIncId
+            'cancel_url' => $notificationUrl . 'action/cancel/orderId/' . $orderIncId,
+            'decline_url' => $notificationUrl . 'action/decline/orderId/' . $orderIncId,
+            'inprocess_url' => $notificationUrl . 'action/inprocess/orderId/' . $orderIncId,
+            'success_url' => $notificationUrl . 'action/success/orderId/' . $orderIncId
         ];
 
         return $requestParams;
+    }
+
+    public function validateAndFormatPhoneNumber(string $phoneNumber)
+    {
+        $cleanedPhone = $this->cleanPhone($phoneNumber);
+
+        if (strlen($cleanedPhone) < 8 || strlen($cleanedPhone) > 18) {
+            throw new UnlimitBaseException(
+                __("Phone Number is invalid, valid value is from 8 to 18 characters.")
+            );
+        }
+
+        return $this->formatPhoneNumber($cleanedPhone);
+    }
+
+    private function cleanPhone($phone)
+    {
+        return preg_replace("/\D+/", "", $phone);
+    }
+
+    public function formatPhoneNumber(string $phoneNumber): string
+    {
+        $phoneNumber = trim($phoneNumber);
+        if (strlen($phoneNumber) < 5) {
+            return str_pad($phoneNumber, 5, '0');
+        }
+
+        return $phoneNumber;
     }
 
     /**
@@ -587,7 +618,6 @@ class Core extends AbstractMethod
         // set default error
         $messageErrorToClient = $errors['NOT_IDENTIFIED'];
         if (isset($response['response']['cause']) && count($response['response']['cause']) > 0) {
-
             // get first error
             $cause = $response['response']['cause'][0];
 
@@ -651,8 +681,8 @@ class Core extends AbstractMethod
     /**
      * Refund specified amount for payment
      *
-     * @param  DataObject|InfoInterface  $payment
-     * @param  float  $amount
+     * @param DataObject|InfoInterface $payment
+     * @param float $amount
      * @return $this
      * @api
      */
@@ -665,7 +695,6 @@ class Core extends AbstractMethod
     {
         if (isset($paymentInfo['payment_method']) &&
             $paymentInfo['payment_method'] === ConfigData::BANK_CARD_API_PAYMENT_METHOD) {
-
             $areInstallmentsEnabled = (1 === (int)(
                 $this->_scopeConfig->getValue(
                     ConfigData::PATH_CUSTOM_INSTALLMENT,
@@ -680,12 +709,13 @@ class Core extends AbstractMethod
                     'installment_type' => $this->_scopeConfig->getValue(ConfigData::PATH_BANKCARD_INSTALLMENT_TYPE),
                     'installments' => $numberOfInstallments,
                 ];
-
             }
-            $dynamicDescriptor = trim($this->_scopeConfig->getValue(
-                ConfigData::PATH_CUSTOM_DESCRIPTOR,
-                ScopeInterface::SCOPE_STORE
-            ));
+            $dynamicDescriptor = trim(
+                $this->_scopeConfig->getValue(
+                    ConfigData::PATH_CUSTOM_DESCRIPTOR,
+                    ScopeInterface::SCOPE_STORE
+                )
+            );
             if (!empty($dynamicDescriptor)) {
                 $requestParams[self::PAYMENT_DATA]['dynamic_descriptor'] = $dynamicDescriptor;
             }

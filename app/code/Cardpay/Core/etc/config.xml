@@ -107,6 +107,16 @@
                 <payment_action>authorize</payment_action>
                 <sandbox_paypal>1</sandbox_paypal>
             </cardpay_spei>
+            <cardpay_oxxo>
+                <active>0</active>
+                <api_access_mode>gateway</api_access_mode>
+                <model>Cardpay\Core\Model\Payment\OxxoPayment</model>
+                <title translate="label">OXXO - Unlimit</title>
+                <allowspecific>0</allowspecific>
+                <sort_order>10</sort_order>
+                <payment_action>authorize</payment_action>
+                <sandbox_paypal>1</sandbox_paypal>
+            </cardpay_oxxo>
             <cardpay>
                 <order_status_authorized>processing</order_status_authorized>
                 <order_status_cancelled>cancelled</order_status_cancelled>

@@ -9,6 +9,7 @@
                 <include path="Cardpay_Core::system/custom_checkout_gpay.xml"/>
                 <include path="Cardpay_Core::system/custom_checkout_mbway.xml"/>
                 <include path="Cardpay_Core::system/custom_checkout_multibanco.xml"/>
+                <include path="Cardpay_Core::system/custom_checkout_oxxo.xml"/>
                 <include path="Cardpay_Core::system/custom_checkout_paypal.xml"/>
                 <include path="Cardpay_Core::system/custom_checkout_pix.xml"/>
                 <include path="Cardpay_Core::system/custom_checkout_sepainstant.xml"/>

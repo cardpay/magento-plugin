@@ -108,6 +108,7 @@ class Response
         '4098' => 'Payer identification number required.',
 
         // Place order
+        'INVALID_AMOUNT' => 'Unable to pay using payment method. Choose another payment method.',
         'CARD_NUMBER_IS_INCORRECT' => 'Card number is incorrect',
         'EXPIRATION_DATE_IS_INCORRECT' => 'Expiration date is incorrect',
         'CARD_NUMBER_AND_EXPIRATION_DATE_ARE_INCORRECT' => 'Card number and expiration date are incorrect',

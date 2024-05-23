@@ -4,7 +4,6 @@ namespace Cardpay\Core\Model\Payment;
 
 use Cardpay\Core\Exceptions\UnlimitBaseException;
 use Cardpay\Core\Helper\ConfigData;
-use Cardpay\Core\Helper\Response;
 use Magento\Framework\DataObject;
 use Magento\Payment\Model\InfoInterface;
 use Magento\Payment\Model\Method\Cc;
@@ -22,6 +21,7 @@ class BankCardPayment extends UnlimitPayment
     protected $ulCode = self::CODE;
 
     const BANCARD_MESSAGE = 'BankCardPayment::initialize';
+    protected const MAX_ZIP_LENGTH = 12;
 
     protected $fields = [
         'payment_method_id',
@@ -41,7 +41,8 @@ class BankCardPayment extends UnlimitPayment
     }
 
     /**
-     * @param  DataObject  $data
+     * @param DataObject $data
+     *
      * @return $this|Cc
      * @throws UnlimitBaseException
      */
@@ -68,13 +69,13 @@ class BankCardPayment extends UnlimitPayment
                 $additionalData,
                 [
                     'expiration_date' => 'card_expiration_date',
-                    'gateway_mode' => 'gateway_mode',
-                    'payment_method' => 'payment_method_id',
+                    'gateway_mode'    => 'gateway_mode',
+                    'payment_method'  => 'payment_method_id',
                     'cardholder_name' => 'card_holder_name',
-                    'card_number' => 'card_number',
-                    'security_code' => 'security_code',
-                    'installments' => 'installments',
-                    'total_amount' => 'total_amount',
+                    'card_number'     => 'card_number',
+                    'security_code'   => 'security_code',
+                    'installments'    => 'installments',
+                    'total_amount'    => 'total_amount',
                 ]
             );
 
@@ -90,14 +91,16 @@ class BankCardPayment extends UnlimitPayment
     }
 
     /**
-     * @param  string  $paymentAction
-     * @param  object  $stateObject
+     * @param string $paymentAction
+     * @param object $stateObject
+     *
      * @return bool
      * @throws UnlimitBaseException
      */
     public function initialize($paymentAction, $stateObject)
     {
         $requestParams = $this->createApiRequest();
+
         return $this->makeApiPayment($requestParams);
     }
 
@@ -107,12 +110,21 @@ class BankCardPayment extends UnlimitPayment
     public function createApiRequest()
     {
         try {
-            $order = $this->getInfoInstance()->getOrder();
-            $payment = $order->getPayment();
-            $paymentInfo = $this->getPaymentInfo($payment);
+            $order                         = $this->getInfoInstance()->getOrder();
+            $payment                       = $order->getPayment();
+            $paymentInfo                   = $this->getPaymentInfo($payment);
             $paymentInfo['payment_method'] = ConfigData::BANK_CARD_API_PAYMENT_METHOD;
 
             $requestParams = $this->_coreModel->getDefaultRequestParams($paymentInfo, $this->_getQuote(), $order, []);
+
+            if (strlen($requestParams['merchant_order']['shipping_address']['zip']) > self::MAX_ZIP_LENGTH) {
+                throw new UnlimitBaseException(
+                    __(
+                        "Zip / Postal Code is invalid, must be " .
+                        self::MAX_ZIP_LENGTH . " characters."
+                    )
+                );
+            }
 
             if ($this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_ASK_CPF)) {
                 $requestParams['customer']['identity'] = $payment->getAdditionalInformation('cpf');
@@ -120,8 +132,10 @@ class BankCardPayment extends UnlimitPayment
             $mode = $this->_scopeConfig->getValue(ConfigData::PATH_BANKCARD_API_ACCESS_MODE);
 
             if ($mode === 'gateway') {
-                $requestParams['card_account']['card']['pan'] = $payment->getAdditionalInformation('card_number');
-                $requestParams['card_account']['card']['expiration'] = substr_replace(
+                $requestParams['card_account']['card']['pan']           = $payment->getAdditionalInformation(
+                    'card_number'
+                );
+                $requestParams['card_account']['card']['expiration']    = substr_replace(
                     $payment->getAdditionalInformation('expiration_date'),
                     '20',
                     3,
@@ -129,14 +143,14 @@ class BankCardPayment extends UnlimitPayment
                 );
                 $requestParams['card_account']['card']['security_code'] =
                     $payment->getAdditionalInformation('security_code');
-                $requestParams['card_account']['card']['holder'] =
+                $requestParams['card_account']['card']['holder']        =
                     $payment->getAdditionalInformation('cardholder_name');
-                $requestParams['customer']['identity'] = $payment->getAdditionalInformation('cpf');
+                $requestParams['customer']['identity']                  = $payment->getAdditionalInformation('cpf');
 
                 $requestMasked = $requestParams;
 
-                $pan = $requestMasked['card_account']['card']['pan'];
-                $requestMasked['card_account']['card']['pan'] = substr($pan, 0, 6).'...'.substr($pan, -4);
+                $pan                                                    = $requestMasked['card_account']['card']['pan'];
+                $requestMasked['card_account']['card']['pan']           = substr($pan, 0, 6) . '...' . substr($pan, -4);
                 $requestMasked['card_account']['card']['security_code'] = '...';
 
                 $this->_helperData->log(
@@ -146,20 +160,24 @@ class BankCardPayment extends UnlimitPayment
                 );
             }
 
-            $numInstallments = (int)$payment->getAdditionalInformation('installments');
-            $installmentType = $this->_scopeConfig->getValue(ConfigData::PATH_BANKCARD_INSTALLMENT_TYPE);
+            $numInstallments        = (int)$payment->getAdditionalInformation('installments');
+            $installmentType        = $this->_scopeConfig->getValue(ConfigData::PATH_BANKCARD_INSTALLMENT_TYPE);
             $areInstallmentsEnabled = (1 === (int)$this->_scopeConfig->getValue(
-                    ConfigData::PATH_CUSTOM_INSTALLMENT, ScopeInterface::SCOPE_STORE
+                    ConfigData::PATH_CUSTOM_INSTALLMENT,
+                    ScopeInterface::SCOPE_STORE
                 ));
-            $capturePayment = (int)$this->_scopeConfig->getValue(ConfigData::PATH_CUSTOM_CAPTURE,
-                    ScopeInterface::SCOPE_STORE) === 1;
 
-            if ((!$areInstallmentsEnabled) || $numInstallments === 1) {
-                $isPreAuth = !$capturePayment;
+            $capturePayment = (int)$this->_scopeConfig->getValue(
+                    ConfigData::PATH_CUSTOM_CAPTURE,
+                    ScopeInterface::SCOPE_STORE
+                ) === 1;
+
+            if (( ! $areInstallmentsEnabled) || $numInstallments === 1) {
+                $isPreAuth = ! $capturePayment;
             } else {
                 $isPreAuth = (
                     ($installmentType !== 'IF') &&
-                    (!$capturePayment)
+                    ( ! $capturePayment)
                 );
             }
 
@@ -178,14 +196,15 @@ class BankCardPayment extends UnlimitPayment
                     2
                 );
             }
+
             return $requestParams;
         } catch (UnlimitBaseException $e) {
             $this->_helperData->log(
                 'CustomPayment::initialize - There was an error
-                retrieving the information to create the payment, more details: '.
+                retrieving the information to create the payment, more details: ' .
                 $e->getMessage()
             );
-            throw new UnlimitBaseException(__(Response::PAYMENT_CREATION_ERRORS['INTERNAL_ERROR_MODULE']));
+            throw new UnlimitBaseException($e->getMessage());
         }
     }
 
@@ -200,11 +219,11 @@ class BankCardPayment extends UnlimitPayment
     {
         $paymentInfo = [];
 
-        if (!empty($payment->getAdditionalInformation('cpf'))) {
+        if ( ! empty($payment->getAdditionalInformation('cpf'))) {
             $paymentInfo['cpf'] = $payment->getAdditionalInformation('cpf');
         }
 
-        if (!empty($payment->getAdditionalInformation('installments'))) {
+        if ( ! empty($payment->getAdditionalInformation('installments'))) {
             $paymentInfo['installments'] = $payment->getAdditionalInformation('installments');
         }
 
@@ -213,11 +232,12 @@ class BankCardPayment extends UnlimitPayment
 
     /**
      * @param $requestParams
+     *
      * @return bool
      */
     public function makeApiPayment($requestParams)
     {
-        $order = $this->getInfoInstance()->getOrder();
+        $order    = $this->getInfoInstance()->getOrder();
         $response = $this->_apiModel->postPayment($requestParams, $order);
 
         return $this->handleApiResponse($response, self::BANCARD_MESSAGE);
@@ -230,11 +250,11 @@ class BankCardPayment extends UnlimitPayment
     {
         $ip = '';
 
-        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {
+        if ( ! empty($_SERVER['HTTP_CLIENT_IP'])) {
             $ip = $_SERVER['HTTP_CLIENT_IP'];
         }
 
-        if (empty($ip) && !empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+        if (empty($ip) && ! empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {
             $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
         }
 
@@ -248,7 +268,7 @@ class BankCardPayment extends UnlimitPayment
 
         if (strpos($ip, ',') !== false) {
             $exploded_ip = explode(',', $ip);
-            $ip = $exploded_ip[0];
+            $ip          = $exploded_ip[0];
         }
 
         return $ip;
@@ -266,7 +286,8 @@ class BankCardPayment extends UnlimitPayment
     }
 
     /**
-     * @param  CartInterface|null  $quote
+     * @param CartInterface|null $quote
+     *
      * @return bool
      * @throws UnlimitBaseException
      */
@@ -287,10 +308,11 @@ class BankCardPayment extends UnlimitPayment
     }
 
     /**
-     * @param  Order  $order
+     * @param Order $order
+     *
      * @throws UnlimitBaseException
      */
-    public static function isBankCardPaymentMethod($order)
+    public static function isPaymentMethod($order)
     {
         if (is_null($order)) {
             return false;

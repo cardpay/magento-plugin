@@ -2,9 +2,8 @@
 
 namespace Cardpay\Core\Model\Payment;
 
+use Cardpay\Core\Exceptions\UnlimitBaseException;
 use Cardpay\Core\Helper\ConfigData;
-use Cardpay\Core\Helper\Response;
-use Exception;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Api\Data\CartInterface;
@@ -36,7 +35,8 @@ class PaypalPayment extends UnlimitPayment
     ];
 
     /**
-     * @param  DataObject  $data
+     * @param DataObject $data
+     *
      * @return $this|PaypalPayment
      * @throws LocalizedException
      */
@@ -52,11 +52,11 @@ class PaypalPayment extends UnlimitPayment
 
         $info = $this->getInfoInstance();
 
-        if (!empty($infoForm['method'])) {
+        if ( ! empty($infoForm['method'])) {
             $info->setAdditionalInformation('method', $infoForm['method']);
         }
 
-        if (!empty($additionalData['payment_method_paypal'])) {
+        if ( ! empty($additionalData['payment_method_paypal'])) {
             $info->setAdditionalInformation('payment_method', $additionalData['payment_method_paypal']);
             $info->setAdditionalInformation('payment_method_id', $additionalData['payment_method_paypal']);
         }
@@ -71,15 +71,16 @@ class PaypalPayment extends UnlimitPayment
     }
 
     /**
-     * @param  string  $paymentAction
-     * @param  object  $stateObject
+     * @param string $paymentAction
+     * @param object $stateObject
+     *
      * @throws \Cardpay\Core\Model\Api\V1\Exception
      * @throws LocalizedException
      */
     public function initialize($paymentAction, $stateObject)
     {
         try {
-            $this->_helperData->log(self::PAYPAL_MESSAGE." - Paypal: init prepare post payment", self::LOG_NAME);
+            $this->_helperData->log(self::PAYPAL_MESSAGE . " - Paypal: init prepare post payment", self::LOG_NAME);
 
             /**
              * @var Quote
@@ -93,23 +94,30 @@ class PaypalPayment extends UnlimitPayment
 
             $paymentInfo = [];
 
-            $paymentInfo['payment_method'] = ConfigData::PAYPAL_API_PAYMENT_METHOD;
-            $requestParams = $this->_coreModel->getDefaultRequestParams($paymentInfo, $quote, $order, []);
+            $paymentInfo['payment_method']          = ConfigData::PAYPAL_API_PAYMENT_METHOD;
+            $requestParams                          = $this->_coreModel->getDefaultRequestParams(
+                $paymentInfo,
+                $quote,
+                $order,
+                []
+            );
             $requestParams['customer']['full_name'] = trim($order->getCustomerName());
 
-            $requestParams['payment_method'] = ConfigData::PAYPAL_API_PAYMENT_METHOD;
+            $requestParams['payment_method']        = ConfigData::PAYPAL_API_PAYMENT_METHOD;
             $requestParams['customer']['full_name'] = trim($order->getCustomerName());
 
-            $this->_helperData->log(self::PAYPAL_MESSAGE." - Preference to POST", 'cardpay.log', $requestParams);
-        } catch (Exception $e) {
-            $this->_helperData->log(self::PAYPAL_MESSAGE.
-                " - There was an error retrieving the information to create the payment, more details: ".
-                $e->getMessage());
-            throw new LocalizedException(__(Response::PAYMENT_CREATION_ERRORS['INTERNAL_ERROR_MODULE']));
+            $this->_helperData->log(self::PAYPAL_MESSAGE . " - Preference to POST", 'cardpay.log', $requestParams);
+        } catch (UnlimitBaseException $e) {
+            $this->_helperData->log(
+                self::PAYPAL_MESSAGE .
+                " - There was an error retrieving the information to create the payment, more details: " .
+                $e->getMessage()
+            );
+            throw new UnlimitBaseException($e->getMessage());
         }
 
         $response = $this->_apiModel->postPayment($requestParams, $order);
-        $this->_helperData->log(self::PAYPAL_MESSAGE." - POST RESPONSE", self::LOG_NAME, $response);
+        $this->_helperData->log(self::PAYPAL_MESSAGE . " - POST RESPONSE", self::LOG_NAME, $response);
 
         return $this->handleApiResponse($response, self::PAYPAL_MESSAGE);
     }
@@ -121,7 +129,7 @@ class PaypalPayment extends UnlimitPayment
      */
     public function getPaypalOptions()
     {
-        $pm['id'] = 1;
+        $pm['id']              = 1;
         $pm['payment_type_id'] = 'paypal';
 
         $tickets[] = $pm;
@@ -132,7 +140,7 @@ class PaypalPayment extends UnlimitPayment
     /**
      * @throws LocalizedException
      */
-    function setOrderSubtotals($data)
+    public function setOrderSubtotals($data)
     {
         $total = $data['transaction_details']['total_paid_amount'];
 
@@ -146,7 +154,7 @@ class PaypalPayment extends UnlimitPayment
     /**
      * is payment method available?
      *
-     * @param  CartInterface|null  $quote
+     * @param CartInterface|null $quote
      *
      * @return bool
      */
@@ -157,15 +165,18 @@ class PaypalPayment extends UnlimitPayment
             return false;
         }
 
-        return $this->isPaymentMethodAvailable(ConfigData::PATH_PAYPAL_TERMINAL_CODE,
-            ConfigData::PATH_PAYPAL_TERMINAL_PASSWORD);
+        return $this->isPaymentMethodAvailable(
+            ConfigData::PATH_PAYPAL_TERMINAL_CODE,
+            ConfigData::PATH_PAYPAL_TERMINAL_PASSWORD
+        );
     }
 
     /**
-     * @param  Order  $order
+     * @param Order $order
+     *
      * @throws LocalizedException
      */
-    public static function isPaypalPaymentMethod($order)
+    public static function isPaymentMethod($order)
     {
         if (is_null($order)) {
             return false;

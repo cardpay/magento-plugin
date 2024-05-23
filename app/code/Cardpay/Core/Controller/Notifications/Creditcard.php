@@ -83,8 +83,8 @@ class Creditcard extends NotificationBase
 
             $statusResponse = Response::HTTP_INTERNAL_ERROR;
 
-            if (method_exists($e, 'getCode')) {
-                $statusResponse = $e->getCode();
+            if (method_exists($e, 'getHttpStatus')) {
+                $statusResponse = $e->getHttpStatus();
             }
 
             $this->setResponseHttp($statusResponse, self::UNSUCCESSFUL_RESPONSE);

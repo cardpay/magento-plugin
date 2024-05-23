@@ -291,6 +291,8 @@
 "Payer identification type required.", "Tipo de documento del pagador requerido."
 "Payer identification number required.", "Número del documento del pagador requerido."
 
+"Unable to pay using payment method. Choose another payment method.", "No se puede pagar mediante el método de pago. Elige otro método de pago."
+"An error occurred when creating the payment. Please refresh the page and try again.", "Se produjo un error al crear el pago. Por favor actualiza la página y vuelve a intentarlo."
 "Verify the form data or wait until the validation of the payment data.", "Verifique los datos del formulario o espere hasta la validación de los datos de pago."
 "There was an internal error when creating the payment.", "Hubo un error interno al crear el pago."
 
@@ -748,3 +750,4 @@
 "Payment processing certificate","Certificado de procesamiento de pago"
 "Merchant identity certificate","Certificado de identidad mercantil"
 "Invalid file format","Formato de archivo inválido"
+"Phone Number is invalid, valid value is from 8 to 18 characters.","El número de teléfono no es válido, el valor válido es de 8 a 18 caracteres."

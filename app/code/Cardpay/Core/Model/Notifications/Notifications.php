@@ -13,6 +13,7 @@ use Cardpay\Core\Model\Payment\ApayPayment;
 use Cardpay\Core\Model\Payment\BoletoPayment;
 use Cardpay\Core\Model\Payment\GpayPayment;
 use Cardpay\Core\Model\Payment\MbWayPayment;
+use Cardpay\Core\Model\Payment\OxxoPayment;
 use Cardpay\Core\Model\Payment\MultibancoPayment;
 use Cardpay\Core\Model\Payment\PaypalPayment;
 use Cardpay\Core\Model\Payment\PixPayment;
@@ -55,11 +56,11 @@ class Notifications
     private $orderFactory;
 
     /**
-     * @param  cpHelper  $cpHelper
-     * @param  ScopeConfigInterface  $scopeConfig
-     * @param  MerchantOrder  $merchantOrder
-     * @param  Payment  $payment
-     * @param  OrderFactory  $orderFactory
+     * @param cpHelper $cpHelper
+     * @param ScopeConfigInterface $scopeConfig
+     * @param MerchantOrder $merchantOrder
+     * @param Payment $payment
+     * @param OrderFactory $orderFactory
      */
     public function __construct(
         cpHelper $cpHelper,
@@ -76,7 +77,7 @@ class Notifications
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      * @return array
      * @throws UnlimitBaseException
      */
@@ -96,7 +97,6 @@ class Notifications
 
         if (empty($type) || !isset($bodyDecoded['payment_method'])) {
             throw new UnlimitBaseException(__('Invalid Unlimit callback'), null, Response::HTTP_BAD_REQUEST);
-
         }
         $method = $bodyDecoded['payment_method'];
 
@@ -111,15 +111,18 @@ class Notifications
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      * @throws UnlimitBaseException
      */
     public function validateSignature($request)
     {
         $callbackSignatureHeader = $request->getHeaders(self::HEADER_SIGNATURE, null);
         if (is_null($callbackSignatureHeader)) {
-            throw new UnlimitBaseException(__('Could not get Unlimit callback signature'), null,
-                Response::HTTP_BAD_REQUEST);
+            throw new UnlimitBaseException(
+                __('Could not get Unlimit callback signature'),
+                null,
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
         $bodyDecoded = $this->getBodyDecoded($request);
@@ -130,66 +133,77 @@ class Notifications
         $orderId = $bodyDecoded['merchant_order']['id'];
         $order = $this->orderFactory->create()->loadByIncrementId($orderId);
 
-        if (BankCardPayment::isBankCardPaymentMethod($order)) {
+        if (BankCardPayment::isPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_BANKCARD_CALLBACK_SECRET,
                 ScopeInterface::SCOPE_STORE
             );
-        } elseif (ApayPayment::isApayPaymentMethod($order)) {
+        } elseif (ApayPayment::isPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_APAY_CALLBACK_SECRET,
                 ScopeInterface::SCOPE_STORE
             );
-        } elseif (BoletoPayment::isBoletoPaymentMethod($order)) {
+        } elseif (BoletoPayment::isPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_BOLETO_CALLBACK_SECRET,
                 ScopeInterface::SCOPE_STORE
             );
-        } elseif (PixPayment::isPixPaymentMethod($order)) {
+        } elseif (PixPayment::isPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_PIX_CALLBACK_SECRET,
                 ScopeInterface::SCOPE_STORE
             );
-        } elseif (PaypalPayment::isPaypalPaymentMethod($order)) {
+        } elseif (PaypalPayment::isPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_PAYPAL_CALLBACK_SECRET,
                 ScopeInterface::SCOPE_STORE
             );
-        } elseif (GpayPayment::isGpayPaymentMethod($order)) {
+        } elseif (GpayPayment::isPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_GPAY_CALLBACK_SECRET,
                 ScopeInterface::SCOPE_STORE
             );
-        } elseif (SepaInstantPayment::isSepaInstantPaymentMethod($order)) {
+        } elseif (SepaInstantPayment::isPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_SEPA_CALLBACK_SECRET,
                 ScopeInterface::SCOPE_STORE
             );
-        } elseif (SpeiPayment::isSpeiPaymentMethod($order)) {
+        } elseif (SpeiPayment::isPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_SPEI_CALLBACK_SECRET,
                 ScopeInterface::SCOPE_STORE
             );
-        } elseif (MultibancoPayment::isMultibancoPaymentMethod($order)) {
+        } elseif (MultibancoPayment::isPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_MULTIBANCO_CALLBACK_SECRET,
                 ScopeInterface::SCOPE_STORE
             );
-        } elseif (MbWayPayment::isMbWayPaymentMethod($order)) {
+        } elseif (MbWayPayment::isPaymentMethod($order)) {
             $callbackSecret = $this->scopeConfig->getValue(
                 ConfigData::PATH_MBWAY_CALLBACK_SECRET,
                 ScopeInterface::SCOPE_STORE
             );
+        } elseif (OxxoPayment::isPaymentMethod($order)) {
+            $callbackSecret = $this->scopeConfig->getValue(
+                ConfigData::PATH_OXXO_CALLBACK_SECRET,
+                ScopeInterface::SCOPE_STORE
+            );
         } else {
-            throw new UnlimitBaseException(__('Unable to detect Unlimit callback secret'), null,
-                Response::HTTP_BAD_REQUEST);
+            throw new UnlimitBaseException(
+                __('Unable to detect Unlimit callback secret'),
+                null,
+                Response::HTTP_BAD_REQUEST
+            );
         }
 
-        $generatedSignature = hash('sha512', $request->getContent().$callbackSecret);
+        $generatedSignature = hash('sha512', $request->getContent() . $callbackSecret);
 
         if ($generatedSignature !== $callbackSignatureHeader->getFieldValue()) {
-            throw new UnlimitBaseException(__('Unlimit callback signature does not match'), null,
-                Response::HTTP_BAD_REQUEST);
+            throw new UnlimitBaseException(
+                __('Unlimit callback signature does not match'),
+                null,
+                Response::HTTP_BAD_REQUEST
+            );
         }
     }
 
@@ -212,7 +226,7 @@ class Notifications
     }
 
     /**
-     * @param  cpHelper  $cpHelper
+     * @param cpHelper $cpHelper
      */
     public function setCpHelper(cpHelper $cpHelper): void
     {

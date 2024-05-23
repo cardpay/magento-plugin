@@ -209,24 +209,24 @@ class UnlimitPayment extends Cc implements GatewayInterface
     protected $scopeConfig;
 
     /**
-     * @param  \Cardpay\Core\Helper\Data  $helperData
-     * @param  \Magento\Checkout\Model\Session  $checkoutSession
-     * @param  \Magento\Customer\Model\Session  $customerSession
-     * @param  \Magento\Sales\Model\OrderFactory  $orderFactory
-     * @param  \Magento\Framework\UrlInterface  $urlBuilder
-     * @param  \Magento\Framework\Model\Context  $context
-     * @param  \Magento\Framework\Registry  $registry
-     * @param  \Magento\Framework\Api\ExtensionAttributesFactory  $extensionFactory
-     * @param  \Magento\Framework\Api\AttributeValueFactory  $customAttributeFactory
-     * @param  \Magento\Payment\Helper\Data  $paymentData
-     * @param  \Magento\Framework\App\Config\ScopeConfigInterface  $scopeConfig
-     * @param  \Magento\Payment\Model\Method\Logger  $logger
-     * @param  \Magento\Framework\Module\ModuleListInterface  $moduleList
-     * @param  \Magento\Framework\Stdlib\DateTime\TimezoneInterface  $localeDate
-     * @param  \Magento\Checkout\Model\Session  $checkoutSession
-     * @param  \Magento\Sales\Model\OrderFactory  $orderFactory
-     * @param  \Cardpay\Core\Model\Core  $coreModel
-     * @param  \Cardpay\Core\Model\ApiManager  $apiModel
+     * @param \Cardpay\Core\Helper\Data $helperData
+     * @param \Magento\Checkout\Model\Session $checkoutSession
+     * @param \Magento\Customer\Model\Session $customerSession
+     * @param \Magento\Sales\Model\OrderFactory $orderFactory
+     * @param \Magento\Framework\UrlInterface $urlBuilder
+     * @param \Magento\Framework\Model\Context $context
+     * @param \Magento\Framework\Registry $registry
+     * @param \Magento\Framework\Api\ExtensionAttributesFactory $extensionFactory
+     * @param \Magento\Framework\Api\AttributeValueFactory $customAttributeFactory
+     * @param \Magento\Payment\Helper\Data $paymentData
+     * @param \Magento\Framework\App\Config\ScopeConfigInterface $scopeConfig
+     * @param \Magento\Payment\Model\Method\Logger $logger
+     * @param \Magento\Framework\Module\ModuleListInterface $moduleList
+     * @param \Magento\Framework\Stdlib\DateTime\TimezoneInterface $localeDate
+     * @param \Magento\Checkout\Model\Session $checkoutSession
+     * @param \Magento\Sales\Model\OrderFactory $orderFactory
+     * @param \Cardpay\Core\Model\Core $coreModel
+     * @param \Cardpay\Core\Model\ApiManager $apiModel
      */
     public function __construct(//NOSONAR
         \Cardpay\Core\Helper\Data $helperData,//NOSONAR
@@ -376,8 +376,8 @@ class UnlimitPayment extends Cc implements GatewayInterface
     /**
      * Refund specified amount for payment
      *
-     * @param  DataObject|InfoInterface  $payment
-     * @param  float  $amount
+     * @param DataObject|InfoInterface $payment
+     * @param float $amount
      * @return $this
      * @throws LocalizedException
      * @api
@@ -393,8 +393,8 @@ class UnlimitPayment extends Cc implements GatewayInterface
         if ($payment !== null) {
             $additionalInformation = $payment->getAdditionalInformation();
             if (!empty($payment->getAdditionalInformation()) &&
-                 (isset($additionalInformation['raw_details_info']['filing']) &&
-                  !empty($additionalInformation['raw_details_info']['filing']['id']))
+                (isset($additionalInformation['raw_details_info']['filing']) &&
+                    !empty($additionalInformation['raw_details_info']['filing']['id']))
             ) {
                 {
                     $this->throwRefundException(__("Refund is not available for installment payment"));
@@ -442,8 +442,8 @@ class UnlimitPayment extends Cc implements GatewayInterface
     }
 
     /**
-     * @throws LocalizedException
      * @return string|null
+     * @throws LocalizedException
      */
     private function performRefund($paymentID, $order, $amountToRefund)
     {
@@ -465,9 +465,9 @@ class UnlimitPayment extends Cc implements GatewayInterface
         );
         $completeArray = ['AUTHORIZED', 'COMPLETED', 'REFUNDED'];
         if (
-			!is_null($refundResponse) &&
+            !is_null($refundResponse) &&
             ((int)$refundResponse['status'] === 200 ||
-            (int)$refundResponse['status'] === 201) &&
+                (int)$refundResponse['status'] === 201) &&
             in_array($refundResponse['response']['refund_data']['status'], $completeArray)
         ) {
             // Refund was successful, proceed with creating credit memo
@@ -496,7 +496,7 @@ class UnlimitPayment extends Cc implements GatewayInterface
     /**
      * Void specified amount for payment
      *
-     * @param  DataObject|InfoInterface  $payment
+     * @param DataObject|InfoInterface $payment
      * @return $this
      * @throws LocalizedException
      * @api
@@ -520,7 +520,8 @@ class UnlimitPayment extends Cc implements GatewayInterface
     {
         $refundForMfHold = $this->_scopeConfig->getValue(
             ConfigData::PATH_BANKCARD_INSTALLMENT_TYPE,
-            ScopeInterface::SCOPE_STORE);
+            ScopeInterface::SCOPE_STORE
+        );
 
         $getAdditionalInformation = $this->getData('info_instance')
             ->getOrder()
@@ -557,7 +558,7 @@ class UnlimitPayment extends Cc implements GatewayInterface
         ];
 
         $this->_helperData->log(
-            $message.' - The API returned an error while creating the payment, more details: '.
+            $message . ' - The API returned an error while creating the payment, more details: ' .
             json_encode($arrayLog)
         );
 
@@ -570,5 +571,4 @@ class UnlimitPayment extends Cc implements GatewayInterface
 
         return substr($id, 0, strpos($id, '-'));
     }
-
 }

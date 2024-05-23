@@ -301,6 +301,7 @@ Se a configuração"==================== CREDENTIALS CONFIGURATION PAGE ========
 "Payer identification type required.", "Tipo de documento do comprador é obrigatório."
 "Payer identification number required.", "Número do documento do comprador é obrigatório."
 
+"Unable to pay using payment method. Choose another payment method.", "Não é possível pagar usando o método de pagamento. Escolha outro método de pagamento."
 "An error occurred when creating the payment. Please refresh the page and try again.", "Ocorreu um erro ao criar o pagamento. Atualize a página e tente novamente."
 "Verify the form data or wait until the validation of the payment data.", "Verifique os dados do formulário ou aguarde até a validação dos dados de pagamento."
 "There was an internal error when creating the payment.", "Houve um erro interno ao criar o pagamento. Tente novamente, caso o erro persista entre em contato com o vendedor."
@@ -650,3 +651,4 @@ Cannot operate between users from different countries.", "Não é possível oper
 "Payment processing certificate","Certificado de processamento de pagamento"
 "Merchant identity certificate","Certificado de identidade do comerciante"
 "Invalid file format","Formato de arquivo inválido"
+"Phone Number is invalid, valid value is from 8 to 18 characters.","O número de telefone é inválido, o valor válido é de 8 a 18 caracteres."

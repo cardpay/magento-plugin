@@ -2,9 +2,8 @@
 
 namespace Cardpay\Core\Model\Payment;
 
+use Cardpay\Core\Exceptions\UnlimitBaseException;
 use Cardpay\Core\Helper\ConfigData;
-use Cardpay\Core\Helper\Response;
-use Exception;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Api\Data\CartInterface;
@@ -36,7 +35,8 @@ class SepaInstantPayment extends UnlimitPayment
     ];
 
     /**
-     * @param  DataObject  $data
+     * @param DataObject $data
+     *
      * @return $this|GpayPayment
      * @throws LocalizedException
      */
@@ -44,7 +44,7 @@ class SepaInstantPayment extends UnlimitPayment
     {
         $infoForm = $data->getData();
 
-        if (!isset($infoForm['additional_data']) || empty($infoForm['additional_data'])) {
+        if ( ! isset($infoForm['additional_data']) || empty($infoForm['additional_data'])) {
             return $this;
         }
 
@@ -52,11 +52,11 @@ class SepaInstantPayment extends UnlimitPayment
 
         $info = $this->getInfoInstance();
 
-        if (!empty($infoForm['method'])) {
+        if ( ! empty($infoForm['method'])) {
             $info->setAdditionalInformation('method', $infoForm['method']);
         }
 
-        if (!empty($additionalData['payment_method_sepa'])) {
+        if ( ! empty($additionalData['payment_method_sepa'])) {
             $info->setAdditionalInformation('payment_method', $additionalData['payment_method_sepa']);
             $info->setAdditionalInformation('payment_method_id', $additionalData['payment_method_sepa']);
         }
@@ -71,8 +71,9 @@ class SepaInstantPayment extends UnlimitPayment
     }
 
     /**
-     * @param  string  $paymentAction
-     * @param  object  $stateObject
+     * @param string $paymentAction
+     * @param object $stateObject
+     *
      * @throws \Cardpay\Core\Model\Api\V1\Exception
      * @throws LocalizedException
      */
@@ -80,7 +81,8 @@ class SepaInstantPayment extends UnlimitPayment
     {
         try {
             $this->_helperData->log(
-                self::SEPA_MESSAGE." - SepaInstant: init prepare post payment", self::LOG_NAME
+                self::SEPA_MESSAGE . " - SepaInstant: init prepare post payment",
+                self::LOG_NAME
             );
 
             /**
@@ -92,30 +94,37 @@ class SepaInstantPayment extends UnlimitPayment
              * @var Order
              */
             $order = $this->getInfoInstance()->getOrder();
-            $payment = $order->getPayment();
 
             $paymentInfo = [];
 
-            $paymentInfo['payment_method'] = ConfigData::SEPA_API_PAYMENT_METHOD;
-            $requestParams = $this->_coreModel->getDefaultRequestParams($paymentInfo, $quote, $order, []);
+            $paymentInfo['payment_method']          = ConfigData::SEPA_API_PAYMENT_METHOD;
+            $requestParams                          = $this->_coreModel->getDefaultRequestParams(
+                $paymentInfo,
+                $quote,
+                $order,
+                []
+            );
             $requestParams['customer']['full_name'] = trim($order->getCustomerName());
 
-            $requestParams['payment_method'] = ConfigData::SEPA_API_PAYMENT_METHOD;
+            $requestParams['payment_method']        = ConfigData::SEPA_API_PAYMENT_METHOD;
             $requestParams['customer']['full_name'] = trim($order->getCustomerName());
 
             $this->_helperData->log(
-                self::SEPA_MESSAGE." - Preference to POST", 'cardpay.log', $requestParams
+                self::SEPA_MESSAGE . " - Preference to POST",
+                'cardpay.log',
+                $requestParams
             );
-        } catch (Exception $e) {
+        } catch (UnlimitBaseException $e) {
             $this->_helperData->log(
-                self::SEPA_MESSAGE." - There was an error retrieving the information to create the payment,
-                more details: ".$e->getMessage()
+                self::SEPA_MESSAGE .
+                " - There was an error retrieving the information to create the payment, more details: " .
+                $e->getMessage()
             );
-            throw new LocalizedException(__(Response::PAYMENT_CREATION_ERRORS['INTERNAL_ERROR_MODULE']));
+            throw new UnlimitBaseException($e->getMessage());
         }
 
         $response = $this->_apiModel->postPayment($requestParams, $order);
-        $this->_helperData->log(self::SEPA_MESSAGE." - POST RESPONSE", self::LOG_NAME, $response);
+        $this->_helperData->log(self::SEPA_MESSAGE . " - POST RESPONSE", self::LOG_NAME, $response);
 
         return $this->handleApiResponse($response, self::SEPA_MESSAGE);
     }
@@ -123,7 +132,7 @@ class SepaInstantPayment extends UnlimitPayment
     /**
      * @throws LocalizedException
      */
-    function setOrderSubtotals($data)
+    public function setOrderSubtotals($data)
     {
         $total = $data['transaction_details']['total_paid_amount'];
 
@@ -137,7 +146,7 @@ class SepaInstantPayment extends UnlimitPayment
     /**
      * is payment method available?
      *
-     * @param  CartInterface|null  $quote
+     * @param CartInterface|null $quote
      *
      * @return bool
      */
@@ -155,10 +164,11 @@ class SepaInstantPayment extends UnlimitPayment
     }
 
     /**
-     * @param  Order  $order
+     * @param Order $order
+     *
      * @throws LocalizedException
      */
-    public static function isSepaInstantPaymentMethod($order)
+    public static function isPaymentMethod($order)
     {
         if (is_null($order)) {
             return false;

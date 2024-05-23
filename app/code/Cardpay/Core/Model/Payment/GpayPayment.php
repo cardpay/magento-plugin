@@ -2,9 +2,8 @@
 
 namespace Cardpay\Core\Model\Payment;
 
+use Cardpay\Core\Exceptions\UnlimitBaseException;
 use Cardpay\Core\Helper\ConfigData;
-use Cardpay\Core\Helper\Response;
-use Exception;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Api\Data\CartInterface;
@@ -36,7 +35,8 @@ class GpayPayment extends UnlimitPayment
     ];
 
     /**
-     * @param  DataObject  $data
+     * @param DataObject $data
+     *
      * @return $this|GpayPayment
      * @throws LocalizedException
      */
@@ -44,7 +44,7 @@ class GpayPayment extends UnlimitPayment
     {
         $infoForm = $data->getData();
 
-        if (!isset($infoForm['additional_data']) || empty($infoForm['additional_data'])) {
+        if ( ! isset($infoForm['additional_data']) || empty($infoForm['additional_data'])) {
             return $this;
         }
 
@@ -52,16 +52,16 @@ class GpayPayment extends UnlimitPayment
 
         $info = $this->getInfoInstance();
 
-        if (!empty($infoForm['method'])) {
+        if ( ! empty($infoForm['method'])) {
             $info->setAdditionalInformation('method', $infoForm['method']);
         }
 
-        if (!empty($additionalData['payment_method_gpay'])) {
+        if ( ! empty($additionalData['payment_method_gpay'])) {
             $info->setAdditionalInformation('payment_method', $additionalData['payment_method_gpay']);
             $info->setAdditionalInformation('payment_method_id', $additionalData['payment_method_gpay']);
         }
 
-        if (!empty($additionalData['encrypted_data'])) {
+        if ( ! empty($additionalData['encrypted_data'])) {
             $info->setAdditionalInformation('encrypted_data', $additionalData['encrypted_data']);
         }
 
@@ -75,15 +75,16 @@ class GpayPayment extends UnlimitPayment
     }
 
     /**
-     * @param  string  $paymentAction
-     * @param  object  $stateObject
+     * @param string $paymentAction
+     * @param object $stateObject
+     *
      * @throws \Cardpay\Core\Model\Api\V1\Exception
      * @throws LocalizedException
      */
     public function initialize($paymentAction, $stateObject)
     {
         try {
-            $this->_helperData->log(self::GPAY_MESSAGE." - Gpay: init prepare post payment", self::LOG_NAME);
+            $this->_helperData->log(self::GPAY_MESSAGE . " - Gpay: init prepare post payment", self::LOG_NAME);
 
             /**
              * @var Quote
@@ -93,33 +94,39 @@ class GpayPayment extends UnlimitPayment
             /**
              * @var Order
              */
-            $order = $this->getInfoInstance()->getOrder();
+            $order   = $this->getInfoInstance()->getOrder();
             $payment = $order->getPayment();
 
             $paymentInfo = [];
 
-            if (!empty($payment->getAdditionalInformation('encrypted_data'))) {
+            if ( ! empty($payment->getAdditionalInformation('encrypted_data'))) {
                 $paymentInfo['encrypted_data'] = base64_encode($payment->getAdditionalInformation('encrypted_data'));
             }
 
-            $paymentInfo['payment_method'] = ConfigData::GPAY_API_PAYMENT_METHOD;
-            $requestParams = $this->_coreModel->getDefaultRequestParams($paymentInfo, $quote, $order, []);
+            $paymentInfo['payment_method']          = ConfigData::GPAY_API_PAYMENT_METHOD;
+            $requestParams                          = $this->_coreModel->getDefaultRequestParams(
+                $paymentInfo,
+                $quote,
+                $order,
+                []
+            );
             $requestParams['customer']['full_name'] = trim($order->getCustomerName());
 
-            $requestParams['payment_method'] = ConfigData::GPAY_API_PAYMENT_METHOD;
+            $requestParams['payment_method']        = ConfigData::GPAY_API_PAYMENT_METHOD;
             $requestParams['customer']['full_name'] = trim($order->getCustomerName());
 
-            $this->_helperData->log(self::GPAY_MESSAGE." - Preference to POST", 'cardpay.log', $requestParams);
-        } catch (Exception $e) {
+            $this->_helperData->log(self::GPAY_MESSAGE . " - Preference to POST", 'cardpay.log', $requestParams);
+        } catch (UnlimitBaseException $e) {
             $this->_helperData->log(
-                self::GPAY_MESSAGE.
-                " - There was an error retrieving the information to create the payment, more details: ".
-                $e->getMessage());
-            throw new LocalizedException(__(Response::PAYMENT_CREATION_ERRORS['INTERNAL_ERROR_MODULE']));
+                self::GPAY_MESSAGE .
+                " - There was an error retrieving the information to create the payment, more details: " .
+                $e->getMessage()
+            );
+            throw new UnlimitBaseException($e->getMessage());
         }
 
         $response = $this->_apiModel->postPayment($requestParams, $order);
-        $this->_helperData->log(self::GPAY_MESSAGE." - POST RESPONSE", self::LOG_NAME, $response);
+        $this->_helperData->log(self::GPAY_MESSAGE . " - POST RESPONSE", self::LOG_NAME, $response);
 
         return $this->handleApiResponse($response, self::GPAY_MESSAGE);
     }
@@ -127,7 +134,7 @@ class GpayPayment extends UnlimitPayment
     /**
      * @throws LocalizedException
      */
-    function setOrderSubtotals($data)
+    public function setOrderSubtotals($data)
     {
         $total = $data['transaction_details']['total_paid_amount'];
 
@@ -141,7 +148,7 @@ class GpayPayment extends UnlimitPayment
     /**
      * is payment method available?
      *
-     * @param  CartInterface|null  $quote
+     * @param CartInterface|null $quote
      *
      * @return bool
      */
@@ -159,10 +166,11 @@ class GpayPayment extends UnlimitPayment
     }
 
     /**
-     * @param  Order  $order
+     * @param Order $order
+     *
      * @throws LocalizedException
      */
-    public static function isGpayPaymentMethod($order)
+    public static function isPaymentMethod($order)
     {
         if (is_null($order)) {
             return false;

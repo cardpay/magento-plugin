@@ -2,9 +2,8 @@
 
 namespace Cardpay\Core\Model\Payment;
 
+use Cardpay\Core\Exceptions\UnlimitBaseException;
 use Cardpay\Core\Helper\ConfigData;
-use Cardpay\Core\Helper\Response;
-use Exception;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Api\Data\CartInterface;
@@ -20,6 +19,7 @@ class PixPayment extends UnlimitPayment
     const CODE = ConfigData::PIX_PAYMENT_METHOD;
 
     const PIX_MESSAGE = 'PixPayment::initialize';
+    const MAX_ZIP_LENGTH = 17;
 
     protected $_code = self::CODE; //NOSONAR
 
@@ -36,7 +36,8 @@ class PixPayment extends UnlimitPayment
     ];
 
     /**
-     * @param  DataObject  $data
+     * @param DataObject $data
+     *
      * @return $this|PixPayment
      * @throws LocalizedException
      */
@@ -52,18 +53,20 @@ class PixPayment extends UnlimitPayment
 
             $info = $this->getInfoInstance();
 
-            if (!empty($infoForm['method'])) {
+            if ( ! empty($infoForm['method'])) {
                 $info->setAdditionalInformation('method', $infoForm['method']);
             }
 
-            if (!empty($additionalData['payment_method_pix'])) {
+            if ( ! empty($additionalData['payment_method_pix'])) {
                 $info->setAdditionalInformation('payment_method', $additionalData['payment_method_pix']);
                 $info->setAdditionalInformation('payment_method_id', $additionalData['payment_method_pix']);
             }
 
-            if (!empty($additionalData['cpf'])) {
-                $info->setAdditionalInformation('cpf',
-                    preg_replace('/[^0-9]+/', '', $additionalData['cpf']));   // leave only digits
+            if ( ! empty($additionalData['cpf'])) {
+                $info->setAdditionalInformation(
+                    'cpf',
+                    preg_replace('/\D+/', '', $additionalData['cpf'])
+                );
             }
 
             foreach ($this->fields_febraban as $key) {
@@ -77,15 +80,16 @@ class PixPayment extends UnlimitPayment
     }
 
     /**
-     * @param  string  $paymentAction
-     * @param  object  $stateObject
+     * @param string $paymentAction
+     * @param object $stateObject
+     *
      * @throws \Cardpay\Core\Model\Api\V1\Exception
      * @throws LocalizedException
      */
     public function initialize($paymentAction, $stateObject)
     {
         try {
-            $this->_helperData->log(self::PIX_MESSAGE." - Pix: init prepare post payment", self::LOG_NAME);
+            $this->_helperData->log(self::PIX_MESSAGE . " - Pix: init prepare post payment", self::LOG_NAME);
 
             /**
              * @var Quote
@@ -95,31 +99,41 @@ class PixPayment extends UnlimitPayment
             /**
              * @var Order
              */
-            $order = $this->getInfoInstance()->getOrder();
+            $order   = $this->getInfoInstance()->getOrder();
             $payment = $order->getPayment();
 
             $paymentInfo = [];
-            if (!empty($payment->getAdditionalInformation('cpf'))) {
+            if ( ! empty($payment->getAdditionalInformation('cpf'))) {
                 $paymentInfo['cpf'] = $payment->getAdditionalInformation('cpf');
             }
 
             $paymentInfo['payment_method'] = ConfigData::PIX_API_PAYMENT_METHOD;
-            $requestParams = $this->_coreModel->getDefaultRequestParams($paymentInfo, $quote, $order, []);
+            $requestParams                 = $this->_coreModel->getDefaultRequestParams($paymentInfo, $quote, $order, []
+            );
+
+            if (strlen($requestParams['merchant_order']['shipping_address']['zip']) > self::MAX_ZIP_LENGTH) {
+                throw new UnlimitBaseException(
+                    "Zip / Postal Code is invalid, must be " . self::MAX_ZIP_LENGTH . " characters."
+                );
+            }
+
             $requestParams['customer']['full_name'] = trim($order->getCustomerName());
 
-            $requestParams['payment_method'] = ConfigData::PIX_API_PAYMENT_METHOD;
+            $requestParams['payment_method']        = ConfigData::PIX_API_PAYMENT_METHOD;
             $requestParams['customer']['full_name'] = trim($order->getCustomerName());
 
-            $this->_helperData->log(self::PIX_MESSAGE." - Preference to POST", 'cardpay.log', $requestParams);
-        } catch (Exception $e) {
-            $this->_helperData->log(self::PIX_MESSAGE.
-                " - There was an error retrieving the information to create the payment, more details: ".
-                $e->getMessage());
-            throw new LocalizedException(__(Response::PAYMENT_CREATION_ERRORS['INTERNAL_ERROR_MODULE']));
+            $this->_helperData->log(self::PIX_MESSAGE . " - Preference to POST", 'cardpay.log', $requestParams);
+        } catch (UnlimitBaseException $e) {
+            $this->_helperData->log(
+                self::PIX_MESSAGE .
+                " - There was an error retrieving the information to create the payment, more details: " .
+                $e->getMessage()
+            );
+            throw new UnlimitBaseException($e->getMessage());
         }
 
         $response = $this->_apiModel->postPayment($requestParams, $order);
-        $this->_helperData->log(self::PIX_MESSAGE." - POST RESPONSE", self::LOG_NAME, $response);
+        $this->_helperData->log(self::PIX_MESSAGE . " - POST RESPONSE", self::LOG_NAME, $response);
 
         return $this->handleApiResponse($response, self::PIX_MESSAGE);
     }
@@ -131,7 +145,7 @@ class PixPayment extends UnlimitPayment
      */
     public function getPixOptions()
     {
-        $pm['id'] = 1;
+        $pm['id']              = 1;
         $pm['payment_type_id'] = 'pix';
 
         $tickets[] = $pm;
@@ -142,7 +156,7 @@ class PixPayment extends UnlimitPayment
     /**
      * @throws LocalizedException
      */
-    function setOrderSubtotals($data)
+    public function setOrderSubtotals($data)
     {
         $total = $data['transaction_details']['total_paid_amount'];
 
@@ -156,7 +170,7 @@ class PixPayment extends UnlimitPayment
     /**
      * is payment method available?
      *
-     * @param  CartInterface|null  $quote
+     * @param CartInterface|null $quote
      *
      * @return bool
      */
@@ -167,15 +181,18 @@ class PixPayment extends UnlimitPayment
             return false;
         }
 
-        return $this->isPaymentMethodAvailable(ConfigData::PATH_PIX_TERMINAL_CODE,
-            ConfigData::PATH_PIX_TERMINAL_PASSWORD);
+        return $this->isPaymentMethodAvailable(
+            ConfigData::PATH_PIX_TERMINAL_CODE,
+            ConfigData::PATH_PIX_TERMINAL_PASSWORD
+        );
     }
 
     /**
-     * @param  Order  $order
+     * @param Order $order
+     *
      * @throws LocalizedException
      */
-    public static function isPixPaymentMethod($order)
+    public static function isPaymentMethod($order)
     {
         if (is_null($order)) {
             return false;

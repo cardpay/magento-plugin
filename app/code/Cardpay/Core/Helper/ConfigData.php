@@ -15,6 +15,7 @@ class ConfigData
     public const SPEI_PAYMENT_METHOD = 'cardpay_spei';
     public const MULTIBANCO_PAYMENT_METHOD = 'cardpay_multibanco';
     public const MBWAY_PAYMENT_METHOD = 'cardpay_mbway';
+    public const OXXO_PAYMENT_METHOD = 'cardpay_oxxo';
 
     // Unlimit API payment methods
     public const BANK_CARD_API_PAYMENT_METHOD = 'BANKCARD';
@@ -27,6 +28,7 @@ class ConfigData
     public const SPEI_API_PAYMENT_METHOD = 'SPEI';
     public const MULTIBANCO_API_PAYMENT_METHOD = 'MULTIBANCO';
     public const MBWAY_API_PAYMENT_METHOD = 'MBWAY';
+    public const OXXO_API_PAYMENT_METHOD = 'OXXO';
 
     // credentials path (cards)
     public const PATH_BANKCARD_TERMINAL_CODE = 'payment/cardpay_custom/terminal_code';
@@ -120,6 +122,14 @@ class ConfigData
     public const PATH_MBWAY_API_ACCESS_MODE = 'payment/cardpay_mbway/api_access_mode';
     public const PATH_MBWAY_ACTIVE = 'payment/cardpay_mbway/active';
 
+    // credentials path (Mb Way)
+    public const PATH_OXXO_TERMINAL_CODE = 'payment/cardpay_oxxo/terminal_code_oxxo';
+    public const PATH_OXXO_TERMINAL_PASSWORD = 'payment/cardpay_oxxo/terminal_password_oxxo';
+    public const PATH_OXXO_CALLBACK_SECRET = 'payment/cardpay_oxxo/callback_secret_oxxo';
+    public const PATH_OXXO_SANDBOX = 'payment/cardpay_oxxo/sandbox_oxxo';
+    public const PATH_OXXO_API_ACCESS_MODE = 'payment/cardpay_oxxo/api_access_mode';
+    public const PATH_OXXO_ACTIVE = 'payment/cardpay_oxxo/active';
+
     // configuration hidden path
     public const PATH_SITE_ID = 'payment/cardpay/site_id';
     public const PATH_SPONSOR_ID = 'payment/cardpay/sponsor_id';
@@ -146,6 +156,7 @@ class ConfigData
         'SPEI' => 'payment/cardpay_spei/',
         'MULTIBANCO' => 'payment/cardpay_multibanco/',
         'MBWAY' => 'payment/cardpay_mbway/',
+        'OXXO' => 'payment/cardpay_oxxo/',
     ];
 
     // Boleto payment method

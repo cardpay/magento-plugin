@@ -14,6 +14,7 @@
     - [Google Pay](#google-pay)
     - [MB WAY](#mb-way)
     - [Multibanco](#multibanco)
+    - [OXXO](#oxxo)
     - [PayPal](#paypal)
     - [Pix](#pix)
     - [SEPA Instant](#sepa-instant)
@@ -57,6 +58,7 @@ Unlimit’s Magento 2 plugin is open-source and compatible with:
 | Google Pay     | Global   | Yes     | No          | No          | Yes           | Yes            |
 | MB WAY         | Portugal | Yes     | No          | No          | Yes           | Yes            |
 | Multibanco     | Portugal | Yes     | No          | No          | No            | Yes            |
+| OXXO           | Mexico   | Yes     | No          | No          | No            | Yes            |
 | PayPal         | Global   | Yes     | No          | No          | Yes           | Yes            |
 | Pix            | Brazil   | Yes     | No          | No          | No            | Yes            |
 | SEPA Instant   | Europe   | Yes     | No          | No          | No            | Yes            |
@@ -93,7 +95,6 @@ To install the Magento 2 plugin, follow these steps:
 7. If you encounter folder permission issues when accessing the store, review your permissions
    following [the official Magento recommendations](https://experienceleague.adobe.com/docs/commerce-operations/installation-guide/overview.html?lang=en).
 
-
 8. Verify the successful installation of the plugin:
 
 * Log in to the **Admin panel** of the Unlimit Magento plugin using your admin credentials.
@@ -127,6 +128,7 @@ methods.
     - Google Pay
     - MB WAY
     - Multibanco
+    - OXXO
     - PayPal
     - Pix
     - SEPA Instant
@@ -257,6 +259,24 @@ To enable payments via **Multibanco** complete the following steps:
     * Set to **No** for Production environment.
 * **Payment title** - fill in the name of the payment method, which will be presented for the customer in checkout.
 * **Checkout position** - this setting value is the position of the payment method for the customer in checkout.
+
+#### OXXO
+To enable payments via **OXXO** complete the following steps:
+
+![](readme_images/oxxo.png)
+
+* Set **Enabled** to **Yes** (by default it's disabled).
+* **API access mode:**
+    * Set to **Payment page** for cases when payment page by Unlimit in iFrame is used for customer data collecting.
+    * Set to **Gateway** for cases when embedded payment form in plugin is used for customer data collecting.
+* Set **Terminal code**, **Terminal password**, **Callback secret** values - it should be merchant credentials in
+  Unlimit APIv3 for this payment method (how to obtain credentials see [here](https://www.unlimit.com/integration/))
+* **Test environment:**
+    * Set to **Yes** for Sandbox environment (for test purposes).
+    * Set to **No** for Production environment.
+* **Payment title** - fill in the name of the payment method, which will be presented for the customer in checkout.
+* **Checkout position** - this setting value is the position of the payment method for the customer in checkout.
+
 
 <a name="PayPal"></a>
 #### PayPal

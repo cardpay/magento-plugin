@@ -31,5 +31,8 @@
         <method name="cardpay_mbway">
             <allow_multiple_address>1</allow_multiple_address>
         </method>
+        <method name="cardpay_oxxo">
+            <allow_multiple_address>1</allow_multiple_address>
+        </method>
     </methods>
 </payment>

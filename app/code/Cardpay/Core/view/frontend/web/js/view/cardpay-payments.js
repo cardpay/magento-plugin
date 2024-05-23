@@ -66,6 +66,12 @@ define(
                 component: 'Cardpay_Core/js/view/method-renderer/custom-method-mbway'
             }
         );
+        rendererList.push(
+            {
+                type: 'cardpay_oxxo',
+                component: 'Cardpay_Core/js/view/method-renderer/custom-method-oxxo'
+            }
+        );
 
         return Component.extend({});
     }

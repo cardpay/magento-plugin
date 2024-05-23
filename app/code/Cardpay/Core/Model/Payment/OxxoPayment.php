@@ -4,6 +4,7 @@ namespace Cardpay\Core\Model\Payment;
 
 use Cardpay\Core\Exceptions\UnlimitBaseException;
 use Cardpay\Core\Helper\ConfigData;
+use Cardpay\Core\Helper\Response;
 use Magento\Framework\DataObject;
 use Magento\Framework\Exception\LocalizedException;
 use Magento\Quote\Api\Data\CartInterface;
@@ -11,14 +12,14 @@ use Magento\Quote\Model\Quote;
 use Magento\Sales\Model\Order;
 use Magento\Store\Model\ScopeInterface;
 
-class MultibancoPayment extends UnlimitPayment
+class OxxoPayment extends UnlimitPayment
 {
     /**
      * Define payment method code
      */
-    const CODE = ConfigData::MULTIBANCO_PAYMENT_METHOD;
+    const CODE = ConfigData::OXXO_PAYMENT_METHOD;
 
-    const MULTIBANCO_MESSAGE = "MultibancoPayment::initialize";
+    const OXXO_MESSAGE = 'OxxoPayment::initialize';
 
     protected $_code = self::CODE; //NOSONAR
 
@@ -37,7 +38,7 @@ class MultibancoPayment extends UnlimitPayment
     /**
      * @param DataObject $data
      *
-     * @return $this|MultibancoPayment
+     * @return $this|OxxoPayment
      * @throws LocalizedException
      */
     public function assignData(DataObject $data)
@@ -56,9 +57,9 @@ class MultibancoPayment extends UnlimitPayment
             $info->setAdditionalInformation('method', $infoForm['method']);
         }
 
-        if ( ! empty($additionalData['payment_method_multibanco'])) {
-            $info->setAdditionalInformation('payment_method', $additionalData['payment_method_multibanco']);
-            $info->setAdditionalInformation('payment_method_id', $additionalData['payment_method_multibanco']);
+        if ( ! empty($additionalData['payment_method_oxxo'])) {
+            $info->setAdditionalInformation('payment_method', $additionalData['payment_method_oxxo']);
+            $info->setAdditionalInformation('payment_method_id', $additionalData['payment_method_oxxo']);
         }
 
         foreach ($this->fields_febraban as $key) {
@@ -80,10 +81,7 @@ class MultibancoPayment extends UnlimitPayment
     public function initialize($paymentAction, $stateObject)
     {
         try {
-            $this->_helperData->log(
-                self::MULTIBANCO_MESSAGE . " - Multibanco: init prepare post payment",
-                self::LOG_NAME
-            );
+            $this->_helperData->log(self::OXXO_MESSAGE . " - Oxxo: init prepare post payment", self::LOG_NAME);
 
             /**
              * @var Quote
@@ -97,7 +95,7 @@ class MultibancoPayment extends UnlimitPayment
 
             $paymentInfo = [];
 
-            $paymentInfo['payment_method']          = ConfigData::MULTIBANCO_API_PAYMENT_METHOD;
+            $paymentInfo['payment_method']          = ConfigData::OXXO_API_PAYMENT_METHOD;
             $requestParams                          = $this->_coreModel->getDefaultRequestParams(
                 $paymentInfo,
                 $quote,
@@ -106,27 +104,40 @@ class MultibancoPayment extends UnlimitPayment
             );
             $requestParams['customer']['full_name'] = trim($order->getCustomerName());
 
-            $requestParams['payment_method']        = ConfigData::MULTIBANCO_API_PAYMENT_METHOD;
+            $requestParams['payment_method']        = ConfigData::OXXO_API_PAYMENT_METHOD;
             $requestParams['customer']['full_name'] = trim($order->getCustomerName());
 
-            $this->_helperData->log(
-                self::MULTIBANCO_MESSAGE . " - Preference to POST",
-                'cardpay.log',
-                $requestParams
-            );
+            $this->_helperData->log(self::OXXO_MESSAGE . " - Preference to POST", 'cardpay.log', $requestParams);
         } catch (UnlimitBaseException $e) {
             $this->_helperData->log(
-                self::MULTIBANCO_MESSAGE .
+                self::OXXO_MESSAGE .
                 " - There was an error retrieving the information to create the payment, more details: " .
                 $e->getMessage()
             );
             throw new UnlimitBaseException($e->getMessage());
         }
 
-        $response = $this->_apiModel->postPayment($requestParams, $order);
-        $this->_helperData->log(self::MULTIBANCO_MESSAGE . " - POST RESPONSE", self::LOG_NAME, $response);
+        $this->validateAmount($requestParams);
 
-        return $this->handleApiResponse($response, self::MULTIBANCO_MESSAGE);
+        $response = $this->_apiModel->postPayment($requestParams, $order);
+        $this->_helperData->log(self::OXXO_MESSAGE . " - POST RESPONSE", self::LOG_NAME, $response);
+
+        return $this->handleApiResponse($response, self::OXXO_MESSAGE);
+    }
+
+    /**
+     * Return tickets options
+     *
+     * @return array
+     */
+    public function getOxxoOptions()
+    {
+        $pm['id']              = 1;
+        $pm['payment_type_id'] = 'oxxo';
+
+        $tickets[] = $pm;
+
+        return $tickets;
     }
 
     /**
@@ -152,14 +163,14 @@ class MultibancoPayment extends UnlimitPayment
      */
     public function isAvailable(CartInterface $quote = null)
     {
-        $isActive = (int)$this->_scopeConfig->getValue(ConfigData::PATH_MULTIBANCO_ACTIVE, ScopeInterface::SCOPE_STORE);
+        $isActive = (int)$this->_scopeConfig->getValue(ConfigData::PATH_OXXO_ACTIVE, ScopeInterface::SCOPE_STORE);
         if (0 === $isActive) {
             return false;
         }
 
         return $this->isPaymentMethodAvailable(
-            ConfigData::PATH_MULTIBANCO_TERMINAL_CODE,
-            ConfigData::PATH_MULTIBANCO_TERMINAL_PASSWORD
+            ConfigData::PATH_OXXO_TERMINAL_CODE,
+            ConfigData::PATH_OXXO_TERMINAL_PASSWORD
         );
     }
 
@@ -184,6 +195,18 @@ class MultibancoPayment extends UnlimitPayment
 
         $paymentMethod = $payment->getMethodInstance()->getCode();
 
-        return ConfigData::MULTIBANCO_PAYMENT_METHOD === $paymentMethod;
+        return ConfigData::OXXO_PAYMENT_METHOD === $paymentMethod;
+    }
+
+    public function validateAmount($params)
+    {
+        if ($params['payment_data']['amount'] > 99999.99) {
+            $this->_helperData->log(
+                self::OXXO_MESSAGE .
+                " - There was an error retrieving the information to create the payment, more details: " .
+                Response::PAYMENT_CREATION_ERRORS['INVALID_AMOUNT']
+            );
+            throw new LocalizedException(__(Response::PAYMENT_CREATION_ERRORS['INVALID_AMOUNT']));
+        }
     }
 }

@@ -162,7 +162,7 @@ class ApayPayment extends UnlimitPayment
      * @param  Order  $order
      * @throws LocalizedException
      */
-    public static function isApayPaymentMethod($order)
+    public static function isPaymentMethod($order)
     {
         if (is_null($order)) {
             return false;
